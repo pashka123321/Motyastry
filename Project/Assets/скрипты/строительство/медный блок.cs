@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding; // Добавьте этот импорт
 
 public class BuildModeController : MonoBehaviour
 {
@@ -10,12 +11,12 @@ public class BuildModeController : MonoBehaviour
     public class BlockPrefabData
     {
         public GameObject prefab;
-        public GameObject previewPrefab; // Префаб для предпросмотра блока
+        public GameObject previewPrefab;
         public Button button;
-        public bool canRotate; // Флаг, позволяющий поворачивать блок на -90 градусов
+        public bool canRotate;
     }
 
-    public BlockPrefabData[] blockPrefabsData; // Массив данных о префабах блоков
+    public BlockPrefabData[] blockPrefabsData;
     public AudioClip[] buildSounds;
     public AudioClip[] breakSounds;
     private AudioSource audioSource;
@@ -24,10 +25,10 @@ public class BuildModeController : MonoBehaviour
     private bool[,] grid;
     private int gridWidth = 200;
     private int gridHeight = 200;
-    private int currentBlockPrefabIndex = 0; // Текущий индекс активного префаба
-    public Text buildModeText; // Ссылка на текстовый элемент для режима строительства
+    private int currentBlockPrefabIndex = 0;
+    public Text buildModeText;
     private List<GameObject> uiObjectsToIgnore = new List<GameObject>();
-    public GameObject[] uiObjectsToIgnoreArray; // Массив объектов UI для игнорирования
+    public GameObject[] uiObjectsToIgnoreArray;
 
     public bool IsBuildModeActive => isBuildModeActive;
 
@@ -35,29 +36,23 @@ public class BuildModeController : MonoBehaviour
     {
         grid = new bool[gridWidth, gridHeight];
 
-        // Инициализация кнопок для выбора префабов блоков
         foreach (var blockPrefabData in blockPrefabsData)
         {
-            // Убираем анимацию выбора блока
             blockPrefabData.button.transition = Selectable.Transition.None;
             blockPrefabData.button.onClick.AddListener(() => SetCurrentBlockPrefab(blockPrefabData));
             AddButtonAnimation(blockPrefabData.button);
         }
 
-        // Получаем компонент AudioSource с текущего объекта
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
             Debug.LogError("AudioSource component not found on this GameObject.");
         }
 
-        // Устанавливаем предпросмотры для всех префабов при запуске
         SetPreviewBlock(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
 
-        // Изначально скрываем текст режима строительства
         buildModeText.gameObject.SetActive(false);
 
-        // Инициализация массива объектов UI для игнорирования
         InitializeUIObjectsToIgnoreArray();
     }
 
@@ -76,21 +71,17 @@ public class BuildModeController : MonoBehaviour
     IEnumerator AnimateButtonPress(Button button, Color normalColor, Color pressedColor)
     {
         button.image.color = pressedColor;
-
-        yield return new WaitForSeconds(0.1f); // Adjust the duration of button press animation
-
+        yield return new WaitForSeconds(0.1f);
         button.image.color = normalColor;
     }
 
     void SetCurrentBlockPrefab(BlockPrefabData prefabData)
     {
-        // Сбрасываем все кнопки блоков в UI на активное состояние
         foreach (var data in blockPrefabsData)
         {
             data.button.interactable = true;
         }
 
-        // Уничтожаем предыдущий предпросмотрный блок
         Destroy(previewBlock);
 
         for (int i = 0; i < blockPrefabsData.Length; i++)
@@ -98,10 +89,10 @@ public class BuildModeController : MonoBehaviour
             if (blockPrefabsData[i] == prefabData)
             {
                 currentBlockPrefabIndex = i;
-                isBuildModeActive = false; // Выключаем режим строительства
-                ToggleBuildMode(); // Убеждаемся, что предпросмотрный блок уничтожен и режим выключен
-                SetPreviewBlock(prefabData.previewPrefab); // Обновляем предпросмотр блока
-                prefabData.button.interactable = false; // Делаем кнопку неактивной
+                isBuildModeActive = false;
+                ToggleBuildMode();
+                SetPreviewBlock(prefabData.previewPrefab);
+                prefabData.button.interactable = false;
                 break;
             }
         }
@@ -121,7 +112,6 @@ public class BuildModeController : MonoBehaviour
             buildModeText.gameObject.SetActive(false);
             Destroy(previewBlock);
 
-            // Снимаем выбранный блок в UI (если есть)
             foreach (var data in blockPrefabsData)
             {
                 data.button.interactable = true;
@@ -131,7 +121,6 @@ public class BuildModeController : MonoBehaviour
 
     void Update()
     {
-        // Проверка на нахождение курсора над UI
         bool isPointerOverUI = IsPointerOverIgnoredUI();
 
         if (isPointerOverUI && !isBuildModeActive)
@@ -160,7 +149,6 @@ public class BuildModeController : MonoBehaviour
             }
             UpdatePreviewBlockPosition();
 
-            // Строительство блока зажатием левой кнопки мыши
             if (Input.GetMouseButton(0) && !isPointerOverUI)
             {
                 PlaceBlock();
@@ -174,12 +162,11 @@ public class BuildModeController : MonoBehaviour
             }
         }
 
-        // Удаление блока зажатием правой кнопки мыши
         if (Input.GetMouseButton(1))
         {
             if (isBuildModeActive)
             {
-                ToggleBuildMode(); // Toggle off build mode
+                ToggleBuildMode();
             }
             else
             {
@@ -187,7 +174,6 @@ public class BuildModeController : MonoBehaviour
             }
         }
 
-        // Поворот блока на -90 градусов при нажатии клавиши R
         if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
         {
             if (Input.GetKeyDown(KeyCode.R))
@@ -225,7 +211,6 @@ public class BuildModeController : MonoBehaviour
 
     void InitializeUIObjectsToIgnoreArray()
     {
-        // Здесь можно установить массив объектов UI для игнорирования
         foreach (GameObject uiObject in uiObjectsToIgnoreArray)
         {
             if (uiObject != null)
@@ -278,10 +263,12 @@ public class BuildModeController : MonoBehaviour
 
         PlayBuildSound();
 
-        // Создаем новый блок с учетом поворота
         Quaternion rotation = previewBlock.transform.rotation;
         GameObject newBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].prefab, new Vector3(x, y, 0f), rotation);
         grid[x, y] = true;
+
+        // Обновляем граф после добавления блока
+        UpdateGraph(newBlock);
     }
 
     void RemoveBlock()
@@ -306,6 +293,9 @@ public class BuildModeController : MonoBehaviour
             {
                 if (col.gameObject.CompareTag("Block"))
                 {
+                    // Обновляем граф до удаления блока
+                    UpdateGraphBeforeRemoval(col.gameObject);
+
                     Destroy(col.gameObject);
                     grid[x, y] = false;
                     break;
@@ -402,5 +392,21 @@ public class BuildModeController : MonoBehaviour
         previewBlock = Instantiate(previewPrefab);
         SetBlockTransparency(previewBlock, 0.5f);
         SetBlockLayer(previewBlock, 10);
+    }
+
+    // Обновление графа после добавления блока
+    void UpdateGraph(GameObject newBlock)
+    {
+        Bounds bounds = newBlock.GetComponent<Collider2D>().bounds;
+        GraphUpdateObject guo = new GraphUpdateObject(bounds);
+        AstarPath.active.UpdateGraphs(guo);
+    }
+
+    // Обновление графа перед удалением блока
+    void UpdateGraphBeforeRemoval(GameObject block)
+    {
+        Bounds bounds = block.GetComponent<Collider2D>().bounds;
+        GraphUpdateObject guo = new GraphUpdateObject(bounds);
+        AstarPath.active.UpdateGraphs(guo);
     }
 }

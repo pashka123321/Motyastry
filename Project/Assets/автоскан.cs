@@ -28,4 +28,13 @@ public class AutoScanScript : MonoBehaviour
             Debug.LogError("AstarPath не найден в сцене. Убедитесь, что плагин A* Pathfinding Project правильно настроен.");
         }
     }
+
+    public void UpdateGraphAfterAddingObject(Bounds bounds)
+    {
+        // Создаем GraphUpdateObject с заданными границами
+        GraphUpdateObject guo = new GraphUpdateObject(bounds);
+
+        // Обновляем граф
+        AstarPath.active.UpdateGraphs(guo);
+    }
 }
