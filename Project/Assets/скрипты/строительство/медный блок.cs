@@ -1,0 +1,406 @@
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.Collections;
+using System.Collections.Generic;
+
+public class BuildModeController : MonoBehaviour
+{
+    [System.Serializable]
+    public class BlockPrefabData
+    {
+        public GameObject prefab;
+        public GameObject previewPrefab; // Префаб для предпросмотра блока
+        public Button button;
+        public bool canRotate; // Флаг, позволяющий поворачивать блок на -90 градусов
+    }
+
+    public BlockPrefabData[] blockPrefabsData; // Массив данных о префабах блоков
+    public AudioClip[] buildSounds;
+    public AudioClip[] breakSounds;
+    private AudioSource audioSource;
+    private GameObject previewBlock;
+    private bool isBuildModeActive = false;
+    private bool[,] grid;
+    private int gridWidth = 200;
+    private int gridHeight = 200;
+    private int currentBlockPrefabIndex = 0; // Текущий индекс активного префаба
+    public Text buildModeText; // Ссылка на текстовый элемент для режима строительства
+    private List<GameObject> uiObjectsToIgnore = new List<GameObject>();
+    public GameObject[] uiObjectsToIgnoreArray; // Массив объектов UI для игнорирования
+
+    public bool IsBuildModeActive => isBuildModeActive;
+
+    void Start()
+    {
+        grid = new bool[gridWidth, gridHeight];
+
+        // Инициализация кнопок для выбора префабов блоков
+        foreach (var blockPrefabData in blockPrefabsData)
+        {
+            // Убираем анимацию выбора блока
+            blockPrefabData.button.transition = Selectable.Transition.None;
+            blockPrefabData.button.onClick.AddListener(() => SetCurrentBlockPrefab(blockPrefabData));
+            AddButtonAnimation(blockPrefabData.button);
+        }
+
+        // Получаем компонент AudioSource с текущего объекта
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            Debug.LogError("AudioSource component not found on this GameObject.");
+        }
+
+        // Устанавливаем предпросмотры для всех префабов при запуске
+        SetPreviewBlock(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
+
+        // Изначально скрываем текст режима строительства
+        buildModeText.gameObject.SetActive(false);
+
+        // Инициализация массива объектов UI для игнорирования
+        InitializeUIObjectsToIgnoreArray();
+    }
+
+    void AddButtonAnimation(Button button)
+    {
+        ColorBlock colors = button.colors;
+        Color normalColor = colors.normalColor;
+        Color pressedColor = new Color(normalColor.r * 0.8f, normalColor.g * 0.8f, normalColor.b * 0.8f, normalColor.a);
+
+        button.onClick.AddListener(() =>
+        {
+            StartCoroutine(AnimateButtonPress(button, normalColor, pressedColor));
+        });
+    }
+
+    IEnumerator AnimateButtonPress(Button button, Color normalColor, Color pressedColor)
+    {
+        button.image.color = pressedColor;
+
+        yield return new WaitForSeconds(0.1f); // Adjust the duration of button press animation
+
+        button.image.color = normalColor;
+    }
+
+    void SetCurrentBlockPrefab(BlockPrefabData prefabData)
+    {
+        // Сбрасываем все кнопки блоков в UI на активное состояние
+        foreach (var data in blockPrefabsData)
+        {
+            data.button.interactable = true;
+        }
+
+        // Уничтожаем предыдущий предпросмотрный блок
+        Destroy(previewBlock);
+
+        for (int i = 0; i < blockPrefabsData.Length; i++)
+        {
+            if (blockPrefabsData[i] == prefabData)
+            {
+                currentBlockPrefabIndex = i;
+                isBuildModeActive = false; // Выключаем режим строительства
+                ToggleBuildMode(); // Убеждаемся, что предпросмотрный блок уничтожен и режим выключен
+                SetPreviewBlock(prefabData.previewPrefab); // Обновляем предпросмотр блока
+                prefabData.button.interactable = false; // Делаем кнопку неактивной
+                break;
+            }
+        }
+    }
+
+    void ToggleBuildMode()
+    {
+        isBuildModeActive = !isBuildModeActive;
+
+        if (isBuildModeActive)
+        {
+            buildModeText.text = "Повернуть на R";
+            buildModeText.gameObject.SetActive(true);
+        }
+        else
+        {
+            buildModeText.gameObject.SetActive(false);
+            Destroy(previewBlock);
+
+            // Снимаем выбранный блок в UI (если есть)
+            foreach (var data in blockPrefabsData)
+            {
+                data.button.interactable = true;
+            }
+        }
+    }
+
+    void Update()
+    {
+        // Проверка на нахождение курсора над UI
+        bool isPointerOverUI = IsPointerOverIgnoredUI();
+
+        if (isPointerOverUI && !isBuildModeActive)
+        {
+            if (previewBlock != null)
+            {
+                previewBlock.SetActive(false);
+            }
+            return;
+        }
+        else
+        {
+            if (previewBlock != null)
+            {
+                previewBlock.SetActive(true);
+            }
+        }
+
+        if (isBuildModeActive)
+        {
+            if (previewBlock == null)
+            {
+                previewBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
+                SetBlockTransparency(previewBlock, 0.5f);
+                SetBlockLayer(previewBlock, 10);
+            }
+            UpdatePreviewBlockPosition();
+
+            // Строительство блока зажатием левой кнопки мыши
+            if (Input.GetMouseButton(0) && !isPointerOverUI)
+            {
+                PlaceBlock();
+            }
+        }
+        else
+        {
+            if (previewBlock != null)
+            {
+                Destroy(previewBlock);
+            }
+        }
+
+        // Удаление блока зажатием правой кнопки мыши
+        if (Input.GetMouseButton(1))
+        {
+            if (isBuildModeActive)
+            {
+                ToggleBuildMode(); // Toggle off build mode
+            }
+            else
+            {
+                RemoveBlock();
+            }
+        }
+
+        // Поворот блока на -90 градусов при нажатии клавиши R
+        if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                previewBlock.transform.Rotate(0, 0, -90f);
+            }
+        }
+    }
+
+    bool IsPointerOverIgnoredUI()
+    {
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = Input.mousePosition;
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null && (uiObjectsToIgnore.Contains(result.gameObject) || System.Array.Exists(uiObjectsToIgnoreArray, element => element == result.gameObject)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void AddUIObjectToIgnore(GameObject uiObject)
+    {
+        if (!uiObjectsToIgnore.Contains(uiObject))
+        {
+            uiObjectsToIgnore.Add(uiObject);
+        }
+    }
+
+    void InitializeUIObjectsToIgnoreArray()
+    {
+        // Здесь можно установить массив объектов UI для игнорирования
+        foreach (GameObject uiObject in uiObjectsToIgnoreArray)
+        {
+            if (uiObject != null)
+            {
+                AddUIObjectToIgnore(uiObject);
+            }
+        }
+    }
+
+    void UpdatePreviewBlockPosition()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 gridPosition = SnapToGrid(mousePosition);
+        previewBlock.transform.position = new Vector3(gridPosition.x, gridPosition.y, 0f);
+
+        int x = Mathf.RoundToInt(gridPosition.x);
+        int y = Mathf.RoundToInt(gridPosition.y);
+
+        if (CanPlaceBlock(x, y))
+        {
+            SetBlockColor(previewBlock, Color.white);
+        }
+        else
+        {
+            SetBlockColor(previewBlock, Color.red);
+        }
+
+        SetBlockTransparency(previewBlock, 0.5f);
+        SetBlockLayer(previewBlock, 10);
+    }
+
+    void PlaceBlock()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 gridPosition = SnapToGrid(mousePosition);
+        int x = Mathf.RoundToInt(gridPosition.x);
+        int y = Mathf.RoundToInt(gridPosition.y);
+
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+        {
+            Debug.Log("Position is out of bounds");
+            return;
+        }
+
+        if (!CanPlaceBlock(x, y))
+        {
+            Debug.Log("Cannot place block: Cell is already occupied by another block");
+            return;
+        }
+
+        PlayBuildSound();
+
+        // Создаем новый блок с учетом поворота
+        Quaternion rotation = previewBlock.transform.rotation;
+        GameObject newBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].prefab, new Vector3(x, y, 0f), rotation);
+        grid[x, y] = true;
+    }
+
+    void RemoveBlock()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 gridPosition = SnapToGrid(mousePosition);
+        int x = Mathf.RoundToInt(gridPosition.x);
+        int y = Mathf.RoundToInt(gridPosition.y);
+
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+        {
+            Debug.Log("Position is out of bounds");
+            return;
+        }
+
+        if (IsCellOccupied(x, y))
+        {
+            PlayBreakSound();
+
+            Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
+            foreach (Collider2D col in colliders)
+            {
+                if (col.gameObject.CompareTag("Block"))
+                {
+                    Destroy(col.gameObject);
+                    grid[x, y] = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    bool CanPlaceBlock(int x, int y)
+    {
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+        {
+            return false;
+        }
+
+        Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(x, y));
+        foreach (Collider2D col in colliders)
+        {
+            if (col.gameObject != previewBlock && col.gameObject.CompareTag("Block"))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void SetBlockTransparency(GameObject block, float alpha)
+    {
+        SpriteRenderer renderer = block.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            Color color = renderer.color;
+            color.a = alpha;
+            renderer.color = color;
+        }
+    }
+
+    void SetBlockColor(GameObject block, Color color)
+    {
+        SpriteRenderer renderer = block.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            renderer.color = color;
+        }
+    }
+
+    void SetBlockLayer(GameObject block, int layer)
+    {
+        SpriteRenderer renderer = block.GetComponent<SpriteRenderer>();
+        if (renderer != null)
+        {
+            renderer.sortingOrder = layer;
+        }
+    }
+
+    Vector3 SnapToGrid(Vector3 position)
+    {
+        int x = Mathf.RoundToInt(position.x);
+        int y = Mathf.RoundToInt(position.y);
+        return new Vector3(x, y, 0f);
+    }
+
+    bool IsCellOccupied(int x, int y)
+    {
+        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+        {
+            return true;
+        }
+        return grid[x, y];
+    }
+
+    void PlayBuildSound()
+    {
+        if (buildSounds.Length > 0)
+        {
+            int randomIndex = Random.Range(0, buildSounds.Length);
+            audioSource.PlayOneShot(buildSounds[randomIndex]);
+        }
+    }
+
+    void PlayBreakSound()
+    {
+        if (breakSounds.Length > 0)
+        {
+            int randomIndex = Random.Range(0, breakSounds.Length);
+            audioSource.PlayOneShot(breakSounds[randomIndex]);
+        }
+    }
+
+    void SetPreviewBlock(GameObject previewPrefab)
+    {
+        Destroy(previewBlock);
+        previewBlock = Instantiate(previewPrefab);
+        SetBlockTransparency(previewBlock, 0.5f);
+        SetBlockLayer(previewBlock, 10);
+    }
+}
