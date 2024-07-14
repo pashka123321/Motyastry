@@ -181,52 +181,52 @@ namespace Pathfinding {
 			// as then the collected statistics will be a bit more accurate
 			var offsetMinutes = (Application.isPlaying && Time.time > 60) || AstarPath.active != null ? -20 : 20;
 			var minutesUntilUpdate = lastUpdateCheck.AddDays(updateCheckRate).AddMinutes(offsetMinutes).Subtract(System.DateTime.UtcNow).TotalMinutes;
-			if (minutesUntilUpdate < 0) {
-				DownloadVersionInfo();
-			}
+			//if (minutesUntilUpdate < 0) {
+			//	DownloadVersionInfo();
+			//}
 
 			return updateCheckDownload != null || minutesUntilUpdate < 10;
 		}
 
-		static void DownloadVersionInfo () {
-			var script = AstarPath.active != null ? AstarPath.active : GameObject.FindObjectOfType(typeof(AstarPath)) as AstarPath;
+//		static void DownloadVersionInfo () {
+//			var script = AstarPath.active != null ? AstarPath.active : GameObject.FindObjectOfType(typeof(AstarPath)) as AstarPath;
 
-			if (script != null) {
-				script.ConfigureReferencesInternal();
-				if ((!Application.isPlaying && (script.data.graphs == null || script.data.graphs.Length == 0)) || script.data.graphs == null) {
-					script.data.DeserializeGraphs();
-				}
-			}
+//			if (script != null) {
+//				script.ConfigureReferencesInternal();
+//				if ((!Application.isPlaying && (script.data.graphs == null || script.data.graphs.Length == 0)) || script.data.graphs == null) {
+//					script.data.DeserializeGraphs();
+//				}
+//			}
 
-			bool mecanim = GameObject.FindObjectOfType(typeof(Animator)) != null;
-			string query = updateURL+
-						   "?v="+AstarPath.Version+
-						   "&pro=0"+
-						   "&check="+updateCheckRate+"&distr="+AstarPath.Distribution+
-						   "&unitypro="+(Application.HasProLicense() ? "1" : "0")+
-						   "&inscene="+(script != null ? "1" : "0")+
-						   "&targetplatform="+EditorUserBuildSettings.activeBuildTarget+
-						   "&devplatform="+Application.platform+
-						   "&mecanim="+(mecanim ? "1" : "0")+
-						   "&hasNavmesh=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "NavMeshGraph") ? 1 : 0) +
-						   "&hasPoint=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "PointGraph") ? 1 : 0) +
-						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
-						   "&hasLayered=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "LayerGridGraph") ? 1 : 0) +
-						   "&hasRecast=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "RecastGraph") ? 1 : 0) +
-						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
-						   "&hasCustom=" + (script != null && script.data.graphs.Any(g => g != null && !g.GetType().FullName.Contains("Pathfinding.")) ? 1 : 0) +
-						   "&graphCount=" + (script != null ? script.data.graphs.Count(g => g != null) : 0) +
-						   "&unityversion="+Application.unityVersion +
-						   "&branch="+AstarPath.Branch;
+//			bool mecanim = GameObject.FindObjectOfType(typeof(Animator)) != null;
+//			string query = updateURL+
+//						   "?v="+AstarPath.Version+
+//						   "&pro=0"+
+//						   "&check="+updateCheckRate+"&distr="+AstarPath.Distribution+
+//						   "&unitypro="+(Application.HasProLicense() ? "1" : "0")+
+//						   "&inscene="+(script != null ? "1" : "0")+
+//						   "&targetplatform="+EditorUserBuildSettings.activeBuildTarget+
+//						   "&devplatform="+Application.platform+
+//						   "&mecanim="+(mecanim ? "1" : "0")+
+//						   "&hasNavmesh=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "NavMeshGraph") ? 1 : 0) +
+//						   "&hasPoint=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "PointGraph") ? 1 : 0) +
+//						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
+//						   "&hasLayered=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "LayerGridGraph") ? 1 : 0) +
+//						   "&hasRecast=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "RecastGraph") ? 1 : 0) +
+//						   "&hasGrid=" + (script != null && script.data.graphs.Any(g => g.GetType().Name == "GridGraph") ? 1 : 0) +
+//						   "&hasCustom=" + (script != null && script.data.graphs.Any(g => g != null && !g.GetType().FullName.Contains("Pathfinding.")) ? 1 : 0) +
+//						   "&graphCount=" + (script != null ? script.data.graphs.Count(g => g != null) : 0) +
+//						   "&unityversion="+Application.unityVersion +
+//						   "&branch="+AstarPath.Branch;
 
-#if UNITY_2018_1_OR_NEWER
-			updateCheckDownload = UnityWebRequest.Get(query);
-			updateCheckDownload.SendWebRequest();
-#else
-			updateCheckDownload = new WWW(query);
-#endif
-			lastUpdateCheck = System.DateTime.UtcNow;
-		}
+//#if UNITY_2018_1_OR_NEWER
+//			//updateCheckDownload = UnityWebRequest.Get(query);
+//			//updateCheckDownload.SendWebRequest();
+//#else
+//			//updateCheckDownload = new WWW(query);
+//#endif
+//			//lastUpdateCheck = System.DateTime.UtcNow;
+//		}
 
 		/// <summary>Handles the data from the update page</summary>
 		static void UpdateCheckCompleted (string result) {
