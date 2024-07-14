@@ -33,23 +33,16 @@ public class CoreToggleScript : MonoBehaviour
     void Update()
     {
         // Check for right mouse button click
-        if (Input.GetMouseButtonDown(1)) // 1 is the right mouse button
+        if (Input.GetMouseButtonDown(1))
         {
-            // Check if the cursor is not over any UI element
-            if (!IsPointerOverUIElement())
+            // Ensure the click is not on a UI element
+            if (!EventSystem.current.IsPointerOverGameObject())
             {
-                // Hide the canvas if it is currently visible
                 if (resourceCanvas != null && resourceCanvas.gameObject.activeSelf)
                 {
-                    resourceCanvas.gameObject.SetActive(false);
+                    resourceCanvas.gameObject.SetActive(false); // Hide the canvas
                 }
             }
         }
-    }
-
-    // Check if the pointer is over a UI element
-    private bool IsPointerOverUIElement()
-    {
-        return EventSystem.current.IsPointerOverGameObject();
     }
 }
