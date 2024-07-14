@@ -16600,8 +16600,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lead: 0
   gold: 0
-  coal: 100
-  copper: 0
+  coal: 0
+  copper: 100
   copperigot: 0
   leadigot: 0
   goldigot: 0
