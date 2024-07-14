@@ -6,6 +6,9 @@ public class CoreResourcesScript : MonoBehaviour
     public int gold;
     public int coal;
     public int copper;
+    public int copperigot;
+    public int leadigot;
+    public int goldigot;
 
     // Метод Start можно удалить, если он не используется
     void Start()
@@ -29,6 +32,15 @@ public class CoreResourcesScript : MonoBehaviour
                     break;
                 case "угольная руда":
                     coal++;
+                    break;
+                case "слиток меди":
+                    copperigot++;
+                    break;
+                case "слиток свинца":
+                    leadigot++;
+                    break;
+                case "слиток золота":
+                    goldigot++;
                     break;
                 default:
                     return;
