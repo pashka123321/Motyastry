@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class PlayerShooting : MonoBehaviour
 {
@@ -28,6 +29,9 @@ public class PlayerShooting : MonoBehaviour
 
     private PlayerHealth playerHealth; // Ссылка на скрипт PlayerHealth
 
+    // Список игнорируемых UI элементов
+    public List<GameObject> ignoreUIElements = new List<GameObject>();
+
     void Start()
     {
         buildModeController = GetComponent<BuildModeController>();
@@ -44,6 +48,12 @@ public class PlayerShooting : MonoBehaviour
 
     void Update()
     {
+        if (PauseController.IsGamePaused)
+        {
+            // Игра на паузе, не стреляем
+            return;
+        }
+
         if (buildModeController != null && buildModeController.IsBuildModeActive)
         {
             // Build mode active, do not shoot
@@ -153,7 +163,22 @@ public class PlayerShooting : MonoBehaviour
 
     bool IsPointerOverUI()
     {
-        return EventSystem.current.IsPointerOverGameObject();
+        // Проверяем, находится ли указатель мыши над любым UI элементом, кроме тех, которые в списке ignoreUIElements
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+
+        foreach (RaycastResult result in raycastResults)
+        {
+            if (!ignoreUIElements.Contains(result.gameObject))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

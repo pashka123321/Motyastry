@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isRotating = false; // Флаг для отслеживания, идет ли поворот
     private bool wasRotatingInitially = false; // Флаг для отслеживания, начался ли поворот до наведения на UI
+
+    // Список игнорируемых UI элементов
+    public List<GameObject> ignoreUIElements = new List<GameObject>();
 
     void Update()
     {
@@ -62,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
 
         bool isLMBPressed = Input.GetMouseButton(0);
 
-        if (isLMBPressed && !EventSystem.current.IsPointerOverGameObject())
+        if (isLMBPressed && !IsPointerOverUI())
         {
             wasRotatingInitially = true;
             isRotating = true;
@@ -74,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
             wasRotatingInitially = false;
         }
 
-        if ((isRotating && wasRotatingInitially) || (!EventSystem.current.IsPointerOverGameObject() && isLMBPressed))
+        if ((isRotating && wasRotatingInitially) || (!IsPointerOverUI() && isLMBPressed))
         {
             RotateTowardsMouse();
         }
@@ -104,5 +108,25 @@ public class PlayerMovement : MonoBehaviour
         float angle = Mathf.Atan2(movement.y, movement.x) * Mathf.Rad2Deg;
         Quaternion targetRotation = Quaternion.Euler(new Vector3(0, 0, angle));
         transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    bool IsPointerOverUI()
+    {
+        // Проверяем, находится ли указатель мыши над любым UI элементом, кроме тех, которые в списке ignoreUIElements
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+
+        foreach (RaycastResult result in raycastResults)
+        {
+            if (!ignoreUIElements.Contains(result.gameObject))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
