@@ -16522,6 +16522,9 @@ MonoBehaviour:
   gold: 0
   coal: 0
   copper: 0
+  copperigot: 0
+  leadigot: 0
+  goldigot: 0
 --- !u!1 &1518150766
 GameObject:
   m_ObjectHideFlags: 0
@@ -24751,6 +24754,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunTransform: {fileID: 97620438}
   playerTransform: {fileID: 1360284264}
+  playerNearby: 0
 --- !u!1 &1864315540
 GameObject:
   m_ObjectHideFlags: 0

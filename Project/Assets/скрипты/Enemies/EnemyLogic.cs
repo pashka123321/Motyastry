@@ -7,18 +7,37 @@ public class EnemyLogic : MonoBehaviour
 
     public Transform playerTransform;
 
-    private bool playerNearby;
+    [SerializeField] private bool playerNearby;
+
+    private Transform transendenceTransform;
+
+    private Transform core;
 
     private void Start()
     {
+        transendenceTransform = gunTransform;
 
+        core = GameObject.Find("ядро").GetComponent<Transform>();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
+        if (gunTransform.eulerAngles.z == 90)
+        {
+            Debug.Log(gunTransform.eulerAngles.z);
+        }
+
         if (playerNearby)
         {
+            Debug.Log("Ok");
             Vector3 look = gunTransform.InverseTransformPoint(playerTransform.position);
+            float angle = Mathf.Atan2(look.y, look.x) * Mathf.Rad2Deg * Time.deltaTime * 0.45f;
+
+            gunTransform.Rotate(0, 0, angle);
+        }
+        else
+        {
+            Vector3 look = gunTransform.InverseTransformPoint(core.position);
             float angle = Mathf.Atan2(look.y, look.x) * Mathf.Rad2Deg * Time.deltaTime * 0.45f;
 
             gunTransform.Rotate(0, 0, angle);
@@ -27,7 +46,7 @@ public class EnemyLogic : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.CompareTag("Player"))
         {
             playerNearby = true;
         }
@@ -35,7 +54,7 @@ public class EnemyLogic : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.CompareTag("Player"))
         {
             playerNearby = false;
         }
