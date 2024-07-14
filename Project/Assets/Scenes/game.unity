@@ -24846,6 +24846,7 @@ MonoBehaviour:
   gunTransform: {fileID: 97620438}
   playerTransform: {fileID: 1360284264}
   playerNearby: 0
+  rotationSpeed: 100
 --- !u!1 &1864315540
 GameObject:
   m_ObjectHideFlags: 0

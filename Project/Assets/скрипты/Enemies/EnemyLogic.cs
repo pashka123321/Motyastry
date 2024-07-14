@@ -7,33 +7,38 @@ public class EnemyLogic : MonoBehaviour
     [SerializeField] private bool playerNearby;
     private Transform core;
 
+    [SerializeField] private float rotationSpeed = 5f; // скорость поворота
+
     private void Start()
     {
-        core = GameObject.Find("CoreTransform").GetComponent<Transform>(); // Замените "CoreTransform" на имя вашего объекта
+        core = GameObject.Find("ядро").GetComponent<Transform>(); // замените "Core" на имя объекта с ядром
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        if (playerNearby)
+        if (playerNearby && IsPlayerCloserThanCore())
         {
-            RotateTowards(playerTransform.position);
+            RotateTowardsTarget(playerTransform.position);
         }
         else
         {
-            RotateTowards(core.position);
+            RotateTowardsTarget(core.position);
         }
     }
 
-    private void RotateTowards(Vector3 targetPosition)
+    private void RotateTowardsTarget(Vector3 targetPosition)
     {
         Vector3 direction = targetPosition - gunTransform.position;
-        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        float currentAngle = gunTransform.eulerAngles.z;
-        
-        // Интерполяция углов для плавного поворота
-        float angle = Mathf.LerpAngle(currentAngle, targetAngle, Time.deltaTime * 5f); // Увеличьте значение для увеличения скорости поворота
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
+        gunTransform.rotation = Quaternion.RotateTowards(gunTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
 
-        gunTransform.eulerAngles = new Vector3(0, 0, angle);
+    private bool IsPlayerCloserThanCore()
+    {
+        float distanceToPlayer = Vector3.Distance(gunTransform.position, playerTransform.position);
+        float distanceToCore = Vector3.Distance(gunTransform.position, core.position);
+        return distanceToPlayer < distanceToCore;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
