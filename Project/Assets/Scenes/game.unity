@@ -16461,7 +16461,7 @@ GameObject:
   - component: {fileID: 1517684058}
   - component: {fileID: 1517684057}
   m_Layer: 3
-  m_Name: ResourceEnter
+  m_Name: ResourceReciever
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
