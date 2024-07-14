@@ -1020,7 +1020,7 @@ Transform:
   m_GameObject: {fileID: 97620437}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.10714722, z: 0}
+  m_LocalPosition: {x: 0, y: -0.14285278, z: 0}
   m_LocalScale: {x: 2.6221998, y: 2.6221998, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5397,6 +5397,8 @@ MonoBehaviour:
     volume: 60
   - clip: {fileID: 8300000, guid: edeec260ffd1b3747a2142ce755f0859, type: 3}
     volume: 100
+  - clip: {fileID: 8300000, guid: f37bae46b20a6af4ca5c6cff62aee03d, type: 3}
+    volume: 60
 --- !u!82 &467504654
 AudioSource:
   m_ObjectHideFlags: 0
@@ -16025,7 +16027,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 0.98039216}
+  m_Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -16598,7 +16600,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lead: 0
   gold: 0
-  coal: 0
+  coal: 100
   copper: 0
   copperigot: 0
   leadigot: 0
