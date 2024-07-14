@@ -5397,8 +5397,8 @@ MonoBehaviour:
     volume: 60
   - clip: {fileID: 8300000, guid: edeec260ffd1b3747a2142ce755f0859, type: 3}
     volume: 100
-  - clip: {fileID: 8300000, guid: f37bae46b20a6af4ca5c6cff62aee03d, type: 3}
-    volume: 60
+  - clip: {fileID: 8300000, guid: 618a0657b85605745b7f09281005a21f, type: 3}
+    volume: 100
 --- !u!82 &467504654
 AudioSource:
   m_ObjectHideFlags: 0
@@ -17440,7 +17440,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 2a379a915cc725e46982e7a63266de4d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7d19d846ff4747e49b41c4f65997192c, type: 3}
   m_Color: {r: 0.24705882, g: 0.25490198, b: 0.26666668, a: 1}
   m_FlipX: 0
   m_FlipY: 0
