@@ -1005,7 +1005,7 @@ GameObject:
   - component: {fileID: 97620438}
   - component: {fileID: 97620439}
   m_Layer: 8
-  m_Name: enemy_gun
+  m_Name: Gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1019,12 +1019,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 97620437}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0359, y: -0, z: 0}
-  m_LocalScale: {x: 0.87846005, y: 0.87846005, z: 0.87846005}
+  m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.10714722, z: 0}
+  m_LocalScale: {x: 2.6221998, y: 2.6221998, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 391619546}
+  m_Father: {fileID: 1858131618}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &97620439
 SpriteRenderer:
@@ -4435,9 +4435,8 @@ GameObject:
   - component: {fileID: 391619551}
   - component: {fileID: 391619552}
   - component: {fileID: 391619554}
-  - component: {fileID: 391619555}
   m_Layer: 8
-  m_Name: enemy
+  m_Name: Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4507,8 +4506,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2.9849963, y: 2.9849963, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 97620438}
+  m_Children: []
   m_Father: {fileID: 1858131618}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!61 &391619549
@@ -4710,25 +4708,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &391619555
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 391619543}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebb64ec632febfb4eb182be81d11cf06, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 1060417408}
-  speed: 2
-  raycastDistance: 10
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 8
-  isClone: 0
 --- !u!1 &407583462
 GameObject:
   m_ObjectHideFlags: 0
@@ -15057,7 +15036,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360284262}
-  m_BodyType: 2
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -16617,13 +16596,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e48047aff710d5d4fa501fbbf86f193d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lead: 1
-  gold: 1
-  coal: 1
-  copper: 1
-  copperigot: 1
-  leadigot: 1
-  goldigot: 1
+  lead: 0
+  gold: 0
+  coal: 0
+  copper: 0
+  copperigot: 0
+  leadigot: 0
+  goldigot: 0
   resourceUIPrefab: {fileID: 4760215754539161360, guid: f7cbb13a54b8e494689a8712d17fa6aa, type: 3}
   resourceUIParent: {fileID: 1977180852}
   goldPrefab: {fileID: 1770712592}
@@ -24705,8 +24684,10 @@ GameObject:
   - component: {fileID: 1858131621}
   - component: {fileID: 1858131620}
   - component: {fileID: 1858131619}
+  - component: {fileID: 1858131623}
+  - component: {fileID: 1858131622}
   m_Layer: 0
-  m_Name: "\u0443\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u0432\u0440\u0430\u0433\u0430\u043C\u0438"
+  m_Name: Tank
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24725,6 +24706,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 97620438}
   - {fileID: 391619546}
   m_Father: {fileID: 831373319}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -24741,7 +24723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  target: {fileID: 1360284264}
+  target: {fileID: 1060417408}
 --- !u!114 &1858131620
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24812,6 +24794,56 @@ MonoBehaviour:
   tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   graphMask:
     value: -1
+--- !u!58 &1858131622
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858131617}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 15
+--- !u!114 &1858131623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1858131617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d80c30b7f265f41ad8a5084c0cbf5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gunTransform: {fileID: 97620438}
+  playerTransform: {fileID: 1360284264}
+  playerNearby: 0
 --- !u!1 &1864315540
 GameObject:
   m_ObjectHideFlags: 0
