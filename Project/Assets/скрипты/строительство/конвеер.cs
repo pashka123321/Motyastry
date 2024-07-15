@@ -167,6 +167,12 @@ public class conveerBuildModeController : MonoBehaviour
                     grid[x, y] = false;
                     break;
                 }
+                else if (col.gameObject.CompareTag("Conveer"))
+                {
+                    Destroy(col.gameObject);
+                    grid[x, y] = false;
+                    break;
+                }
             }
         }
     }
@@ -182,6 +188,10 @@ public class conveerBuildModeController : MonoBehaviour
         foreach (Collider2D col in colliders)
         {
             if (col.gameObject != previewBlock && col.gameObject.CompareTag("Block"))
+            {
+                return false; // В этой клетке уже есть другой блок
+            }
+            else if (col.gameObject != previewBlock && col.gameObject.CompareTag("Conveer"))
             {
                 return false; // В этой клетке уже есть другой блок
             }

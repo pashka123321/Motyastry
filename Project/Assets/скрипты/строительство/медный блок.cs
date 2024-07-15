@@ -291,7 +291,7 @@ public class BuildModeController : MonoBehaviour
             Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
             foreach (Collider2D col in colliders)
             {
-                if (col.gameObject.CompareTag("Block"))
+                if (col.gameObject.CompareTag("Block") || col.gameObject.CompareTag("Conveer"))
                 {
                     // Обновляем граф до удаления блока
                     UpdateGraphBeforeRemoval(col.gameObject);
@@ -314,7 +314,7 @@ public class BuildModeController : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(x, y));
         foreach (Collider2D col in colliders)
         {
-            if (col.gameObject != previewBlock && col.gameObject.CompareTag("Block"))
+            if (col.gameObject != previewBlock && (col.gameObject.CompareTag("Block") || col.gameObject.CompareTag("Conveer")))
             {
                 return false;
             }
