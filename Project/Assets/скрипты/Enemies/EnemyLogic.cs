@@ -1,47 +1,44 @@
-using Pathfinding;
 using UnityEngine;
 
 public class EnemyLogic : MonoBehaviour
 {
     [SerializeField] private Transform gunTransform;
-
     public Transform playerTransform;
-
     [SerializeField] private bool playerNearby;
-
-    private Transform transendenceTransform;
-
     private Transform core;
+
+    [SerializeField] private float rotationSpeed = 5f; // скорость поворота
 
     private void Start()
     {
-        transendenceTransform = gunTransform;
-
-        core = GameObject.Find("����").GetComponent<Transform>();
+        core = GameObject.Find("ядро").GetComponent<Transform>(); // замените "Core" на имя объекта с ядром
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        if (gunTransform.eulerAngles.z == 90)
+        if (playerNearby && IsPlayerCloserThanCore())
         {
-            Debug.Log(gunTransform.eulerAngles.z);
-        }
-
-        if (playerNearby)
-        {
-            Debug.Log("Ok");
-            Vector3 look = gunTransform.InverseTransformPoint(playerTransform.position);
-            float angle = Mathf.Atan2(look.y, look.x) * Mathf.Rad2Deg * Time.deltaTime * 0.45f;
-
-            gunTransform.Rotate(0, 0, angle);
+            RotateTowardsTarget(playerTransform.position);
         }
         else
         {
-            Vector3 look = gunTransform.InverseTransformPoint(core.position);
-            float angle = Mathf.Atan2(look.y, look.x) * Mathf.Rad2Deg * Time.deltaTime * 0.45f;
-
-            gunTransform.Rotate(0, 0, angle);
+            RotateTowardsTarget(core.position);
         }
+    }
+
+    private void RotateTowardsTarget(Vector3 targetPosition)
+    {
+        Vector3 direction = targetPosition - gunTransform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
+        gunTransform.rotation = Quaternion.RotateTowards(gunTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    private bool IsPlayerCloserThanCore()
+    {
+        float distanceToPlayer = Vector3.Distance(gunTransform.position, playerTransform.position);
+        float distanceToCore = Vector3.Distance(gunTransform.position, core.position);
+        return distanceToPlayer < distanceToCore;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

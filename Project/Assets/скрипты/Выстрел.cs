@@ -27,14 +27,14 @@ public class PlayerShooting : MonoBehaviour
 
     public Text shootingModeText; // Reference to the UI Text component
 
-    private PlayerHealth playerHealth; // Ссылка на скрипт PlayerHealth
+    private PlayerHealth playerHealth; // Reference to PlayerHealth script
 
-    // Список игнорируемых UI элементов
+    // List of UI elements to ignore for pointer detection
     public List<GameObject> ignoreUIElements = new List<GameObject>();
 
     void Start()
     {
-        buildModeController = GetComponent<BuildModeController>();
+        buildModeController = FindObjectOfType<BuildModeController>();
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -43,14 +43,14 @@ public class PlayerShooting : MonoBehaviour
 
         UpdateShootingModeText();
 
-        playerHealth = GetComponent<PlayerHealth>(); // Получаем ссылку на скрипт PlayerHealth
+        playerHealth = GetComponent<PlayerHealth>(); // Get reference to PlayerHealth script
     }
 
     void Update()
     {
         if (PauseController.IsGamePaused)
         {
-            // Игра на паузе, не стреляем
+            // Game is paused, do not shoot
             return;
         }
 
@@ -66,7 +66,7 @@ public class PlayerShooting : MonoBehaviour
             UpdateShootingModeText();
         }
 
-        if (shootingModeEnabled && Time.time > nextFireTime && playerHealth.isAlive) // Добавлена проверка isAlive
+        if (shootingModeEnabled && Time.time > nextFireTime && playerHealth.isAlive)
         {
             bool isPointerOverUI = IsPointerOverUI();
             bool fireButtonPressed = Input.GetButton("Fire1");
@@ -163,7 +163,6 @@ public class PlayerShooting : MonoBehaviour
 
     bool IsPointerOverUI()
     {
-        // Проверяем, находится ли указатель мыши над любым UI элементом, кроме тех, которые в списке ignoreUIElements
         PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
         pointerEventData.position = Input.mousePosition;
 
