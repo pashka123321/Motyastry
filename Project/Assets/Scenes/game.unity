@@ -18154,26 +18154,19 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1680893874}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94a58a4b77566b34b8a756d9df8fe1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundInfos:
-  - clip: {fileID: 8300000, guid: 618a0657b85605745b7f09281005a21f, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: fa10c37fdc30df142b87a5770cb5ecc5, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: 4ff517b57eaedeb49a324a34e547be68, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: edeec260ffd1b3747a2142ce755f0859, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: 473128102f6af5c4dbdeb1d4d447f631, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: 30b866a2a93be6f4fb120bb68d2fc3db, type: 3}
-    volume: 0.01
-  - clip: {fileID: 8300000, guid: 4d6b860a8a846e64a9233de6d56f334d, type: 3}
-    volume: 0.01
+  audioClips:
+  - {fileID: 8300000, guid: 618a0657b85605745b7f09281005a21f, type: 3}
+  - {fileID: 8300000, guid: 4d6b860a8a846e64a9233de6d56f334d, type: 3}
+  - {fileID: 8300000, guid: fa10c37fdc30df142b87a5770cb5ecc5, type: 3}
+  - {fileID: 8300000, guid: 30b866a2a93be6f4fb120bb68d2fc3db, type: 3}
+  - {fileID: 8300000, guid: 4ff517b57eaedeb49a324a34e547be68, type: 3}
+  - {fileID: 8300000, guid: edeec260ffd1b3747a2142ce755f0859, type: 3}
+  - {fileID: 8300000, guid: 473128102f6af5c4dbdeb1d4d447f631, type: 3}
 --- !u!1 &1687265545
 GameObject:
   m_ObjectHideFlags: 0

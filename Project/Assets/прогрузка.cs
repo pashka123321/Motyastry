@@ -1,30 +1,28 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SoundPreloader : MonoBehaviour
 {
-    [System.Serializable]
-    public class SoundInfo
-    {
-        public AudioClip clip;
-        [Range(0f, 1f)]
-        public float volume = 0f;
-    }
-
-    public SoundInfo[] soundInfos;
+    public AudioClip[] audioClips;  // Массив для хранения всех звуков и музыки, которые нужно загрузить
 
     void Start()
     {
-        foreach (var soundInfo in soundInfos)
+        // Проходимся по массиву и загружаем все звуки и музыку
+        foreach (var clip in audioClips)
         {
-            GameObject tempGO = new GameObject("TempAudio"); // Создаем временный GameObject
-            AudioSource audioSource = tempGO.AddComponent<AudioSource>(); // Добавляем компонент AudioSource
-            audioSource.clip = soundInfo.clip; // Устанавливаем AudioClip
-            audioSource.volume = soundInfo.volume; // Устанавливаем громкость
+            // Создаем временный объект для звука
+            GameObject soundObject = new GameObject("TempAudio");
+            AudioSource audioSource = soundObject.AddComponent<AudioSource>();
 
-            // Воспроизводим звук в точке (0, 0, 0) с заданной громкостью
-            AudioSource.PlayClipAtPoint(soundInfo.clip, Vector3.zero);
+            // Устанавливаем звук и громкость
+            audioSource.clip = clip;
+            audioSource.volume = 0.001f; // Устанавливаем громкость в 0.1%
 
-            Destroy(tempGO, soundInfo.clip.length); // Удаляем временный GameObject после окончания звука
+            // Проигрываем звук
+            audioSource.Play();
+
+            // Уничтожаем объект после завершения звука
+            Destroy(soundObject, clip.length);
         }
     }
 }
