@@ -3299,7 +3299,7 @@ GameObject:
   - component: {fileID: 294702881}
   - component: {fileID: 294702880}
   m_Layer: 0
-  m_Name: "\u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0441\u0442\u0435\u043D"
+  m_Name: MapGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
