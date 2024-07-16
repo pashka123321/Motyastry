@@ -26,6 +26,7 @@ TagManager:
   - fon
   - ConveerEnter
   - ZavodEnter
+  - ConveerExit
   layers:
   - Default
   - TransparentFX
