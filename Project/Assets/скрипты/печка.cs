@@ -14,13 +14,30 @@ public class Furnace : MonoBehaviour
     public List<OreToIngotMapping> oreToIngotMappings; // Список сопоставлений руды и слитков
     public Transform[] spawnPoints;    // Точка спавна слитка
 
+    private float timer;
+    [SerializeField] private float interval;
+
     private int i = 0;
     public bool[] activeSP;
     private List<Collider2D> oresInTrigger = new List<Collider2D>();
 
+    [SerializeField] private GameObject[] zavodEnters;
+
+
     private void Start()
     {
         CheckAllOresInTrigger();
+        timer = 0f;
+    }
+
+    private void Update()
+    {
+        timer += Time.deltaTime;
+
+        if (timer >= interval)
+        {
+
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -92,6 +109,8 @@ public class Furnace : MonoBehaviour
         {
             activeSP[spIndex] = true;
             CheckAllOresInTrigger(); // Проверка руды при активации спавн-точки
+
+            zavodEnters[spIndex].SetActive(false);
         }
     }
 
@@ -100,6 +119,8 @@ public class Furnace : MonoBehaviour
         if (activeSP[spIndex] == true)
         {
             activeSP[spIndex] = false;
+
+            zavodEnters[spIndex].SetActive(false);
         }
     }
 }
