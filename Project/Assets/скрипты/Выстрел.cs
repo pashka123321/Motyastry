@@ -32,6 +32,9 @@ public class PlayerShooting : MonoBehaviour
     // List of UI elements to ignore for pointer detection
     public List<GameObject> ignoreUIElements = new List<GameObject>();
 
+    private float shootingStartTime = 0f; // Time when the shooting button was first pressed
+    private float shootingDelay = 0.5f; // Delay before shooting starts (1 second)
+
     void Start()
     {
         buildModeController = FindObjectOfType<BuildModeController>();
@@ -73,17 +76,24 @@ public class PlayerShooting : MonoBehaviour
 
             if (fireButtonPressed && !isPointerOverUI)
             {
-                wasShootingInitially = true;
-                isShooting = true;
-            }
+                if (!wasShootingInitially)
+                {
+                    shootingStartTime = Time.time;
+                    wasShootingInitially = true;
+                }
 
-            if (!fireButtonPressed)
+                if (Time.time - shootingStartTime >= shootingDelay)
+                {
+                    isShooting = true;
+                }
+            }
+            else
             {
                 isShooting = false;
                 wasShootingInitially = false;
             }
 
-            if (isShooting && (wasShootingInitially || !isPointerOverUI))
+            if (isShooting)
             {
                 nextFireTime = Time.time + fireRate;
 

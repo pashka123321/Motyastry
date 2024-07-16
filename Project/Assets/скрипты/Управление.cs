@@ -9,7 +9,8 @@ public class PlayerMovement : MonoBehaviour
     public float acceleration = 15f; // Коэффициент ускорения
     public float deceleration = 10f; // Коэффициент замедления
     public float directionChangeSpeed = 10f; // Скорость изменения направления
-    public float rotationSpeed = 10f;
+    public float rotationSpeed = 10f; // Скорость поворота
+    public float rotationDelay = 0.5f; // Задержка перед началом поворота
 
     private Vector2 currentDirection = Vector2.zero; // Текущее направление
     private float currentSpeed = 0.0f; // Текущая скорость
@@ -18,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool isRotating = false; // Флаг для отслеживания, идет ли поворот
     private bool wasRotatingInitially = false; // Флаг для отслеживания, начался ли поворот до наведения на UI
+    private float rotationStartTime = 0f; // Время начала удерживания кнопки для поворота
 
     // Список игнорируемых UI элементов
     public List<GameObject> ignoreUIElements = new List<GameObject>();
@@ -68,17 +70,24 @@ public class PlayerMovement : MonoBehaviour
 
         if (isLMBPressed && !IsPointerOverUI())
         {
-            wasRotatingInitially = true;
-            isRotating = true;
-        }
+            if (!wasRotatingInitially)
+            {
+                rotationStartTime = Time.time;
+                wasRotatingInitially = true;
+            }
 
-        if (!isLMBPressed)
+            if (Time.time - rotationStartTime >= rotationDelay)
+            {
+                isRotating = true;
+            }
+        }
+        else
         {
             isRotating = false;
             wasRotatingInitially = false;
         }
 
-        if ((isRotating && wasRotatingInitially) || (!IsPointerOverUI() && isLMBPressed))
+        if (isRotating)
         {
             RotateTowardsMouse();
         }
