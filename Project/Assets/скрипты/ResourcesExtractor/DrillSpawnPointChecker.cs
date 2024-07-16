@@ -11,7 +11,7 @@ public class DrillSpawnPointChecker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Conveer"))
+        if (collision.CompareTag("ConveerEnter"))
         {
             spawner.ActivateSpawnPoint((int)(gameObject.name[12]) - 49);
         }
@@ -19,7 +19,7 @@ public class DrillSpawnPointChecker : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Conveer"))
+        if (collision.CompareTag("ConveerEnter"))
         {
             spawner.DeactivateSpawnPoint((int)(gameObject.name[12]) - 49);
         }
