@@ -33,7 +33,7 @@ public class PlayerShooting : MonoBehaviour
     public List<GameObject> ignoreUIElements = new List<GameObject>();
 
     private float shootingStartTime = 0f; // Time when the shooting button was first pressed
-    private float shootingDelay = 0.5f; // Delay before shooting starts (1 second)
+    private float shootingDelay = 0.2f; // Delay before shooting starts (1 second)
 
     void Start()
     {

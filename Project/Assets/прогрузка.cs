@@ -1,6 +1,5 @@
 using UnityEngine;
-using UnityEngine.Audio;
-
+using System.Collections;
 public class SoundPreloader : MonoBehaviour
 {
     public AudioClip[] audioClips;  // Массив для хранения всех звуков и музыки, которые нужно загрузить
@@ -21,8 +20,22 @@ public class SoundPreloader : MonoBehaviour
             // Проигрываем звук
             audioSource.Play();
 
-            // Уничтожаем объект после завершения звука
-            Destroy(soundObject, clip.length);
+            // Запускаем корутину для остановки звука через 1 секунду
+            StartCoroutine(StopMusicAfterDelay(soundObject, 1f));
         }
+    }
+
+    private IEnumerator StopMusicAfterDelay(GameObject soundObject, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        AudioSource audioSource = soundObject.GetComponent<AudioSource>();
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
+
+        // Уничтожаем объект после остановки звука
+        Destroy(soundObject);
     }
 }

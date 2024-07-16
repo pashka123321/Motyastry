@@ -75,22 +75,23 @@ public class TurretController : MonoBehaviour
         return null;
     }
 
-    void Shoot()
+void Shoot()
+{
+    if (Bullet1 != null && firePoint != null)
     {
-        if (Bullet1 != null && firePoint != null)
+        GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
+        Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
+        if (bulletScript != null)
         {
-            GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
-            Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
-            if (bulletScript != null)
-            {
-                bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
-            }
-        }
-
-        if (shootSounds.Length > 0 && audioSource != null)
-        {
-            AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
-            audioSource.PlayOneShot(randomShootSound);
+            bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
         }
     }
+
+    if (shootSounds.Length > 0 && audioSource != null)
+    {
+        AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
+        audioSource.PlayOneShot(randomShootSound, 0.5f); // Устанавливаем громкость на 50%
+    }
+}
+
 }
