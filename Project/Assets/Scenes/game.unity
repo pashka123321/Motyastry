@@ -8768,6 +8768,7 @@ MonoBehaviour:
   deceleration: 10
   directionChangeSpeed: 10
   rotationSpeed: 10
+  rotationDelay: 1
   canControl: 1
   ignoreUIElements: []
 --- !u!1 &804762642
@@ -15452,6 +15453,7 @@ MonoBehaviour:
   deceleration: 10
   directionChangeSpeed: 10
   rotationSpeed: 10
+  rotationDelay: 0.5
   canControl: 1
   ignoreUIElements:
   - {fileID: 1054705958}
