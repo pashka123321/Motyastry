@@ -2,28 +2,26 @@ using UnityEngine;
 
 public class HideObjectOnStart : MonoBehaviour
 {
-    // Префаб кнопки настройки
-    public GameObject settingsButtonPrefab;
-
     // Префаб камеры
     public Camera targetCamera;
 
     // Ссылка на канвас
     public Canvas settingsCanvas;
 
-    // Ссылка на кнопку настройки
-    private GameObject settingsButton;
-
     void Start()
     {
         // Скрыть канвас при запуске сцены
         settingsCanvas.gameObject.SetActive(false);
 
-        // Найти кнопку настройки
-        settingsButton = Instantiate(settingsButtonPrefab, transform);
+        // Найти кнопку настройки по имени
+        GameObject settingsButton = GameObject.Find("SettingsButton");
 
-        // Добавить слушатель нажатия на кнопку настройки
-        settingsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(ShowSettingsCanvas);
+        // Проверить, что кнопка настройки найдена
+        if (settingsButton != null)
+        {
+            // Добавить слушатель нажатия на кнопку настройки
+            settingsButton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(ShowSettingsCanvas);
+        }
     }
 
     // Восстановить канвас (показать его снова и привязать к камере)
@@ -37,6 +35,6 @@ public class HideObjectOnStart : MonoBehaviour
         settingsCanvas.worldCamera = targetCamera;
 
         // Установить канвас выше остальных
-        settingsCanvas.sortingOrder = 1004;
+        settingsCanvas.sortingOrder = 2111;
     }
 }

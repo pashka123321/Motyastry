@@ -15,10 +15,34 @@ public class Furnace : MonoBehaviour
     public Transform[] spawnPoints;    // Точка спавна слитка
 
     private int i = 0;
-
     public bool[] activeSP;
+    private List<Collider2D> oresInTrigger = new List<Collider2D>();
+
+    private void Start()
+    {
+        CheckAllOresInTrigger();
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
+    {
+        oresInTrigger.Add(collision);
+        ProcessOre(collision);
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        oresInTrigger.Remove(collision);
+    }
+
+    private void CheckAllOresInTrigger()
+    {
+        foreach (var ore in oresInTrigger.ToList())
+        {
+            ProcessOre(ore);
+        }
+    }
+
+    private void ProcessOre(Collider2D oreCollider)
     {
         int count = activeSP.Where(c => c).Count();
 
@@ -33,7 +57,7 @@ public class Furnace : MonoBehaviour
         }
 
         // Получаем GameObject, с которым произошло столкновение
-        GameObject oreObject = collision.gameObject;
+        GameObject oreObject = oreCollider.gameObject;
 
         // Ищем в списке сопоставлений подходящий префаб слитка для данной руды
         foreach (var mapping in oreToIngotMappings)
@@ -56,6 +80,7 @@ public class Furnace : MonoBehaviour
 
                 // Удаляем объект руды
                 Destroy(oreObject);
+                oresInTrigger.Remove(oreCollider); // Удаляем из списка oresInTrigger
                 return; // Выходим из метода после успешного спавна слитка
             }
         }
@@ -66,6 +91,7 @@ public class Furnace : MonoBehaviour
         if (activeSP[spIndex] == false)
         {
             activeSP[spIndex] = true;
+            CheckAllOresInTrigger(); // Проверка руды при активации спавн-точки
         }
     }
 
