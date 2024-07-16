@@ -18,22 +18,9 @@ public class Furnace : MonoBehaviour
     public bool[] activeSP;
     private List<Collider2D> oresInTrigger = new List<Collider2D>();
 
-    [SerializeField] private GameObject[] zavodEnters;
-
-    [SerializeField] private ObjectStorage storage;
-
     private void Start()
     {
         CheckAllOresInTrigger();
-    }
-
-    private void Update()
-    {
-        if (storage.currentAmount > 0)
-        {
-            ProcessOre(storage.currentType);
-            storage.currentAmount--;
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -57,34 +44,11 @@ public class Furnace : MonoBehaviour
 
     private void ProcessOre(Collider2D oreCollider)
     {
-        if (oreCollider.GetComponent<ResourcesMovementLogic>() == null)
-        {
-            return;
-        }
-
         int count = activeSP.Where(c => c).Count();
 
         if (count == 0)
         {
-            if (storage.currentAmount < storage.StorageLimit && storage.currentAmount != 0 && oreCollider == storage.currentType)
-            {
-                storage.currentAmount++;
-            }
-            else if (storage.currentAmount == 0)
-            {
-                Debug.LogError("pON");
-                storage.currentType = oreCollider;
-                storage.currentAmount++;
-            }
-            else
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    zavodEnters[j].GetComponent<Collider2D>().enabled = false;
-                }
-
-                return;
-            }
+            return;
         }
 
         if (i == 4)
@@ -128,8 +92,6 @@ public class Furnace : MonoBehaviour
         {
             activeSP[spIndex] = true;
             CheckAllOresInTrigger(); // Проверка руды при активации спавн-точки
-
-            zavodEnters[spIndex].SetActive(false);
         }
     }
 
@@ -138,8 +100,6 @@ public class Furnace : MonoBehaviour
         if (activeSP[spIndex] == true)
         {
             activeSP[spIndex] = false;
-
-            zavodEnters[spIndex].SetActive(true);
         }
     }
 }

@@ -49,7 +49,7 @@ public class EnemySpawner : MonoBehaviour
             }
             else
             {
-                //Debug.LogError("Neither EnemyAI nor EnemyAI2D component found on enemyPrefab or its children.");
+                Debug.LogError("Neither EnemyAI nor EnemyAI2D component found on enemyPrefab or its children.");
             }
         }
 
