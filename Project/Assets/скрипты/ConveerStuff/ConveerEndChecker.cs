@@ -13,18 +13,20 @@ public class ConveerEndChecker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag != null)
+        Debug.LogError(collision.tag);
+
+        if (collision.CompareTag("ConveerEnter"))
         {
-            conveerEnd.enabled = false;
+            conveerEnd.gameObject.SetActive(false);
             hasEnd = false;
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag != null)
+        if (collision.CompareTag("ConveerEnter"))
         {
-            conveerEnd.enabled = true;
+            conveerEnd.gameObject.SetActive(true);
             hasEnd = true;
         }
     }
