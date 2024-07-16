@@ -7067,7 +7067,7 @@ GameObject:
   m_Component:
   - component: {fileID: 551375663}
   - component: {fileID: 551375664}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434 3"
   m_TagString: ConveerEnter
   m_Icon: {fileID: 0}
@@ -9699,7 +9699,7 @@ GameObject:
   m_Component:
   - component: {fileID: 787071292}
   - component: {fileID: 787071293}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434 2"
   m_TagString: ConveerEnter
   m_Icon: {fileID: 0}
@@ -16026,7 +16026,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1335237165}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: "\u0432\u044B\u0445\u043E\u0434"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18876,7 +18876,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1617103976}
   - component: {fileID: 1617103977}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434"
   m_TagString: ConveerEnter
   m_Icon: {fileID: 0}
@@ -33361,7 +33361,7 @@ Transform:
   m_GameObject: {fileID: 2042829980}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -447.0712, y: -462.121, z: -3.7339528}
+  m_LocalPosition: {x: -447.0712, y: -462.127, z: -3.7339528}
   m_LocalScale: {x: 3.151725, y: 2.7778, z: 2.7778}
   m_ConstrainProportionsScale: 0
   m_Children:
