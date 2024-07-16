@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,33 +14,19 @@ public class Furnace : MonoBehaviour
 
     public List<OreToIngotMapping> oreToIngotMappings; // Список сопоставлений руды и слитков
     public Transform[] spawnPoints;    // Точка спавна слитка
-
-    private float timer;
-    [SerializeField] private float interval;
+    public Sprite defaultSprite;       // Обычный спрайт печки
+    public Sprite activeSprite;        // Активный спрайт печки
 
     private int i = 0;
     public bool[] activeSP;
     private List<Collider2D> oresInTrigger = new List<Collider2D>();
 
     [SerializeField] private GameObject[] zavodEnters;
-    private bool timerPassed;
-
+    private bool isProcessing = false; // Флаг, указывающий на процесс переплавки
 
     private void Start()
     {
         CheckAllOresInTrigger();
-        timer = 0f;
-    }
-
-    private void Update()
-    {
-        timer += Time.deltaTime;
-
-        if (timer >= interval)
-        {
-            timer = 0f;
-            timerPassed = true;
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -63,14 +50,11 @@ public class Furnace : MonoBehaviour
 
     private void ProcessOre(Collider2D oreCollider)
     {
-        if (!timerPassed)
+        if (isProcessing)
         {
-            return;
+            return; // Если уже идет переплавка, выходим из метода
         }
-        else
-        {
-            timerPassed = false;
-        }
+
         int count = activeSP.Where(c => c).Count();
 
         if (count == 0)
@@ -101,16 +85,33 @@ public class Furnace : MonoBehaviour
                     }
                 }
 
-                // Спавним соответствующий слиток в указанной точке с нулевым поворотом
-                Instantiate(mapping.ingotPrefab, spawnPoints[i].position, Quaternion.identity);
-                i++;
-
-                // Удаляем объект руды
-                Destroy(oreObject);
-                oresInTrigger.Remove(oreCollider); // Удаляем из списка oresInTrigger
-                return; // Выходим из метода после успешного спавна слитка
+                // Запускаем корутину для переплавки
+                StartCoroutine(ProcessOreCoroutine(mapping.ingotPrefab, oreObject, oreCollider));
+                return; // Выходим из метода после успешного запуска корутины
             }
         }
+    }
+
+    private IEnumerator ProcessOreCoroutine(GameObject ingotPrefab, GameObject oreObject, Collider2D oreCollider)
+    {
+        // Устанавливаем спрайт на активный
+        GetComponent<SpriteRenderer>().sprite = activeSprite;
+        isProcessing = true;
+
+        // Задержка переплавки
+        yield return new WaitForSeconds(1f);
+
+        // Спавним соответствующий слиток в указанной точке с нулевым поворотом
+        Instantiate(ingotPrefab, spawnPoints[i].position, Quaternion.identity);
+        i++;
+
+        // Удаляем объект руды
+        Destroy(oreObject);
+        oresInTrigger.Remove(oreCollider); // Удаляем из списка oresInTrigger
+
+        // Возвращаем спрайт на обычный
+        GetComponent<SpriteRenderer>().sprite = defaultSprite;
+        isProcessing = false;
     }
 
     public void ActivateSpawnPoint(int spIndex)
