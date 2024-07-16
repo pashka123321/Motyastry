@@ -8,6 +8,13 @@ public class MovementController : MonoBehaviour
 
     private Transform target; // Целевая позиция для центрирования
 
+    public enum Direction
+    {
+        Up, Right, Left, Down        
+    }
+
+    public Direction currentDirection;
+
     void FixedUpdate()
     {
         // Проверяем, касается ли объект какого-либо объекта на нужном layer'е
@@ -30,18 +37,22 @@ public class MovementController : MonoBehaviour
             if (rotationAngle >= 45f && rotationAngle < 135f)
             {
                 direction = Vector2.up; // Вверх
+                currentDirection = Direction.Up;
             }
             else if (rotationAngle >= 135f && rotationAngle < 225f)
             {
                 direction = Vector2.left; // Влево
+                currentDirection = Direction.Left;
             }
             else if (rotationAngle >= 225f && rotationAngle < 315f)
             {
                 direction = Vector2.down; // Вниз
+                currentDirection = Direction.Down;
             }
             else
             {
                 direction = Vector2.right; // Вправо
+                currentDirection = Direction.Right;
             }
 
             // Двигаем объект в заданном направлении

@@ -21,6 +21,8 @@ public class Furnace : MonoBehaviour
     public bool[] activeSP;
     private List<Collider2D> oresInTrigger = new List<Collider2D>();
 
+    [SerializeField] private float interval;
+
     [SerializeField] private GameObject[] zavodEnters;
     private bool isProcessing = false; // Флаг, указывающий на процесс переплавки
 
@@ -98,8 +100,13 @@ public class Furnace : MonoBehaviour
         GetComponent<SpriteRenderer>().sprite = activeSprite;
         isProcessing = true;
 
+        for (int j = 0; j < 4; j++)
+        {
+            zavodEnters[j].GetComponent<BoxCollider2D>().enabled = true;
+        }
+
         // Задержка переплавки
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(interval);
 
         // Спавним соответствующий слиток в указанной точке с нулевым поворотом
         Instantiate(ingotPrefab, spawnPoints[i].position, Quaternion.identity);
@@ -112,6 +119,11 @@ public class Furnace : MonoBehaviour
         // Возвращаем спрайт на обычный
         GetComponent<SpriteRenderer>().sprite = defaultSprite;
         isProcessing = false;
+
+        for (int j = 0; j < 4; j++)
+        {
+            zavodEnters[j].GetComponent<BoxCollider2D>().enabled = false;
+        }
     }
 
     public void ActivateSpawnPoint(int spIndex)
@@ -131,7 +143,7 @@ public class Furnace : MonoBehaviour
         {
             activeSP[spIndex] = false;
 
-            zavodEnters[spIndex].SetActive(false);
+            zavodEnters[spIndex].SetActive(true);
         }
     }
 }
