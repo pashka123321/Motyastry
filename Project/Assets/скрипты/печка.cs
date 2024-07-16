@@ -22,6 +22,7 @@ public class Furnace : MonoBehaviour
     private List<Collider2D> oresInTrigger = new List<Collider2D>();
 
     [SerializeField] private GameObject[] zavodEnters;
+    private bool timerPassed;
 
 
     private void Start()
@@ -36,7 +37,8 @@ public class Furnace : MonoBehaviour
 
         if (timer >= interval)
         {
-
+            timer = 0f;
+            timerPassed = true;
         }
     }
 
@@ -61,6 +63,14 @@ public class Furnace : MonoBehaviour
 
     private void ProcessOre(Collider2D oreCollider)
     {
+        if (!timerPassed)
+        {
+            return;
+        }
+        else
+        {
+            timerPassed = false;
+        }
         int count = activeSP.Where(c => c).Count();
 
         if (count == 0)

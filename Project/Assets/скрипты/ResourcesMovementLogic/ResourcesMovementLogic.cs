@@ -13,13 +13,13 @@ public class ResourcesMovementLogic : MonoBehaviour
         {
             MovementController movementController = collision.GetComponent<MovementController>();
 
-            Debug.LogError(movementController);
+            //Debug.LogError(movementController);
 
-            Debug.LogError("Pon");
+            //Debug.LogError("Pon");
 
             if (!movementController.enabled)
             {
-                Debug.LogError("Pon");
+                //Debug.LogError("Pon");
 
                 gameObject.GetComponent<MovementController>().enabled = false;
             }
@@ -30,7 +30,7 @@ public class ResourcesMovementLogic : MonoBehaviour
 
             if (collision.CompareTag("ZavodEnter"))
             {
-                Debug.LogError("Damn");
+                //Debug.LogError("Damn");
                 gameObject.GetComponent<MovementController>().enabled = false;
             }
         }
@@ -41,6 +41,11 @@ public class ResourcesMovementLogic : MonoBehaviour
         if (collision.GetComponent<MovementController>() != null)
         {
             gameObject.GetComponent<MovementController>().enabled = true;
+        }
+        else if (collision.CompareTag("ZavodEnter"))
+        {
+            Debug.LogError("PON");
+            gameObject.GetComponentInChildren<MovementController>().enabled = true;
         }
     }
 }

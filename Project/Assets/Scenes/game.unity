@@ -1458,7 +1458,11 @@ MonoBehaviour:
   - {fileID: 464019942}
   interval: 0
   activeSP: 00000000
-  zavodEnters: []
+  zavodEnters:
+  - {fileID: 1982271409}
+  - {fileID: 257043652}
+  - {fileID: 919598741}
+  - {fileID: 1713447415}
 --- !u!61 &128663205
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3551,7 +3555,7 @@ GameObject:
   - component: {fileID: 257043653}
   - component: {fileID: 257043654}
   m_Layer: 0
-  m_Name: ZavodEnter
+  m_Name: ZavodEnter2
   m_TagString: ZavodEnter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10689,7 +10693,7 @@ GameObject:
   - component: {fileID: 919598742}
   - component: {fileID: 919598743}
   m_Layer: 0
-  m_Name: ZavodEnter
+  m_Name: ZavodEnter3
   m_TagString: ZavodEnter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20316,7 +20320,7 @@ GameObject:
   - component: {fileID: 1713447416}
   - component: {fileID: 1713447417}
   m_Layer: 0
-  m_Name: ZavodEnter
+  m_Name: ZavodEnter4
   m_TagString: ZavodEnter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33065,7 +33069,7 @@ GameObject:
   - component: {fileID: 1982271410}
   - component: {fileID: 1982271411}
   m_Layer: 0
-  m_Name: ZavodEnter
+  m_Name: ZavodEnter1
   m_TagString: ZavodEnter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
