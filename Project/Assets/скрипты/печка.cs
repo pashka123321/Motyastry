@@ -96,6 +96,9 @@ public class Furnace : MonoBehaviour
 
     private IEnumerator ProcessOreCoroutine(GameObject ingotPrefab, GameObject oreObject, Collider2D oreCollider)
     {
+        // Удаляем объект руды
+        Destroy(oreObject);
+
         // Устанавливаем спрайт на активный
         GetComponent<SpriteRenderer>().sprite = activeSprite;
         isProcessing = true;
@@ -112,8 +115,6 @@ public class Furnace : MonoBehaviour
         Instantiate(ingotPrefab, spawnPoints[i].position, Quaternion.identity);
         i++;
 
-        // Удаляем объект руды
-        Destroy(oreObject);
         oresInTrigger.Remove(oreCollider); // Удаляем из списка oresInTrigger
 
         // Возвращаем спрайт на обычный

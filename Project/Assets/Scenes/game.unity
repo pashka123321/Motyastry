@@ -2233,6 +2233,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!50 &155276711
 Rigidbody2D:
@@ -4119,6 +4122,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!50 &325718362
 Rigidbody2D:
@@ -7674,6 +7680,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!61 &630675877
 BoxCollider2D:
@@ -11482,6 +11491,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!114 &970737429
 MonoBehaviour:
@@ -19255,6 +19267,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!114 &1646753513
 MonoBehaviour:
@@ -20681,6 +20696,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 0
   currentDirection: 0
 --- !u!50 &1715799094
 Rigidbody2D:
@@ -21257,6 +21275,9 @@ MonoBehaviour:
   activatorLayer:
     serializedVersion: 2
     m_Bits: 1024
+  deathLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   currentDirection: 0
 --- !u!114 &1770712595
 MonoBehaviour:
