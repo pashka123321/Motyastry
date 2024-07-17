@@ -38,14 +38,30 @@ public class ResourcesMovementLogic : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.GetComponent<MovementController>() != null)
+        try
         {
-            gameObject.GetComponent<MovementController>().enabled = true;
+            MovementController movementController = collision.GetComponent<MovementController>();
+
+            //Debug.LogError(movementController);
+
+            //Debug.LogError("Pon");
+
+            if (movementController.enabled || !movementController.enabled)
+            {
+                //Debug.LogError("NIPON");
+
+                gameObject.GetComponent<MovementController>().enabled = true;
+            }
         }
-        else if (collision.CompareTag("ZavodEnter"))
+        catch (System.Exception e)
         {
-            Debug.LogError("PON");
-            gameObject.GetComponentInChildren<MovementController>().enabled = true;
+            Debug.LogError(e);
+
+            if (collision.CompareTag("ZavodEnter"))
+            {
+                Debug.LogError("Damn");
+                gameObject.GetComponent<MovementController>().enabled = true;
+            }
         }
     }
 }
