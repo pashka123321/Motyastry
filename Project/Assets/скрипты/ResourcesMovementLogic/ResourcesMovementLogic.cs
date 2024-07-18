@@ -35,7 +35,9 @@ public class ResourcesMovementLogic : MonoBehaviour
         {
             if (collision.CompareTag("ZavodEnter"))
             {
-                gameObject.GetComponent<MovementController>().enabled = false;
+                movementController = gameObject.GetComponent<MovementController>();
+
+                movementController.enabled = false;
             }
         }
     }
@@ -67,8 +69,24 @@ public class ResourcesMovementLogic : MonoBehaviour
         {
             if (collision.CompareTag("ZavodEnter"))
             {
-                Debug.LogError("CanMove");
-                gameObject.GetComponent<MovementController>().enabled = true;
+                movementController = gameObject.GetComponent<MovementController>();
+
+                if (movementController.currentDirection == MovementController.Direction.Up && gameObject.transform.position.y < collision.transform.position.y)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = true;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x - 1)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = true;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Down && gameObject.transform.position.y > collision.gameObject.transform.position.y)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = true;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Right && gameObject.transform.position.x < collision.gameObject.transform.position.x)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = true;
+                }
             }
         }
     }
