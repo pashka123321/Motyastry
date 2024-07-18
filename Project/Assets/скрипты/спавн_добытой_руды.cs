@@ -11,67 +11,30 @@ public class BlockSpawner : MonoBehaviour
     }
 
     public OrePrefabs[] orePrefabsArray;
-    public Transform[] spawnPoints;  // Точки спавна блоков 
-    public bool[] activeSP; 
-
-    public float spawnInterval = 1f;  // Интервал спавна блока
+    public Transform[] spawnPoints; // Массив точек спавна
+    public float spawnInterval = 1f; // Интервал спавна блока
 
     private Dictionary<string, GameObject[]> orePrefabsDict; // Словарь для хранения префабов руд
-    private float timer;  // Таймер для отслеживания интервалов
+    private float timer; // Таймер для отслеживания интервалов
     private string currentOreTag; // Тег текущей руды
-
-    private int i; // Текущая точка спавна
-
-    [SerializeField] private DrillSpawnPointChecker[] drillSpawnPointCheckers;
+    private List<Transform> activeSpawnPoints; // Список активных точек спавна
 
     void Start()
     {
-        timer = 0f;  // Начальное значение таймера
+        timer = 0f; // Начальное значение таймера
         InitializeOrePrefabsDictionary();
         currentOreTag = null; // Начальное значение текущего тега руды
-
-        i = -1;
-    }
-
-    public void ActivateSpawnPoint(int spIndex)
-    {
-        if (activeSP[spIndex] == false)
-        {
-            activeSP[spIndex] = true;
-        }
-    }
-
-    public void DeactivateSpawnPoint(int spIndex)
-    {
-        if (activeSP[spIndex] == true)
-        {
-            activeSP[spIndex] = false;
-        }
+        activeSpawnPoints = new List<Transform>(); // Инициализация списка активных точек спавна
     }
 
     void Update()
     {
-        timer += Time.deltaTime;  // Увеличиваем таймер каждый кадр
+        timer += Time.deltaTime; // Увеличиваем таймер каждый кадр
 
-        if (i == 3)
+        if (timer >= spawnInterval && currentOreTag != null && activeSpawnPoints.Count > 0)
         {
-            i = -1;
-        }
-
-        if (timer >= spawnInterval && currentOreTag != null && spawnPoints.Length != 0)
-        {
-            i++;
-
-            bool res = SpawnBlock(currentOreTag, i);  // Вызываем метод спавна блока
-
-            if (res)
-            {
-                timer = 0f;  // Сбрасываем таймер
-            }
-            else
-            {
-                timer = spawnInterval;
-            }
+            SpawnBlock(currentOreTag); // Вызываем метод спавна блока
+            timer = 0f; // Сбрасываем таймер
         }
     }
 
@@ -93,6 +56,17 @@ public class BlockSpawner : MonoBehaviour
         {
             currentOreTag = blockTag; // Устанавливаем текущий тег руды
         }
+
+        if (other.CompareTag("Conveer"))
+        {
+            for (int i = 0; i < spawnPoints.Length; i++)
+            {
+                if (other.bounds.Intersects(spawnPoints[i].GetComponent<Collider2D>().bounds) && !activeSpawnPoints.Contains(spawnPoints[i]))
+                {
+                    activeSpawnPoints.Add(spawnPoints[i]); // Добавляем точку спавна в список активных
+                }
+            }
+        }
     }
 
     void OnTriggerExit2D(Collider2D other)
@@ -103,33 +77,31 @@ public class BlockSpawner : MonoBehaviour
         {
             currentOreTag = null; // Сбрасываем текущий тег руды
         }
-    }
 
-    bool SpawnBlock(string oreTag, int i)
-    {
-        if (drillSpawnPointCheckers[i].ConatinsOre == true)
+        if (other.CompareTag("Conveer"))
         {
-            return false;
-        }
-
-        bool spawnRes = false;
-
-        if (orePrefabsDict.ContainsKey(oreTag))
-        {
-            GameObject[] prefabs = orePrefabsDict[oreTag];
-            if (prefabs.Length > 0)
+            for (int i = 0; i < spawnPoints.Length; i++)
             {
-                // Спавним случайный префаб из списка в случайной активной точке спавна
-                GameObject randomPrefab = prefabs[Random.Range(0, prefabs.Length)];
-
-                if (activeSP[i] == true)
+                if (other.bounds.Intersects(spawnPoints[i].GetComponent<Collider2D>().bounds))
                 {
-                    Instantiate(randomPrefab, spawnPoints[i].position, Quaternion.identity);
-                    spawnRes = true;
+                    activeSpawnPoints.Remove(spawnPoints[i]); // Удаляем точку спавна из списка активных
                 }
             }
         }
+    }
 
-        return spawnRes;
+    void SpawnBlock(string oreTag)
+    {
+        if (orePrefabsDict.ContainsKey(oreTag))
+        {
+            GameObject[] prefabs = orePrefabsDict[oreTag];
+            if (prefabs.Length > 0 && activeSpawnPoints.Count > 0)
+            {
+                // Спавним случайный префаб из списка в случайной активной точке спавна
+                GameObject randomPrefab = prefabs[Random.Range(0, prefabs.Length)];
+                Transform randomSpawnPoint = activeSpawnPoints[Random.Range(0, activeSpawnPoints.Count)];
+                Instantiate(randomPrefab, randomSpawnPoint.position, Quaternion.identity);
+            }
+        }
     }
 }
