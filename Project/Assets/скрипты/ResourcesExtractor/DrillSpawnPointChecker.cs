@@ -4,9 +4,11 @@ public class DrillSpawnPointChecker : MonoBehaviour
 {
     [SerializeField] private BlockSpawner spawner;
 
+    public bool ConatinsOre;
+
     void Start()
     {
-
+        ConatinsOre = false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -15,6 +17,10 @@ public class DrillSpawnPointChecker : MonoBehaviour
         {
             spawner.ActivateSpawnPoint((int)(gameObject.name[12]) - 49);
         }
+        else if (collision.GetComponent<ResourcesMovementLogic>() != null)
+        {
+            ConatinsOre = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -22,6 +28,10 @@ public class DrillSpawnPointChecker : MonoBehaviour
         if (collision.CompareTag("ConveerEnter"))
         {
             spawner.DeactivateSpawnPoint((int)(gameObject.name[12]) - 49);
+        }
+        else if (collision.GetComponent<ResourcesMovementLogic>() != null)
+        {
+            ConatinsOre = false;
         }
     }
 }

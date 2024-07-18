@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -6,6 +7,8 @@ public class ConveerEndChecker : MonoBehaviour
     [SerializeField] private BoxCollider2D conveerEnd;
 
     public bool hasEnd;
+
+    public int enters;
 
     private void Start()
     {
@@ -18,6 +21,15 @@ public class ConveerEndChecker : MonoBehaviour
 
         if (collision.CompareTag("ConveerEnter"))
         {
+            ConveerEndChecker tempCEC = collision.GetComponent<ExitReference>().exit.GetComponent<ConveerEndChecker>();
+
+            tempCEC.enters++;
+
+            if (tempCEC.enters > 1 && tempCEC.GetComponent<CrossroadsAlgotithm>() == null)
+            {
+                tempCEC.gameObject.AddComponent<CrossroadsAlgotithm>();
+            }
+
             conveerEnd.gameObject.SetActive(false);
             hasEnd = false;
         }
@@ -32,6 +44,14 @@ public class ConveerEndChecker : MonoBehaviour
     {
         if (collision.CompareTag("ConveerEnter"))
         {
+            ConveerEndChecker tempCEC = collision.GetComponent<ExitReference>().exit.GetComponent<ConveerEndChecker>();
+
+            tempCEC.enters--;
+
+            if (tempCEC.enters < 2 && tempCEC.GetComponent<CrossroadsAlgotithm>() != null)
+            {
+                Destroy(tempCEC.gameObject.GetComponent<CrossroadsAlgotithm>());
+            }
             conveerEnd.gameObject.SetActive(true);
             hasEnd = true;
         }

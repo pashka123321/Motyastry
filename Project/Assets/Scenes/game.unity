@@ -6655,6 +6655,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawner: {fileID: 1308701633}
+  ConatinsOre: 0
 --- !u!61 &503665737
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6687,7 +6688,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 2}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -6698,7 +6699,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
 --- !u!1 &508941215
 GameObject:
@@ -7164,6 +7165,7 @@ GameObject:
   m_Component:
   - component: {fileID: 551375663}
   - component: {fileID: 551375664}
+  - component: {fileID: 551375665}
   m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434 3"
   m_TagString: ConveerEnter
@@ -7231,6 +7233,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.1, y: 0.1}
   m_EdgeRadius: 0
+--- !u!114 &551375665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 551375662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e20adda85454740b24d4d8a8494fe6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exit: {fileID: 1335237164}
 --- !u!1 &553876040
 GameObject:
   m_ObjectHideFlags: 0
@@ -9800,6 +9815,7 @@ GameObject:
   m_Component:
   - component: {fileID: 787071292}
   - component: {fileID: 787071293}
+  - component: {fileID: 787071294}
   m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434 2"
   m_TagString: ConveerEnter
@@ -9867,6 +9883,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.1, y: 0.1}
   m_EdgeRadius: 0
+--- !u!114 &787071294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 787071291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e20adda85454740b24d4d8a8494fe6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exit: {fileID: 1335237164}
 --- !u!1 &804762642
 GameObject:
   m_ObjectHideFlags: 0
@@ -15800,6 +15829,11 @@ MonoBehaviour:
   - {fileID: 2119613179}
   activeSP: 00000000
   spawnInterval: 1
+  drillSpawnPointCheckers:
+  - {fileID: 503665736}
+  - {fileID: 1311982035}
+  - {fileID: 1677484565}
+  - {fileID: 2119613180}
 --- !u!50 &1308701634
 Rigidbody2D:
   serializedVersion: 4
@@ -15873,6 +15907,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawner: {fileID: 1308701633}
+  ConatinsOre: 0
 --- !u!61 &1311982036
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -15905,7 +15940,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -2, y: 0}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -15916,7 +15951,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
 --- !u!1 &1312147304
 GameObject:
@@ -16290,7 +16325,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   conveerEnd: {fileID: 1764595577}
+  exit: {fileID: 0}
   hasEnd: 0
+  enters: 0
 --- !u!1 &1349374865
 GameObject:
   m_ObjectHideFlags: 0
@@ -19119,6 +19156,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1617103976}
   - component: {fileID: 1617103977}
+  - component: {fileID: 1617103978}
   m_Layer: 0
   m_Name: "\u0432\u0445\u043E\u0434"
   m_TagString: ConveerEnter
@@ -19186,6 +19224,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.1, y: 0.1}
   m_EdgeRadius: 0
+--- !u!114 &1617103978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617103975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16e20adda85454740b24d4d8a8494fe6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exit: {fileID: 1335237164}
 --- !u!1 &1646753510
 GameObject:
   m_ObjectHideFlags: 0
@@ -19644,6 +19695,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawner: {fileID: 1308701633}
+  ConatinsOre: 0
 --- !u!61 &1677484566
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -19676,7 +19728,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -2}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -19687,7 +19739,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
 --- !u!1 &1680893874
 GameObject:
@@ -34513,6 +34565,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawner: {fileID: 1308701633}
+  ConatinsOre: 0
 --- !u!61 &2119613181
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -34545,7 +34598,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 2, y: 0}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -34556,7 +34609,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
 --- !u!1 &2125425759
 GameObject:

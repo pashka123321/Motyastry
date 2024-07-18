@@ -18,7 +18,7 @@ public class ResourcesMovementLogic : MonoBehaviour
             {
                 gameObject.GetComponent<MovementController>().enabled = false;
             }
-            else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x < collision.gameObject.transform.position.x)
+            else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x)
             {
                 gameObject.GetComponent<MovementController>().enabled = false;
             }
@@ -50,7 +50,7 @@ public class ResourcesMovementLogic : MonoBehaviour
             {
                 gameObject.GetComponent<MovementController>().enabled = true;
             }
-            else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x < collision.gameObject.transform.position.x)
+            else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x)
             {
                 gameObject.GetComponent<MovementController>().enabled = true;
             }

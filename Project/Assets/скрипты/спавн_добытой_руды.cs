@@ -22,6 +22,8 @@ public class BlockSpawner : MonoBehaviour
 
     private int i; // Текущая точка спавна
 
+    [SerializeField] private DrillSpawnPointChecker[] drillSpawnPointCheckers;
+
     void Start()
     {
         timer = 0f;  // Начальное значение таймера
@@ -105,6 +107,11 @@ public class BlockSpawner : MonoBehaviour
 
     bool SpawnBlock(string oreTag, int i)
     {
+        if (drillSpawnPointCheckers[i].ConatinsOre == true)
+        {
+            return false;
+        }
+
         bool spawnRes = false;
 
         if (orePrefabsDict.ContainsKey(oreTag))

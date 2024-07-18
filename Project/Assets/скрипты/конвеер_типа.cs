@@ -19,12 +19,6 @@ public class MovementController : MonoBehaviour
     {
         // Проверяем, касается ли объект какого-либо объекта на нужном layer'е
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.2f, activatorLayer); // Используем окружность с радиусом 0.2f для проверки касания
-        Collider2D[] deadColliders = Physics2D.OverlapCircleAll(transform.position, 0.2f, deathLayer); // Используем окружность с радиусом 0.2f для проверки касания
-
-        if (deadColliders.Length > 0)
-        {
-            Destroy(gameObject);
-        }
 
         // Двигаем объект в заданном направлении, если он касается активатора
         if (colliders.Length > 0)
@@ -48,7 +42,7 @@ public class MovementController : MonoBehaviour
             else if (rotationAngle >= 135f && rotationAngle < 225f)
             {
                 direction = Vector2.left; // Влево
-                currentDirection = Direction.Right;
+                currentDirection = Direction.Right; 
             }
             else if (rotationAngle >= 225f && rotationAngle < 315f)
             {
