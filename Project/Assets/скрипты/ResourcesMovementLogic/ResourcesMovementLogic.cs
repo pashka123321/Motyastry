@@ -13,7 +13,6 @@ public class ResourcesMovementLogic : MonoBehaviour
 
         if (movementController != null)
         {
-            Debug.LogError($"{gameObject.transform.position.y} <> {collision.transform.position.y} <--> {movementController.currentDirection}", gameObject);
             if (movementController.currentDirection == MovementController.Direction.Up && gameObject.transform.position.y < collision.transform.position.y)
             {
                 gameObject.GetComponent<MovementController>().enabled = false;
@@ -37,7 +36,24 @@ public class ResourcesMovementLogic : MonoBehaviour
             {
                 movementController = gameObject.GetComponent<MovementController>();
 
-                movementController.enabled = false;
+                Debug.LogError($"{gameObject.transform.position.y} <> {collision.transform.position.y} <--> {movementController.currentDirection}", gameObject);
+
+                if (movementController.currentDirection == MovementController.Direction.Up && gameObject.transform.position.y < collision.transform.position.y)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = false;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = false;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Down && gameObject.transform.position.y > collision.gameObject.transform.position.y)
+                {
+                    gameObject.GetComponent<MovementController>().enabled = false;
+                }
+                else if (movementController.currentDirection == MovementController.Direction.Right && gameObject.transform.position.x < collision.gameObject.transform.position.x)
+                {
+
+                }
             }
         }
     }
@@ -75,7 +91,7 @@ public class ResourcesMovementLogic : MonoBehaviour
                 {
                     gameObject.GetComponent<MovementController>().enabled = true;
                 }
-                else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x - 1)
+                else if (movementController.currentDirection == MovementController.Direction.Left && gameObject.transform.position.x > collision.gameObject.transform.position.x - 10)
                 {
                     gameObject.GetComponent<MovementController>().enabled = true;
                 }
