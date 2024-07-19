@@ -29,4 +29,12 @@ public class MusicPlayer : MonoBehaviour
             audioSource.volume = volume; // Обновляем громкость AudioSource
         }
     }
+
+    void FixedUpdate()
+    {
+        if (audioSource != null && audioSource.volume != volume)
+        {
+            audioSource.volume = volume; // Постоянно обновляем громкость до заданного уровня
+        }
+    }
 }

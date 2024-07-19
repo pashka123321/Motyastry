@@ -90,7 +90,7 @@ void Shoot()
     if (shootSounds.Length > 0 && audioSource != null)
     {
         AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
-        audioSource.PlayOneShot(randomShootSound, 1f); // Устанавливаем громкость на 50%
+        audioSource.PlayOneShot(randomShootSound, 0.6f); // Устанавливаем громкость на 50%
     }
 }
 
