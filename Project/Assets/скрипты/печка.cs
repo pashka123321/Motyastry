@@ -13,23 +13,40 @@ public class Furnace : MonoBehaviour
 
     public List<OreToIngotMapping> oreToIngotMappings; // Список сопоставлений руды и слитков
     public Transform[] spawnPoints;    // Точка спавна слитка
+    public bool[] activeSP;
 
     private int i = 0;
 
-    public bool[] activeSP;
-
+    // Метод обработки входа объекта в триггер
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        ProcessCollision(collision);
+    }
+
+    // Метод обработки постоянного нахождения объекта в триггере
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        ProcessCollision(collision);
+    }
+
+    // Обработка столкновения руды с печью
+    private void ProcessCollision(Collider2D collision)
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0 || activeSP == null || activeSP.Length == 0)
+        {
+            return; // Предотвращаем выполнение если точки спавна или активные точки не заданы
+        }
+
         int count = activeSP.Where(c => c).Count();
 
         if (count == 0)
         {
-            return;
+            return; // Если нет активных точек спавна, выходим
         }
 
-        if (i == 4)
+        if (i >= spawnPoints.Length)
         {
-            i = 0;
+            i = 0; // Сбрасываем индекс если он выходит за пределы массива точек спавна
         }
 
         // Получаем GameObject, с которым произошло столкновение
@@ -44,9 +61,9 @@ public class Furnace : MonoBehaviour
                 while (activeSP[i] == false)
                 {
                     i++;
-                    if (i == 4)
+                    if (i >= spawnPoints.Length)
                     {
-                        i = 0;
+                        i = 0; // Сбрасываем индекс если он выходит за пределы массива точек спавна
                     }
                 }
 
@@ -63,8 +80,7 @@ public class Furnace : MonoBehaviour
 
     public void ActivateSpawnPoint(int spIndex)
     {
-        Debug.LogError(spIndex);
-        if (activeSP[spIndex] == false)
+        if (spIndex >= 0 && spIndex < activeSP.Length)
         {
             activeSP[spIndex] = true;
         }
@@ -72,7 +88,7 @@ public class Furnace : MonoBehaviour
 
     public void DeactivateSpawnPoint(int spIndex)
     {
-        if (activeSP[spIndex] == true)
+        if (spIndex >= 0 && spIndex < activeSP.Length)
         {
             activeSP[spIndex] = false;
         }
