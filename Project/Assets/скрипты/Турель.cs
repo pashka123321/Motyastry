@@ -9,6 +9,7 @@ public class TurretController : MonoBehaviour
     public float fireRate = 1f; // Скорость стрельбы (выстрелов в секунду)
     public float detectionRadius = 20f; // Радиус обнаружения врагов
     public float rotationSpeed = 5f; // Скорость поворота турели к врагу
+    public float aimThreshold = 5f; // Порог для проверки, нацелена ли турель
     public AudioClip[] shootSounds; // Массив звуков выстрела
     private float fireCountdown = 0f;
     private AudioSource audioSource;
@@ -32,13 +33,16 @@ public class TurretController : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, direction);
             turretObject.transform.rotation = Quaternion.RotateTowards(turretObject.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
-            if (fireCountdown <= 0f)
+            float angle = Quaternion.Angle(turretObject.transform.rotation, targetRotation);
+            if (angle < aimThreshold)
             {
-                Shoot();
-                fireCountdown = 1f / fireRate;
+                if (fireCountdown <= 0f)
+                {
+                    Shoot();
+                    fireCountdown = 1f / fireRate;
+                }
+                fireCountdown -= Time.deltaTime;
             }
-
-            fireCountdown -= Time.deltaTime;
 
             // Проверяем, жива ли текущая цель
             if (!IsTargetAlive(currentTarget))
@@ -75,23 +79,22 @@ public class TurretController : MonoBehaviour
         return null;
     }
 
-void Shoot()
-{
-    if (Bullet1 != null && firePoint != null)
+    void Shoot()
     {
-        GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
-        Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
-        if (bulletScript != null)
+        if (Bullet1 != null && firePoint != null)
         {
-            bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
+            GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
+            Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
+            if (bulletScript != null)
+            {
+                bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
+            }
+        }
+
+        if (shootSounds.Length > 0 && audioSource != null)
+        {
+            AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
+            audioSource.PlayOneShot(randomShootSound, 0.3f); // Устанавливаем громкость на 30%
         }
     }
-
-    if (shootSounds.Length > 0 && audioSource != null)
-    {
-        AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
-        audioSource.PlayOneShot(randomShootSound, 0.6f); // Устанавливаем громкость на 50%
-    }
-}
-
 }

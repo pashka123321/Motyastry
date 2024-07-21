@@ -28,7 +28,11 @@ public class Bullettank : MonoBehaviour
             {
                 blockHealth.TakeDamage(damage);
             }
-            Destroy(gameObject); // Уничтожить пулю после попадания
+            // Пуля не уничтожается сразу при попадании в Block, поэтому удаляем эту строку
+        }
+        else if (collision.CompareTag("Blockwall"))
+        {
+            Destroy(gameObject); // Уничтожить пулю при попадании в Blockwall
         }
     }
 }

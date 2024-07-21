@@ -4,7 +4,7 @@ public class MusicPlayer : MonoBehaviour
 {
     public AudioClip musicClip; // Сюда перетащите ваш прифаб музыки
     public float volume = 0.5f; // Громкость от 0.0 (без звука) до 1.0 (максимальная громкость)
-    private AudioSource audioSource;
+    public AudioSource audioSource; // Сюда перетащите ваш компонент AudioSource
 
     void Awake()
     {
@@ -13,7 +13,10 @@ public class MusicPlayer : MonoBehaviour
 
     void Start()
     {
-        audioSource = gameObject.AddComponent<AudioSource>(); // Добавляем AudioSource компонент
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>(); // Если AudioSource не назначен, добавляем компонент
+        }
         audioSource.clip = musicClip; // Устанавливаем клип
         audioSource.loop = true; // Устанавливаем бесконечное повторение
         audioSource.volume = volume; // Устанавливаем громкость

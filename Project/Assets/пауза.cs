@@ -6,6 +6,8 @@ public class PauseController : MonoBehaviour
     public Text pauseText;
     public static bool IsGamePaused = false;
     private bool isPaused = false;
+    public GameObject[] interactableObjects; // Все объекты, с которыми можно взаимодействовать
+    public AudioSource backgroundMusic; // Источник музыки
 
     void Start()
     {
@@ -33,6 +35,16 @@ public class PauseController : MonoBehaviour
         pauseText.enabled = true; // Показать текст
         isPaused = true;
         IsGamePaused = true;
+
+        foreach (GameObject obj in interactableObjects)
+        {
+            obj.SetActive(false); // Отключить все взаимодействуемые объекты
+        }
+
+        if (backgroundMusic != null)
+        {
+            backgroundMusic.Pause(); // Остановить музыку
+        }
     }
 
     void ResumeGame()
@@ -41,5 +53,15 @@ public class PauseController : MonoBehaviour
         pauseText.enabled = false; // Скрыть текст
         isPaused = false;
         IsGamePaused = false;
+
+        foreach (GameObject obj in interactableObjects)
+        {
+            obj.SetActive(true); // Включить все взаимодействуемые объекты
+        }
+
+        if (backgroundMusic != null)
+        {
+            backgroundMusic.UnPause(); // Возобновить музыку
+        }
     }
 }
