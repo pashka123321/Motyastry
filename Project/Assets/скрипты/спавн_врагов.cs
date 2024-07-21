@@ -7,6 +7,7 @@ public class EnemySpawner : MonoBehaviour
     public int maxEnemies = 10; // Максимальное количество врагов
     public float spawnInterval = 2.0f; // Интервал между спаунами
     public float minDistanceFromPlayer = 20.0f; // Минимальное расстояние от игрока
+    public LayerMask blockLayer; // Слой для блоков, где нельзя спаунить врагов
 
     private int currentEnemies = 0; // Текущее количество врагов
 
@@ -24,9 +25,10 @@ public class EnemySpawner : MonoBehaviour
         Vector3 spawnPosition = GetRandomSpawnPosition();
 
         // Проверяем расстояние до игрока
-        while (Vector3.Distance(spawnPosition, player.position) < minDistanceFromPlayer)
+        while (Vector3.Distance(spawnPosition, player.position) < minDistanceFromPlayer ||
+               IsPositionOccupiedByBlock(spawnPosition))
         {
-            spawnPosition = GetRandomSpawnPosition(); // Генерируем новую позицию, если слишком близко к игроку
+            spawnPosition = GetRandomSpawnPosition(); // Генерируем новую позицию, если слишком близко к игроку или занята блоком
         }
 
         GameObject clone = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
@@ -47,10 +49,6 @@ public class EnemySpawner : MonoBehaviour
                 enemyAI2D.isClone = true;
                 enemyAI2D.player = player;
             }
-            else
-            {
-                Debug.LogError("Neither EnemyAI nor EnemyAI2D component found on enemyPrefab or its children.");
-            }
         }
 
         currentEnemies++;
@@ -68,5 +66,12 @@ public class EnemySpawner : MonoBehaviour
         while (x >= 75 && x <= 100 && y >= 75 && y <= 100);
 
         return new Vector3(x, y, 0);
+    }
+
+    bool IsPositionOccupiedByBlock(Vector3 position)
+    {
+        // Проверяем, находится ли позиция в коллайдере блока
+        Collider2D collider = Physics2D.OverlapPoint(position, blockLayer);
+        return collider != null;
     }
 }

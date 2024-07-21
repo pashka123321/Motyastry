@@ -27,6 +27,8 @@ TagManager:
   - ConveerEnter
   - ZavodEnter
   - ConveerExit
+  - Blockwall
+  - core
   layers:
   - Default
   - TransparentFX
