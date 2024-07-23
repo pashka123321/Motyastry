@@ -19470,7 +19470,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360284262}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8767945795238dd418277a67aca7e608, type: 3}
   m_Name: 
@@ -19612,6 +19612,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
   cameraFollow: {fileID: 519420033}
   respawnPoint: {fileID: 1060417408}
+  isInvincible: 0
 --- !u!114 &1360284272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23374,8 +23375,6 @@ MonoBehaviour:
   objectsWithDelay:
   - obj: {fileID: 519420028}
     delay: 1.6
-  - obj: {fileID: 1360284262}
-    delay: 1.6
   - obj: {fileID: 1229347318}
     delay: 1.6
   - obj: {fileID: 1518150766}
@@ -23386,6 +23385,10 @@ MonoBehaviour:
     delay: 1.6
   - obj: {fileID: 786270577}
     delay: 1.6
+  - obj: {fileID: 1360284262}
+    delay: 1.6
+  - obj: {fileID: 1360284262}
+    delay: 2
 --- !u!114 &1680893878
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -29,9 +29,18 @@ public class ShowObjectsAfterDelay : MonoBehaviour
         {
             if (!objectShown[i]) // Проверяем, не показан ли уже объект
             {
-                objectsWithDelay[i].obj.SetActive(true); // Делаем объект видимым
-                objectShown[i] = true; // Помечаем объект как показанный
-                return; // Выходим из метода после показа первого непоказанного объекта
+                if (i != 7)
+                {
+                    objectsWithDelay[i].obj.SetActive(true); // Делаем объект видимым
+                    objectShown[i] = true; // Помечаем объект как показанный
+                    return; // Выходим из метода после показа первого непоказанного объекта
+                }
+                else
+                {
+                    objectsWithDelay[i].obj.GetComponent<PlayerMovement>().enabled = true; // Делаем объект видимым
+                    objectShown[i] = true; // Помечаем объект как показанный
+                    return; // Выходим из метода после показа первого непоказанного объекта
+                }
             }
         }
     }
