@@ -73,12 +73,12 @@ public class PlayerHealth : MonoBehaviour
         {
             Die(); // Если здоровье игрока меньше или равно 0, вызываем метод "умереть"
             isInvincible = true;
-            Invoke(nameof(InvincibleTimer), 5f);
+            Invoke(nameof(InvincibleTimer), 1.5f);
         }
         else
         {
             isInvincible = true;
-            Invoke(nameof(InvincibleTimer), 2f);
+            Invoke(nameof(InvincibleTimer), 0.25f);
         }
     }
 
