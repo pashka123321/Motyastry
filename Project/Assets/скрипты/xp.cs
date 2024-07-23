@@ -19,6 +19,8 @@ public class PlayerHealth : MonoBehaviour
 
     public bool isAlive { get; private set; } = true; // Добавлено свойство isAlive
 
+    public bool isInvincible = false;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -46,6 +48,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        if (isInvincible) return;
+
         if (!isAlive) return; // Добавлена проверка на живого игрока
 
         currentHealth -= damage;
@@ -68,7 +72,19 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0f)
         {
             Die(); // Если здоровье игрока меньше или равно 0, вызываем метод "умереть"
+            isInvincible = true;
+            Invoke(nameof(InvincibleTimer), 5f);
         }
+        else
+        {
+            isInvincible = true;
+            Invoke(nameof(InvincibleTimer), 2f);
+        }
+    }
+
+    private void InvincibleTimer()
+    {
+        isInvincible = false;
     }
 
     void PlayRandomHurtSound()
