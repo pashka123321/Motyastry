@@ -23388,7 +23388,7 @@ MonoBehaviour:
   - obj: {fileID: 1360284262}
     delay: 1.6
   - obj: {fileID: 1360284262}
-    delay: 2
+    delay: 2.2
 --- !u!114 &1680893878
 MonoBehaviour:
   m_ObjectHideFlags: 0
