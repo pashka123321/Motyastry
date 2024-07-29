@@ -29,6 +29,7 @@ TagManager:
   - ConveerExit
   - Blockwall
   - core
+  - oblako
   layers:
   - Default
   - TransparentFX
@@ -44,7 +45,7 @@ TagManager:
   - itemore
   - fon
   - "\u0438\u0433\u043D\u043E\u0440"
-  - 
+  - oblako
   - 
   - 
   - 
