@@ -1,20 +1,38 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemySpawner : MonoBehaviour
 {
-    public GameObject enemyPrefab; // Префаб врага
+    public static EnemySpawner Instance { get; private set; }
+
+    public GameObject[] enemyPrefabs; // Массив префабов врагов
     public Transform player; // Ссылка на объект игрока
     public int maxEnemies = 10; // Максимальное количество врагов
     public float spawnInterval = 2.0f; // Интервал между спаунами
     public float minDistanceFromPlayer = 20.0f; // Минимальное расстояние от игрока
     public LayerMask blockLayer; // Слой для блоков, где нельзя спаунить врагов
+    public Text enemyCountText; // Ссылка на текстовый компонент UI
 
     private int currentEnemies = 0; // Текущее количество врагов
+
+    void Awake()
+    {
+        // Настраиваем singleton
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
         // Начинаем спаунить врагов с указанным интервалом
         InvokeRepeating("TrySpawnClone", spawnInterval, spawnInterval);
+        UpdateEnemyCountText();
     }
 
     void TrySpawnClone()
@@ -24,16 +42,19 @@ public class EnemySpawner : MonoBehaviour
 
         Vector3 spawnPosition = GetRandomSpawnPosition();
 
-        // Проверяем расстояние до игрока
         while (Vector3.Distance(spawnPosition, player.position) < minDistanceFromPlayer ||
                IsPositionOccupiedByBlock(spawnPosition))
         {
             spawnPosition = GetRandomSpawnPosition(); // Генерируем новую позицию, если слишком близко к игроку или занята блоком
         }
 
-        GameObject clone = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-        
-        // Проверяем, какой компонент EnemyAI установлен на префабе
+        GameObject selectedEnemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+        GameObject clone = Instantiate(selectedEnemyPrefab, spawnPosition, Quaternion.identity);
+
+        // Добавляем EnemyTracker к клону врага
+        clone.AddComponent<EnemyTracker>();
+
+        // Настраиваем врага (например, связываем с игроком)
         EnemyAI enemyAI = clone.GetComponent<EnemyAI>();
         if (enemyAI != null)
         {
@@ -42,7 +63,6 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
-            // Если не найден EnemyAI, попробуем получить EnemyAI2D
             EnemyAI2D enemyAI2D = clone.GetComponent<EnemyAI2D>();
             if (enemyAI2D != null)
             {
@@ -52,6 +72,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         currentEnemies++;
+        UpdateEnemyCountText();
     }
 
     Vector3 GetRandomSpawnPosition()
@@ -73,5 +94,16 @@ public class EnemySpawner : MonoBehaviour
         // Проверяем, находится ли позиция в коллайдере блока
         Collider2D collider = Physics2D.OverlapPoint(position, blockLayer);
         return collider != null;
+    }
+
+    void UpdateEnemyCountText()
+    {
+        enemyCountText.text = "Врагов: " + currentEnemies.ToString();
+    }
+
+    public void OnEnemyDestroyed()
+    {
+        currentEnemies--;
+        UpdateEnemyCountText();
     }
 }
