@@ -18704,7 +18704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 75486855}
   player: {fileID: 1360284264}
-  maxEnemies: 10
+  maxEnemies: 99999
   spawnInterval: 3
   minDistanceFromPlayer: 20
   blockLayer:
