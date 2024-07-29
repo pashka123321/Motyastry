@@ -6,7 +6,9 @@ public class EnemyAI : MonoBehaviour
 {
     public Transform player; // Ссылка на объект игрока
     public float speed = 2.0f; // Скорость движения врага
-    public float desiredDistance = 15.0f; // Желаемое расстояние между врагом и игроком
+    public float minDesiredDistance = 10.0f; // Минимальное желаемое расстояние между врагом и игроком
+    public float maxDesiredDistance = 15.0f; // Максимальное желаемое расстояние между врагом и игроком
+    public float retreatDistance = 8.0f; // Расстояние для отступления
     public bool isClone = false; // Флаг для определения, является ли объект клоном
     public int damage = 10; // Урон, который наносит враг при попадании
 
@@ -15,8 +17,14 @@ public class EnemyAI : MonoBehaviour
     public float fireRate = 1.0f; // Частота стрельбы (выстрелов в секунду)
     public float bulletSpeed = 10.0f; // Скорость пули
 
+    public float rotationSpeed = 200.0f; // Скорость поворота врага (градусы в секунду)
+    public float shootAngleThreshold = 5.0f; // Максимальный угол отклонения для стрельбы
+    public float acceleration = 5.0f; // Ускорение при движении
+    public float deceleration = 5.0f; // Замедление при остановке
+
     private float fireTimer; // Таймер для отслеживания частоты стрельбы
     private Rigidbody2D rb;
+    private Vector2 currentVelocity; // Текущая скорость врага
 
     void Start()
     {
@@ -28,6 +36,7 @@ public class EnemyAI : MonoBehaviour
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
         fireTimer = 0.0f; // Инициализируем таймер стрельбы
+        currentVelocity = Vector2.zero; // Инициализируем текущую скорость
     }
 
     void Update()
@@ -41,52 +50,79 @@ public class EnemyAI : MonoBehaviour
                 // Направление к игроку
                 Vector3 direction = player.position - transform.position;
                 float distanceToPlayer = direction.magnitude;
+                Vector2 targetVelocity = Vector2.zero;
 
-                // Проверяем текущее расстояние и корректируем движение, если необходимо
-                if (distanceToPlayer < desiredDistance)
+                if (distanceToPlayer < retreatDistance)
                 {
-                    // Нужно двигаться назад от игрока
-                    direction *= -1;
+                    // Если игрок слишком близко, отступаем
+                    targetVelocity = -direction.normalized * speed;
                 }
-                direction.Normalize();
+                else if (distanceToPlayer >= minDesiredDistance && distanceToPlayer <= maxDesiredDistance)
+                {
+                    // Если игрок находится в зоне, останавливаем движение
+                    targetVelocity = Vector2.zero;
+                }
+                else if (distanceToPlayer < minDesiredDistance)
+                {
+                    // Если игрок ближе минимального желаемого расстояния, отступаем
+                    targetVelocity = -direction.normalized * speed;
+                }
+                else
+                {
+                    // Иначе движемся к игроку
+                    targetVelocity = direction.normalized * speed;
+                }
 
-                // Перемещение врага с использованием Rigidbody2D
-                rb.velocity = direction * speed;
+                // Плавное изменение скорости для создания эффекта скольжения
+                currentVelocity = Vector2.MoveTowards(currentVelocity, targetVelocity, (targetVelocity == Vector2.zero ? deceleration : acceleration) * Time.deltaTime);
+
+                // Плавное перемещение врага
+                Vector2 newPosition = rb.position + currentVelocity * Time.deltaTime;
+                rb.MovePosition(newPosition);
 
                 // Поворот врага в сторону игрока
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                float currentAngle = transform.eulerAngles.z;
+                float angle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, rotationSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-                // Стрельба
-                fireTimer += Time.deltaTime;
-                if (fireTimer >= 1.0f / fireRate)
+                // Стрельба только если враг нацелен на игрока и находится в радиусе 15 юнитов
+                float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
+                if (angleDifference < shootAngleThreshold && distanceToPlayer <= maxDesiredDistance)
                 {
-                    Fire();
-                    fireTimer = 0.0f;
+                    fireTimer += Time.deltaTime;
+                    if (fireTimer >= 1.0f / fireRate)
+                    {
+                        Fire();
+                        fireTimer = 0.0f;
+                    }
                 }
             }
         }
     }
 
-void Fire()
-{
-    // Создаем пулю из префаба
-    GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-
-    // Настроим скорость пули
-    Rigidbody2D bulletRB = bulletObj.GetComponent<Rigidbody2D>();
-    if (bulletRB != null)
+    void Fire()
     {
-        bulletRB.velocity = firePoint.right * bulletSpeed; // Устанавливаем скорость пули в направлении firePoint.right
-    }
+        // Создаем пулю из префаба
+        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
 
-    // Наносим урон игроку, если пуля попала в него
-    Bullet bullet = bulletObj.GetComponent<Bullet>();
-    if (bullet != null)
-    {
-        bullet.damage = damage; // Устанавливаем урон пули
+        // Поворачиваем пулю на 90 градусов
+        bulletObj.transform.Rotate(0, 0, -90);
+
+        // Настроим скорость пули
+        Rigidbody2D bulletRB = bulletObj.GetComponent<Rigidbody2D>();
+        if (bulletRB != null)
+        {
+            bulletRB.velocity = firePoint.right * bulletSpeed; // Устанавливаем скорость пули в направлении firePoint.right
+        }
+
+        // Наносим урон игроку, если пуля попала в него
+        Bullet bullet = bulletObj.GetComponent<Bullet>();
+        if (bullet != null)
+        {
+            bullet.damage = damage; // Устанавливаем урон пули
+        }
     }
-}
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -112,7 +148,7 @@ void Fire()
                 playerHealth.TakeDamage(damage);
             }
             
-            // Уничтожаем пулю после попадания в игрока
+            // Уничтожаем врага после столкновения с игроком
             Destroy(gameObject);
         }
     }
