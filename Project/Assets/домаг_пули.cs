@@ -30,6 +30,15 @@ public class Bullettank : MonoBehaviour
             }
             // Пуля не уничтожается сразу при попадании в Block, поэтому удаляем эту строку
         }
+        else if (collision.CompareTag("Conveer"))
+        {
+            BlockHealth blockHealth = collision.GetComponent<BlockHealth>();
+            if (blockHealth != null)
+            {
+                blockHealth.TakeDamage(damage);
+            }
+            // Пуля не уничтожается сразу при попадании в Conveer, поэтому удаляем эту строку
+        }
         else if (collision.CompareTag("Blockwall"))
         {
             Destroy(gameObject); // Уничтожить пулю при попадании в Blockwall

@@ -1,47 +1,73 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class Marchritizator : MonoBehaviour
 {
-    public Transform[] spawnPoints;    // Точки спавна предметов
-    public bool[] activeSP;
+    public Transform[] spawnPoints;    // РњР°СЃСЃРёРІ С‚РѕС‡РµРє СЃРїР°РІРЅР°
+    public bool[] activeSP;            // РњР°СЃСЃРёРІ Р°РєС‚РёРІРЅС‹С… С‚РѕС‡РµРє СЃРїР°РІРЅР°
 
-    private int i = 0;
+    private int currentSpawnIndex = 0;
+    private List<Collider2D> collidersInTrigger = new List<Collider2D>();
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.GetComponent<MovementController>() == null) return;
-
-        if (spawnPoints == null || spawnPoints.Length == 0 || activeSP == null || activeSP.Length == 0)
+        if (collision.GetComponent<MovementController>() != null)
         {
-            return; // Предотвращаем выполнение если точки спавна или активные точки не заданы
-        }
-
-        int count = activeSP.Where(c => c).Count();
-
-        if (count == 0)
-        {
-            return; // Если нет активных точек спавна, выходим
-        }
-
-        if (i >= spawnPoints.Length)
-        {
-            i = 0; // Сбрасываем индекс если он выходит за пределы массива точек спавна
-        }
-
-        while (activeSP[i] == false)
-        {
-            i++;
-            if (i >= spawnPoints.Length)
+            if (!collidersInTrigger.Contains(collision))
             {
-                i = 0; // Сбрасываем индекс если он выходит за пределы массива точек спавна
+                collidersInTrigger.Add(collision);
             }
         }
+    }
 
-        Instantiate(collision.gameObject, spawnPoints[i].position, Quaternion.identity);
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.GetComponent<MovementController>() != null)
+        {
+            if (collidersInTrigger.Contains(collision))
+            {
+                collidersInTrigger.Remove(collision);
+            }
+        }
+    }
 
-        Destroy(collision.gameObject);
-        i++;
+    private void Update()
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0 || activeSP == null || activeSP.Length == 0)
+        {
+            return; // РџСЂРµСЂС‹РІР°РЅРёРµ, РµСЃР»Рё РјР°СЃСЃРёРІС‹ РЅРµ Р·Р°РґР°РЅС‹
+        }
+
+        // РќР°Р№С‚Рё Р°РєС‚РёРІРЅС‹Рµ С‚РѕС‡РєРё СЃРїР°РІРЅР°
+        var activeSpawnPoints = spawnPoints
+            .Select((point, index) => new { point, index })
+            .Where(x => activeSP[x.index])
+            .ToList();
+
+        if (activeSpawnPoints.Count == 0)
+        {
+            return; // РџСЂРµСЂС‹РІР°РЅРёРµ, РµСЃР»Рё РЅРµС‚ Р°РєС‚РёРІРЅС‹С… С‚РѕС‡РµРє СЃРїР°РІРЅР°
+        }
+
+        // РћР±СЂР°Р±РѕС‚Р°С‚СЊ СЂРµСЃСѓСЂСЃС‹
+        if (collidersInTrigger.Count > 0)
+        {
+            var collider = collidersInTrigger.First(); // РџРѕР»СѓС‡Р°РµРј РїРµСЂРІС‹Р№ РєРѕР»Р»Р°Р№РґРµСЂ РёР· СЃРїРёСЃРєР°
+
+            // РЎРѕР·РґР°РµРј РѕР±СЉРµРєС‚ РЅР° С‚РµРєСѓС‰РµР№ Р°РєС‚РёРІРЅРѕР№ С‚РѕС‡РєРµ СЃРїР°РІРЅР°
+            Instantiate(collider.gameObject, activeSpawnPoints[currentSpawnIndex].point.position, Quaternion.identity);
+            Destroy(collider.gameObject);
+
+            collidersInTrigger.Remove(collider); // РЈРґР°Р»СЏРµРј РѕР±СЂР°Р±РѕС‚Р°РЅРЅС‹Р№ РєРѕР»Р»Р°Р№РґРµСЂ РёР· СЃРїРёСЃРєР°
+
+            // РџРµСЂРµРєР»СЋС‡Р°РµРјСЃСЏ РЅР° СЃР»РµРґСѓСЋС‰СѓСЋ С‚РѕС‡РєСѓ СЃРїР°РІРЅР°
+            currentSpawnIndex++;
+            if (currentSpawnIndex >= activeSpawnPoints.Count)
+            {
+                currentSpawnIndex = 0; // РЎР±СЂРѕСЃ РёРЅРґРµРєСЃР° РµСЃР»Рё РїСЂРµРІС‹С€Р°РµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ Р°РєС‚РёРІРЅС‹С… С‚РѕС‡РµРє СЃРїР°РІРЅР°
+            }
+        }
     }
 
     public void ActivateSpawnPoint(int spIndex)

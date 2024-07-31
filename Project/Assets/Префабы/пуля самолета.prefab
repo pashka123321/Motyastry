@@ -173,3 +173,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   lifespan: 2
+  damageTags:
+  - Conveer
+  - bur
+  - Block
+  - Player
+  - Blockwall
+  destroyTags:
+  - Blockwall
+  - Block
+  - Player
+  - Conveer
+  - bur

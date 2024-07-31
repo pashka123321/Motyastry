@@ -3,17 +3,18 @@ using UnityEngine;
 public class MovementController : MonoBehaviour
 {
     private const float moveSpeed = -2f; // Скорость движения объекта
-    private const float centeringSpeed = 1f; // Скорость центрирования (можно настроить)
+    private const float centeringSpeed = 1f; // Скорость центрирования
+    private const float centeringThreshold = 0.1f; // Порог для определения, достаточно ли близко объект к центру
     public LayerMask activatorLayer; // Layer объекта-активатора
 
     private Transform target; // Целевая позиция для центрирования
 
-void FixedUpdate()
+    void FixedUpdate()
     {
         // Проверяем, касается ли объект какого-либо объекта на нужном layer'е
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.2f, activatorLayer); // Используем окружность с радиусом 0.2f для проверки касания
 
-        // Двигаем объект в заданном направлении, если он касается активатора
+        // Если объект касается активатора
         if (colliders.Length > 0)
         {
             // Обрабатываем только первый найденный активатор
@@ -46,12 +47,17 @@ void FixedUpdate()
 
             // Двигаем объект в заданном направлении
             transform.Translate(direction * moveSpeed * Time.fixedDeltaTime);
-            // Центрируем объект постепенно
+
+            // Центрируем объект на целевой позиции, если активатор найден
             if (target != null)
             {
-                Vector3 targetPosition = target.position;
-                transform.position = Vector3.Lerp(transform.position, targetPosition, centeringSpeed * Time.fixedDeltaTime);
-           }
+                // Проверяем, достаточно ли близко объект к целевой позиции
+                if (Vector3.Distance(transform.position, target.position) > centeringThreshold)
+                {
+                    // Центрируем объект на целевой позиции
+                    transform.position = Vector3.MoveTowards(transform.position, target.position, centeringSpeed * Time.fixedDeltaTime);
+                }
+            }
         }
     }
 }
