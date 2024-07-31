@@ -3,7 +3,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
-using Pathfinding; // Добавьте этот импорт
+using System.Linq;
+using Pathfinding;
 
 public class BuildModeController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class BuildModeController : MonoBehaviour
         public GameObject previewPrefab;
         public Button button;
         public bool canRotate;
+        public ResourceRequirement[] requiredResources; // Изменено на массив ResourceRequirement
     }
 
     public BlockPrefabData[] blockPrefabsData;
@@ -31,10 +33,12 @@ public class BuildModeController : MonoBehaviour
     public GameObject[] uiObjectsToIgnoreArray;
 
     public bool IsBuildModeActive => isBuildModeActive;
+    private CoreResourcesScript coreResources; // Ссылка на CoreResourcesScript
 
     void Start()
     {
         grid = new bool[gridWidth, gridHeight];
+        coreResources = FindObjectOfType<CoreResourcesScript>(); // Ищем ссылку на CoreResourcesScript
 
         foreach (var blockPrefabData in blockPrefabsData)
         {
@@ -261,13 +265,21 @@ public class BuildModeController : MonoBehaviour
             return;
         }
 
+        var requiredResources = blockPrefabsData[currentBlockPrefabIndex].requiredResources;
+        var resourceDictionary = requiredResources.ToDictionary(r => r.resourceName, r => r.amount);
+
+        if (!coreResources.ConsumeResources(resourceDictionary))
+        {
+            Debug.Log("Not enough resources to build this block");
+            return;
+        }
+
         PlayBuildSound();
 
         Quaternion rotation = previewBlock.transform.rotation;
         GameObject newBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].prefab, new Vector3(x, y, 0f), rotation);
         grid[x, y] = true;
 
-        // Обновляем граф после добавления блока
         UpdateGraph(newBlock);
     }
 
@@ -293,7 +305,6 @@ public class BuildModeController : MonoBehaviour
             {
                 if (col.gameObject.CompareTag("Block") || col.gameObject.CompareTag("Conveer"))
                 {
-                    // Обновляем граф до удаления блока
                     UpdateGraphBeforeRemoval(col.gameObject);
 
                     Destroy(col.gameObject);
@@ -394,7 +405,6 @@ public class BuildModeController : MonoBehaviour
         SetBlockLayer(previewBlock, 10);
     }
 
-    // Обновление графа после добавления блока
     void UpdateGraph(GameObject newBlock)
     {
         Bounds bounds = newBlock.GetComponent<Collider2D>().bounds;
@@ -402,7 +412,6 @@ public class BuildModeController : MonoBehaviour
         AstarPath.active.UpdateGraphs(guo);
     }
 
-    // Обновление графа перед удалением блока
     void UpdateGraphBeforeRemoval(GameObject block)
     {
         Bounds bounds = block.GetComponent<Collider2D>().bounds;

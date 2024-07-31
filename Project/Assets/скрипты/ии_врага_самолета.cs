@@ -74,20 +74,18 @@ public class EnemyAI : MonoBehaviour
                 }
 
                 // Плавное изменение скорости для создания эффекта скольжения
-                currentVelocity = Vector2.MoveTowards(currentVelocity, targetVelocity, (targetVelocity == Vector2.zero ? deceleration : acceleration) * Time.deltaTime);
+                currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, (targetVelocity == Vector2.zero ? deceleration : acceleration) * Time.deltaTime);
 
                 // Плавное перемещение врага
-                Vector2 newPosition = rb.position + currentVelocity * Time.deltaTime;
-                rb.MovePosition(newPosition);
+                rb.velocity = currentVelocity;
 
                 // Поворот врага в сторону игрока
-                float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                float currentAngle = transform.eulerAngles.z;
-                float angle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, rotationSpeed * Time.deltaTime);
-                transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+                float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 0f;
+                float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.z, targetAngle, rotationSpeed * Time.deltaTime);
+                rb.MoveRotation(angle);
 
                 // Стрельба только если враг нацелен на игрока и находится в радиусе 15 юнитов
-                float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
+                float angleDifference = Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.z, targetAngle));
                 if (angleDifference < shootAngleThreshold && distanceToPlayer <= maxDesiredDistance)
                 {
                     fireTimer += Time.deltaTime;

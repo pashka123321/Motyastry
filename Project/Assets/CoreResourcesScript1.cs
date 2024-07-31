@@ -12,8 +12,8 @@ public class CoreResourcesScript : MonoBehaviour
     public int leadigot;
     public int goldigot;
 
-    public GameObject resourceUIPrefab;  // Префаб для отображения ресурса
-    public Transform resourceUIParent;   // Родительский объект для UI ресурсов
+    public GameObject resourceUIPrefab;
+    public Transform resourceUIParent;
 
     public GameObject goldPrefab;
     public GameObject leadPrefab;
@@ -27,7 +27,6 @@ public class CoreResourcesScript : MonoBehaviour
 
     void Start()
     {
-        // Изначально обновляем UI
         UpdateUI();
     }
 
@@ -109,7 +108,6 @@ public class CoreResourcesScript : MonoBehaviour
             Sprite icon = prefab.GetComponent<SpriteRenderer>().sprite;
             uiElement.GetComponentInChildren<Image>().sprite = icon;
 
-            // Установка цвета, если префаб ресурса содержит компонент SpriteRenderer с цветом
             if (prefab.TryGetComponent<SpriteRenderer>(out SpriteRenderer spriteRenderer))
             {
                 uiElement.GetComponentInChildren<Image>().color = spriteRenderer.color;
@@ -122,6 +120,77 @@ public class CoreResourcesScript : MonoBehaviour
                 Destroy(resourceUIDictionary[resourceName]);
                 resourceUIDictionary.Remove(resourceName);
             }
+        }
+    }
+
+    public bool ConsumeResources(Dictionary<string, int> requiredResources)
+    {
+        foreach (var resource in requiredResources)
+        {
+            if (!HasResource(resource.Key, resource.Value))
+            {
+                Debug.Log("Not enough resources: " + resource.Key);
+                return false;
+            }
+        }
+
+        foreach (var resource in requiredResources)
+        {
+            DeductResource(resource.Key, resource.Value);
+        }
+
+        UpdateUI();
+        return true;
+    }
+
+    private bool HasResource(string resourceName, int amount)
+    {
+        switch (resourceName)
+        {
+            case "золотая руда":
+                return gold >= amount;
+            case "свинцовая руда":
+                return lead >= amount;
+            case "медная руда":
+                return copper >= amount;
+            case "угольная руда":
+                return coal >= amount;
+            case "слиток меди":
+                return copperigot >= amount;
+            case "слиток свинца":
+                return leadigot >= amount;
+            case "слиток золота":
+                return goldigot >= amount;
+            default:
+                return false;
+        }
+    }
+
+    private void DeductResource(string resourceName, int amount)
+    {
+        switch (resourceName)
+        {
+            case "золотая руда":
+                gold -= amount;
+                break;
+            case "свинцовая руда":
+                lead -= amount;
+                break;
+            case "медная руда":
+                copper -= amount;
+                break;
+            case "угольная руда":
+                coal -= amount;
+                break;
+            case "слиток меди":
+                copperigot -= amount;
+                break;
+            case "слиток свинца":
+                leadigot -= amount;
+                break;
+            case "слиток золота":
+                goldigot -= amount;
+                break;
         }
     }
 }

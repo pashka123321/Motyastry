@@ -30,6 +30,8 @@ TagManager:
   - Blockwall
   - core
   - oblako
+  - Ten
+  - Mash
   layers:
   - Default
   - TransparentFX
@@ -46,7 +48,7 @@ TagManager:
   - fon
   - "\u0438\u0433\u043D\u043E\u0440"
   - oblako
-  - 
+  - Mash
   - 
   - 
   - 

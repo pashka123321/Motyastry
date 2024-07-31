@@ -11,9 +11,14 @@ public class TurretController : MonoBehaviour
     public float rotationSpeed = 5f; // Скорость поворота турели к врагу
     public float aimThreshold = 5f; // Порог для проверки, нацелена ли турель
     public AudioClip[] shootSounds; // Массив звуков выстрела
+    public int leadIngotCount = 10; // Количество доступных слитков свинца
+    public int maxLeadIngots = 50; // Максимальное количество слитков свинца, которое может храниться
+    public int ammoRefillAmount = 10; // Количество слитков свинца, добавляемое при пополнении
+    public string ammoTag = "слиток свинца"; // Тег для объектов пополнения боеприпасов
+    public bool requiresAmmo = true; // Флаг, указывающий, требуется ли для стрельбы боеприпасы
+
     private float fireCountdown = 0f;
     private AudioSource audioSource;
-
     private GameObject currentTarget; // Текущая цель турели
 
     void Start()
@@ -23,6 +28,11 @@ public class TurretController : MonoBehaviour
 
     void Update()
     {
+        if (requiresAmmo && leadIngotCount <= 0)
+        {
+            return; // Турель не реагирует на врагов, если включен режим боеприпасов и их нет в наличии
+        }
+
         if (currentTarget == null)
         {
             currentTarget = FindRandomEnemyWithinRadius();
@@ -38,8 +48,15 @@ public class TurretController : MonoBehaviour
             {
                 if (fireCountdown <= 0f)
                 {
-                    Shoot();
-                    fireCountdown = 1f / fireRate;
+                    if (CanShoot()) // Проверяем возможность стрельбы
+                    {
+                        Shoot();
+                        fireCountdown = 1f / fireRate;
+                    }
+                    else
+                    {
+                        Debug.Log("No lead ingots left!");
+                    }
                 }
                 fireCountdown -= Time.deltaTime;
             }
@@ -89,6 +106,11 @@ public class TurretController : MonoBehaviour
             {
                 bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
             }
+
+            if (requiresAmmo)
+            {
+                leadIngotCount--; // Уменьшаем количество слитков свинца после каждого выстрела
+            }
         }
 
         if (shootSounds.Length > 0 && audioSource != null)
@@ -96,5 +118,25 @@ public class TurretController : MonoBehaviour
             AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
             audioSource.PlayOneShot(randomShootSound, 0.3f); // Устанавливаем громкость на 30%
         }
+    }
+
+    bool CanShoot()
+    {
+        return !requiresAmmo || leadIngotCount > 0;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(ammoTag))
+        {
+            RefillAmmo();
+            Destroy(other.gameObject); // Уничтожаем объект "Ammo" после пополнения
+        }
+    }
+
+    void RefillAmmo()
+    {
+        leadIngotCount = Mathf.Min(leadIngotCount + ammoRefillAmount, maxLeadIngots);
+        Debug.Log("Ammo refilled! Current lead ingots: " + leadIngotCount);
     }
 }

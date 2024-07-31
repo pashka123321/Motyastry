@@ -15,6 +15,7 @@ public class PlaySoundOnClick : MonoBehaviour
         
         // Присвоим аудиоклип
         audioSource.clip = audioClip;
+        audioSource.playOnAwake = false; // Убедимся, что звук не будет воспроизводиться автоматически
 
         // Убедимся, что у нас есть ссылка на кнопку и аудиофайл
         if (button != null)

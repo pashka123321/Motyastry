@@ -5,19 +5,22 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; }
 
-    public GameObject[] enemyPrefabs; // Массив префабов врагов
-    public Transform player; // Ссылка на объект игрока
-    public int maxEnemies = 10; // Максимальное количество врагов
-    public float spawnInterval = 2.0f; // Интервал между спаунами
-    public float minDistanceFromPlayer = 20.0f; // Минимальное расстояние от игрока
-    public LayerMask blockLayer; // Слой для блоков, где нельзя спаунить врагов
-    public Text enemyCountText; // Ссылка на текстовый компонент UI
+    public GameObject[] enemyPrefabs; // Array of enemy prefabs
+    public Transform player; // Reference to the player object
+    public int enemiesPerWaveMin = 10; // Minimum number of enemies per wave
+    public int enemiesPerWaveMax = 30; // Maximum number of enemies per wave
+    public float waveInterval = 90.0f; // Interval between waves
+    public float minDistanceFromPlayer = 20.0f; // Minimum distance from player
+    public LayerMask blockLayer; // Layer for blocks where enemies can't spawn
+    public Text enemyCountText; // Reference to the UI text component for enemy count
 
-    private int currentEnemies = 0; // Текущее количество врагов
+    public int maxEnemies = 50; // Maximum number of enemies in the game
+
+    private int currentEnemies = 0; // Current number of enemies
 
     void Awake()
     {
-        // Настраиваем singleton
+        // Set up singleton
         if (Instance == null)
         {
             Instance = this;
@@ -30,31 +33,40 @@ public class EnemySpawner : MonoBehaviour
 
     void Start()
     {
-        // Начинаем спаунить врагов с указанным интервалом
-        InvokeRepeating("TrySpawnClone", spawnInterval, spawnInterval);
+        // Start spawning enemy waves
+        InvokeRepeating("SpawnWave", waveInterval, waveInterval);
         UpdateEnemyCountText();
+    }
+
+    void SpawnWave()
+    {
+        int enemiesToSpawn = Random.Range(enemiesPerWaveMin, enemiesPerWaveMax + 1);
+        for (int i = 0; i < enemiesToSpawn; i++)
+        {
+            if (currentEnemies < maxEnemies)
+            {
+                TrySpawnClone();
+            }
+        }
     }
 
     void TrySpawnClone()
     {
-        if (currentEnemies >= maxEnemies)
-            return;
-
         Vector3 spawnPosition = GetRandomSpawnPosition();
 
         while (Vector3.Distance(spawnPosition, player.position) < minDistanceFromPlayer ||
                IsPositionOccupiedByBlock(spawnPosition))
         {
-            spawnPosition = GetRandomSpawnPosition(); // Генерируем новую позицию, если слишком близко к игроку или занята блоком
+            spawnPosition = GetRandomSpawnPosition(); // Generate new position if too close to player or occupied by a block
         }
 
         GameObject selectedEnemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         GameObject clone = Instantiate(selectedEnemyPrefab, spawnPosition, Quaternion.identity);
 
-        // Добавляем EnemyTracker к клону врага
+        // Add EnemyTracker to the enemy clone
         clone.AddComponent<EnemyTracker>();
 
-        // Настраиваем врага (например, связываем с игроком)
+        // Set up the enemy (e.g., link to the player)
         EnemyAI enemyAI = clone.GetComponent<EnemyAI>();
         if (enemyAI != null)
         {
@@ -91,7 +103,7 @@ public class EnemySpawner : MonoBehaviour
 
     bool IsPositionOccupiedByBlock(Vector3 position)
     {
-        // Проверяем, находится ли позиция в коллайдере блока
+        // Check if the position is within a block collider
         Collider2D collider = Physics2D.OverlapPoint(position, blockLayer);
         return collider != null;
     }
