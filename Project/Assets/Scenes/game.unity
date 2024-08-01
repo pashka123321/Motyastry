@@ -18138,7 +18138,6 @@ GameObject:
   - component: {fileID: 1060417411}
   - component: {fileID: 1060417412}
   - component: {fileID: 1060417413}
-  - component: {fileID: 1060417414}
   m_Layer: 3
   m_Name: "\u044F\u0434\u0440\u043E"
   m_TagString: Block
@@ -18313,18 +18312,6 @@ MonoBehaviour:
   changeDuration: 2
   startSortingOrder: 40
   targetSortingOrder: 3
---- !u!114 &1060417414
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1060417406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1062695366
 GameObject:
   m_ObjectHideFlags: 0
@@ -26137,7 +26124,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.4, y: 0.4}
+  m_Size: {x: 0.5, y: 0.5}
   m_EdgeRadius: 0
 --- !u!114 &1517684058
 MonoBehaviour:
