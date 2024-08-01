@@ -13,10 +13,12 @@ public class EnemySpawner : MonoBehaviour
     public float minDistanceFromPlayer = 20.0f; // Minimum distance from player
     public LayerMask blockLayer; // Layer for blocks where enemies can't spawn
     public Text enemyCountText; // Reference to the UI text component for enemy count
+    public Text waveCountText; // Reference to the UI text component for wave count
 
     public int maxEnemies = 50; // Maximum number of enemies in the game
 
     private int currentEnemies = 0; // Current number of enemies
+    private int currentWave = 0; // Current wave number
 
     void Awake()
     {
@@ -36,10 +38,14 @@ public class EnemySpawner : MonoBehaviour
         // Start spawning enemy waves
         InvokeRepeating("SpawnWave", waveInterval, waveInterval);
         UpdateEnemyCountText();
+        UpdateWaveCountText();
     }
 
     void SpawnWave()
     {
+        currentWave++;
+        UpdateWaveCountText();
+        
         int enemiesToSpawn = Random.Range(enemiesPerWaveMin, enemiesPerWaveMax + 1);
         for (int i = 0; i < enemiesToSpawn; i++)
         {
@@ -111,6 +117,11 @@ public class EnemySpawner : MonoBehaviour
     void UpdateEnemyCountText()
     {
         enemyCountText.text = "Врагов: " + currentEnemies.ToString();
+    }
+
+    void UpdateWaveCountText()
+    {
+        waveCountText.text = "Волны: " + currentWave.ToString();
     }
 
     public void OnEnemyDestroyed()

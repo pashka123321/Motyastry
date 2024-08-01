@@ -55,6 +55,12 @@ public class Marchritizator : MonoBehaviour
         {
             var collider = collidersInTrigger.First(); // Получаем первый коллайдер из списка
 
+            // Проверяем, что текущий индекс находится в пределах допустимого диапазона
+            if (currentSpawnIndex >= activeSpawnPoints.Count)
+            {
+                currentSpawnIndex = 0; // Сброс индекса если превышает количество активных точек спавна
+            }
+
             // Создаем объект на текущей активной точке спавна
             Instantiate(collider.gameObject, activeSpawnPoints[currentSpawnIndex].point.position, Quaternion.identity);
             Destroy(collider.gameObject);
