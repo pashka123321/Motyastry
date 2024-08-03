@@ -15,6 +15,8 @@ public class BlockHealth : MonoBehaviour
 
     private float currentHealth;
 
+    private BuildModeController buildModeController;
+
     private void Start()
     {
         BlockType blockType = GetBlockType(gameObject);
@@ -27,6 +29,8 @@ public class BlockHealth : MonoBehaviour
             Debug.LogWarning("BlockType not found for: " + gameObject.name);
             currentHealth = 0; // Устанавливаем здоровье в 0, если тип не найден
         }
+
+        buildModeController = GameObject.Find("стройка").GetComponent<BuildModeController>();
     }
 
     private BlockType GetBlockType(GameObject block)
@@ -57,7 +61,7 @@ public class BlockHealth : MonoBehaviour
                 AstarPath.active.UpdateGraphs(guo);
             }
 
-            Destroy(gameObject); // Уничтожаем блок, если здоровье упало до нуля
+            buildModeController.DestroyByEnemy(transform.position);
         }
     }
 }

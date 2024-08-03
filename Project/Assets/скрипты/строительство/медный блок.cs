@@ -298,6 +298,7 @@ public class BuildModeController : MonoBehaviour
 
         if (IsCellOccupied(x, y))
         {
+
             PlayBreakSound();
 
             Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
@@ -311,6 +312,27 @@ public class BuildModeController : MonoBehaviour
                     grid[x, y] = false;
                     break;
                 }
+            }
+        }
+    }
+
+    public void DestroyByEnemy(Vector3 destoyedBlock)
+    {
+        Vector3 gridPosition = SnapToGrid(destoyedBlock);
+
+        int x = Mathf.RoundToInt(gridPosition.x);
+        int y = Mathf.RoundToInt(gridPosition.y);
+
+        Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
+        foreach (Collider2D col in colliders)
+        {
+            if (col.gameObject.CompareTag("Block") || col.gameObject.CompareTag("Conveer"))
+            {
+                UpdateGraphBeforeRemoval(col.gameObject);
+
+                Destroy(col.gameObject);
+                grid[x, y] = false;
+                break;
             }
         }
     }
