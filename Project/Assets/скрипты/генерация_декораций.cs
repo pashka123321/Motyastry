@@ -36,6 +36,7 @@ public class ObjectSpawner : MonoBehaviour
             {
                 Instantiate(prefab, spawnPosition, Quaternion.identity);
                 spawned++;
+                Debug.Log($"Spawned at {spawnPosition}");
             }
             else
             {
@@ -51,6 +52,7 @@ public class ObjectSpawner : MonoBehaviour
         {
             if (collider.CompareTag("Ore") || collider.CompareTag("Block"))
             {
+                Debug.Log($"Position {position} blocked by {collider.tag}");
                 return true;
             }
         }

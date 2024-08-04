@@ -1,53 +1,51 @@
- using UnityEngine;
+using UnityEngine;
 
-public class PlayerModelSwitcher : MonoBehaviour
+public class CharacterSwitcher : MonoBehaviour
 {
-    // Переменные для хранения моделей персонажей
-    public GameObject playerModel1; // Первая модель
-    public GameObject playerModel2; // Вторая модель
+    public GameObject defaultCharacter;   // Объект дефолтного персонажа
+    public GameObject modifiedCharacter;  // Объект модифицированного персонажа
+    public Vector3 respawnPosition;       // Координаты для респавна
+    public CameraFollow cameraFollow;     // Ссылка на скрипт CameraFollow
 
-    private GameObject currentPlayerModel; // Текущая активная модель
+    private bool isUsingDefaultCharacter = true;
 
     void Start()
     {
-        // Изначально вторая модель должна быть скрыта
-        if (playerModel2 != null)
-        {
-            playerModel2.SetActive(false);
-        }
+        // Изначально выключаем оба персонажа
+        defaultCharacter.SetActive(false);
+        modifiedCharacter.SetActive(false);
 
-        // Используем первую модель как текущую
-        currentPlayerModel = playerModel1;
-        currentPlayerModel.SetActive(true);
-
-        // Помещаем игрока в иерархию текущей модели
-        transform.parent = currentPlayerModel.transform;
-        transform.localPosition = Vector3.zero;
+        // Включаем начального персонажа и устанавливаем цель для камеры
+        SwitchCharacter();
     }
 
     void Update()
     {
-        // Переключение моделей по нажатию клавиши F1
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            SwitchPlayerModel();
+            // Переключение персонажа при нажатии F1
+            isUsingDefaultCharacter = !isUsingDefaultCharacter;
+            SwitchCharacter();
         }
     }
 
-    void SwitchPlayerModel()
+    void SwitchCharacter()
     {
-        // Определяем текущую и новую модели для переключения
-        GameObject newPlayerModel = (currentPlayerModel == playerModel1) ? playerModel2 : playerModel1;
-
-        // Перемещаем игрока в иерархию новой модели
-        transform.parent = newPlayerModel.transform;
-        transform.localPosition = Vector3.zero;
-
-        // Выключаем текущую модель и включаем новую модель
-        currentPlayerModel.SetActive(false);
-        newPlayerModel.SetActive(true);
-
-        // Обновляем текущую модель
-        currentPlayerModel = newPlayerModel;
+        if (isUsingDefaultCharacter)
+        {
+            // Деактивация модифицированного персонажа и активация дефолтного
+            modifiedCharacter.SetActive(false);
+            defaultCharacter.transform.position = respawnPosition;
+            defaultCharacter.SetActive(true);
+            cameraFollow.SetTarget(defaultCharacter.transform);
+        }
+        else
+        {
+            // Деактивация дефолтного персонажа и активация модифицированного
+            defaultCharacter.SetActive(false);
+            modifiedCharacter.transform.position = respawnPosition;
+            modifiedCharacter.SetActive(true);
+            cameraFollow.SetTarget(modifiedCharacter.transform);
+        }
     }
 }

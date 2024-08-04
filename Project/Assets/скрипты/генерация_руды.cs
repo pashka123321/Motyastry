@@ -12,11 +12,10 @@ public class OreSpawner : MonoBehaviour
     public OreType[] oreTypes;  // Массив типов руды
     public int mapWidth = 100;
     public int mapHeight = 100;
-    public int oreClusterSizeMin = 10;
-    public int oreClusterSizeMax = 20;
-    public int clusterSpacing = 10;
-    public float oreHeightMin = 1f;  // Минимальная высота руды
-    public float oreHeightMax = 5f;  // Максимальная высота руды
+    public int oreClusterSizeMin = 4;
+    public int oreClusterSizeMax = 10;
+    public int clusterSpacing = 5;
+    public float oreHeight = 3f;
 
     private List<Vector2Int> directions = new List<Vector2Int> {
         new Vector2Int(1, 0),
@@ -68,19 +67,13 @@ public class OreSpawner : MonoBehaviour
         OreType oreType = oreTypes[Random.Range(0, oreTypes.Length)];
 
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        List<Vector2Int> clusterPositions = new List<Vector2Int>();
         queue.Enqueue(start);
-        clusterPositions.Add(start);
         usedPositions.Add(start);
+        InstantiateOre(oreType, new Vector3(start.x, start.y, oreHeight));
 
-        float maxHeight = Random.Range(oreHeightMin, oreHeightMax); // Случайная высота кластера
-        InstantiateOre(oreType, new Vector3(start.x, start.y, Random.Range(0, maxHeight)));
-
-        while (queue.Count > 0 && clusterPositions.Count < size)
+        while (queue.Count > 0 && size > 1)
         {
             Vector2Int current = queue.Dequeue();
-            List<Vector2Int> validNeighbors = new List<Vector2Int>();
-
             foreach (Vector2Int direction in directions)
             {
                 Vector2Int next = current + direction;
@@ -88,20 +81,13 @@ public class OreSpawner : MonoBehaviour
                     next.y >= 0 && next.y < mapHeight &&
                     !usedPositions.Contains(next))
                 {
-                    validNeighbors.Add(next);
+                    queue.Enqueue(next);
+                    usedPositions.Add(next);
+                    InstantiateOre(oreType, new Vector3(next.x, next.y, oreHeight));
+                    size--;
+                    if (size <= 1)
+                        break;
                 }
-            }
-
-            if (validNeighbors.Count > 0)
-            {
-                Vector2Int next = validNeighbors[Random.Range(0, validNeighbors.Count)];
-                queue.Enqueue(next);
-                clusterPositions.Add(next);
-                usedPositions.Add(next);
-
-                // Генерируем случайную высоту для каждого нового блока руды
-                float height = Random.Range(0, maxHeight);
-                InstantiateOre(oreType, new Vector3(next.x, next.y, height));
             }
         }
     }

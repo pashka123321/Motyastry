@@ -32,10 +32,33 @@ public class RocketLauncher : MonoBehaviour
     {
         lastFireTime = Time.time;  // Обновляем время последнего запуска
 
+        // Проверяем, что префаб ракеты назначен
+        if (rocketPrefab == null)
+        {
+            Debug.LogError("Rocket Prefab is not assigned!");
+            return;
+        }
+
+        // Проверяем, что точка запуска назначена
+        if (launchPoint == null)
+        {
+            Debug.LogError("Launch Point is not assigned!");
+            return;
+        }
+
+        // Создаем ракету и настраиваем её
         GameObject rocket = Instantiate(rocketPrefab, launchPoint.position, launchPoint.rotation);
         rocket.transform.rotation = Quaternion.Euler(new Vector3(0, 0, launchPoint.rotation.eulerAngles.z - 90)); // Поворачиваем ракету на 90 градусов
 
+        // Настраиваем физику ракеты
         Rigidbody2D rb = rocket.GetComponent<Rigidbody2D>();
-        rb.velocity = rocket.transform.right * rocketSpeed;
+        if (rb != null)
+        {
+            rb.velocity = rocket.transform.right * rocketSpeed;
+        }
+        else
+        {
+            Debug.LogError("Rigidbody2D component not found on rocket prefab!");
+        }
     }
 }

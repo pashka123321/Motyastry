@@ -5,7 +5,6 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform target; // Объект, за которым будет следить камера
     public float smoothing = 5f; // Скорость сглаживания движения камеры
-    public Vector3 offset; // Смещение камеры относительно объекта
 
     public float zoomSpeed = 2f; // Скорость изменения масштаба
     public float minZoom = 2f; // Минимальный масштаб
@@ -15,17 +14,9 @@ public class CameraFollow : MonoBehaviour
     private bool isFollowingPlayer = true; // Флаг, указывающий, следует ли камера за игроком
     private bool isCameraStopped = false; // Флаг для остановки камеры
 
-    private Vector3 originalPosition; // Оригинальная позиция камеры перед тряской
-
     void Start()
     {
-        // Рассчитываем начальное смещение камеры от целевого объекта
-        if (target != null)
-        {
-            offset = transform.position - target.position;
-        }
         targetZoom = Camera.main.orthographicSize; // Инициализация целевого масштаба текущим масштабом камеры
-        originalPosition = transform.position; // Запоминаем исходную позицию камеры
     }
 
     void LateUpdate()
@@ -38,10 +29,10 @@ public class CameraFollow : MonoBehaviour
         // Если камера следует за игроком
         if (isFollowingPlayer && target != null)
         {
-            // Новая позиция камеры
-            Vector3 targetCamPos = target.position + offset;
-            // Исключаем изменение по оси Z
-            targetCamPos.z = transform.position.z;
+            // Новая позиция камеры (центрируем камеру на цели)
+            Vector3 targetCamPos = target.position;
+            targetCamPos.z = transform.position.z; // Сохраняем текущее значение Z
+
             // Плавное движение камеры к новой позиции
             transform.position = Vector3.Lerp(transform.position, targetCamPos, smoothing * Time.deltaTime);
         }
@@ -78,11 +69,6 @@ public class CameraFollow : MonoBehaviour
     public void SetTarget(Transform newTarget)
     {
         target = newTarget;
-        if (target != null)
-        {
-            // Обновляем смещение для нового объекта
-            offset = transform.position - target.position;
-        }
         isFollowingPlayer = true; // Возвращаем камеру к следованию за игроком
     }
 
