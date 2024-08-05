@@ -44,9 +44,13 @@ public class PlayerShooting : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        UpdateShootingModeText();
-
         playerHealth = GetComponent<PlayerHealth>(); // Get reference to PlayerHealth script
+
+        // Initially hide the shooting mode text
+        if (shootingModeText != null)
+        {
+            shootingModeText.gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -167,6 +171,7 @@ public class PlayerShooting : MonoBehaviour
     {
         if (shootingModeText != null)
         {
+            shootingModeText.gameObject.SetActive(!shootingModeEnabled);
             shootingModeText.text = shootingModeEnabled ? "" : "Стрельба отключена";
         }
     }

@@ -7,7 +7,7 @@ public class CanvasController : MonoBehaviour
     [SerializeField] private Button playButton;
     [SerializeField] private Canvas menuCanvas; // Добавляем ссылку на Canvas с меню
     [SerializeField] private Vector3 originalPosition;
-    private bool isAttachedToCamera = false; // Изначально не привязан к камере
+    private bool isCanvasActive = false; // Флаг активности Canvas
     private bool menuWasActiveBefore = false; // Переменная для хранения состояния Canvas с меню
 
     void Start()
@@ -15,7 +15,7 @@ public class CanvasController : MonoBehaviour
         // Запоминаем оригинальное положение Canvas
         originalPosition = inputCanvas.transform.position;
         
-        // Скрываем Canvas при старте
+        // Убедимся, что Canvas активен по умолчанию
         inputCanvas.gameObject.SetActive(false);
         
         // Привязываем метод к кнопке "играть"
@@ -27,14 +27,14 @@ public class CanvasController : MonoBehaviour
         // Проверяем нажатие клавиши Esc для скрытия Canvas
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isAttachedToCamera)
+            if (isCanvasActive)
             {
-                DetachCanvasFromCamera();
+                HideCanvas();
             }
         }
     }
 
-    void AttachCanvasToCamera()
+    void ShowCanvas()
     {
         // Скрываем Canvas с меню, если он активен
         if (menuCanvas.gameObject.activeSelf)
@@ -44,19 +44,14 @@ public class CanvasController : MonoBehaviour
         }
         
         // Показываем основной Canvas
-        inputCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-        inputCanvas.worldCamera = Camera.main;
-        inputCanvas.planeDistance = 1f;
         inputCanvas.gameObject.SetActive(true); // Активируем Canvas
-        isAttachedToCamera = true; // Устанавливаем флаг
+        isCanvasActive = true; // Устанавливаем флаг
     }
 
-    void DetachCanvasFromCamera()
+    void HideCanvas()
     {
-        inputCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        inputCanvas.transform.position = originalPosition;
         inputCanvas.gameObject.SetActive(false); // Скрываем Canvas
-        isAttachedToCamera = false; // Сбрасываем флаг
+        isCanvasActive = false; // Сбрасываем флаг
         
         // Показываем Canvas с меню, если он был активен до открытия основного Canvas
         if (menuWasActiveBefore)
@@ -68,13 +63,13 @@ public class CanvasController : MonoBehaviour
 
     void OnPlayButtonClick()
     {
-        if (isAttachedToCamera)
+        if (isCanvasActive)
         {
-            DetachCanvasFromCamera();
+            HideCanvas();
         }
         else
         {
-            AttachCanvasToCamera();
+            ShowCanvas();
         }
     }
 }
