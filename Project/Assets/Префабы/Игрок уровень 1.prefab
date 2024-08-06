@@ -5159,7 +5159,7 @@ Transform:
   m_GameObject: {fileID: 8072199395865913298}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 99.47, y: 100.54, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.3029047, y: 0.3029047, z: 0.6058093}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5227,7 +5227,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8072199395865913298}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8767945795238dd418277a67aca7e608, type: 3}
   m_Name: 
@@ -5258,8 +5258,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a2300c44607df7408ed4cf21c6754a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 0}
-  secondBulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 1594498211804588152, guid: 544cd7c5910c19b4f94991e85ccd5840, type: 3}
+  secondBulletPrefab: {fileID: 1594498211804588152, guid: 544cd7c5910c19b4f94991e85ccd5840, type: 3}
   bulletSpeed: 15
   bulletCount: 1
   bulletSpacing: 0.2
@@ -5356,14 +5356,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8072199395865913298}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44de4045e1b46fd418cf83eee157a782, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultCharacterPrefab: {fileID: 0}
-  modifiedCharacterPrefab: {fileID: 0}
+  defaultCharacter: {fileID: 0}
+  modifiedCharacter: {fileID: 0}
   respawnPosition: {x: 0, y: 0, z: 0}
+  cameraFollow: {fileID: 0}
 --- !u!114 &1963016705954330137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5394,7 +5395,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8072199395865913298}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e7fff86653284b41a71540839f63b4c, type: 3}
   m_Name: 

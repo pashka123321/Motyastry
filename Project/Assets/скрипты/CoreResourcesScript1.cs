@@ -8,9 +8,11 @@ public class CoreResourcesScript : MonoBehaviour
     public int gold;
     public int coal;
     public int copper;
+    public int iron;
     public int copperigot;
     public int leadigot;
     public int goldigot;
+    public int ironigot;
 
     public GameObject resourceUIPrefab;
     public Transform resourceUIParent;
@@ -19,9 +21,11 @@ public class CoreResourcesScript : MonoBehaviour
     public GameObject leadPrefab;
     public GameObject coalPrefab;
     public GameObject copperPrefab;
+    public GameObject ironPrefab;
     public GameObject copperIgnotPrefab;
     public GameObject leadIgnotPrefab;
     public GameObject goldIgnotPrefab;
+    public GameObject ironIgnotPrefab;
 
     private Dictionary<string, GameObject> resourceUIDictionary = new Dictionary<string, GameObject>();
 
@@ -53,12 +57,20 @@ public class CoreResourcesScript : MonoBehaviour
                     coal++;
                     resourceCollected = true;
                     break;
+                case "железная руда":
+                    iron++;
+                    resourceCollected = true;
+                    break;
                 case "слиток меди":
                     copperigot++;
                     resourceCollected = true;
                     break;
                 case "слиток свинца":
                     leadigot++;
+                    resourceCollected = true;
+                    break;
+                case "слиток железа":
+                    ironigot++;
                     resourceCollected = true;
                     break;
                 case "слиток золота":
@@ -87,9 +99,11 @@ public class CoreResourcesScript : MonoBehaviour
         UpdateResourceUI("свинцовая руда", lead, leadPrefab);
         UpdateResourceUI("медная руда", copper, copperPrefab);
         UpdateResourceUI("угольная руда", coal, coalPrefab);
+        UpdateResourceUI("железная руда", iron, ironPrefab);
         UpdateResourceUI("слиток меди", copperigot, copperIgnotPrefab);
         UpdateResourceUI("слиток свинца", leadigot, leadIgnotPrefab);
         UpdateResourceUI("слиток золота", goldigot, goldIgnotPrefab);
+        UpdateResourceUI("слиток железа", ironigot, ironIgnotPrefab);
     }
 
     void UpdateResourceUI(string resourceName, int amount, GameObject prefab)
@@ -155,10 +169,14 @@ public class CoreResourcesScript : MonoBehaviour
                 return copper >= amount;
             case "угольная руда":
                 return coal >= amount;
+            case "железная руда":
+                return iron >= amount;
             case "слиток меди":
                 return copperigot >= amount;
             case "слиток свинца":
                 return leadigot >= amount;
+            case "слиток железа":
+                return ironigot >= amount;
             case "слиток золота":
                 return goldigot >= amount;
             default:
@@ -182,6 +200,9 @@ public class CoreResourcesScript : MonoBehaviour
             case "угольная руда":
                 coal -= amount;
                 break;
+            case "железная руда":
+                coal -= amount;
+                break;
             case "слиток меди":
                 copperigot -= amount;
                 break;
@@ -189,6 +210,9 @@ public class CoreResourcesScript : MonoBehaviour
                 leadigot -= amount;
                 break;
             case "слиток золота":
+                goldigot -= amount;
+                break;
+            case "слиток железа":
                 goldigot -= amount;
                 break;
         }

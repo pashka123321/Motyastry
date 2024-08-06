@@ -1,28 +1,38 @@
+using System.Collections;
 using UnityEngine;
 
 public class MovementController : MonoBehaviour
 {
     private const float moveSpeed = -2f; // Скорость движения объекта
-    private const float centeringSpeed = 1f; // Скорость центрирования
-    private const float centeringThreshold = 0.1f; // Порог для определения, достаточно ли близко объект к центру
+    private const float delay = 0.07f; // Задержка перед переключением на следующий активатор
     public LayerMask activatorLayer; // Layer объекта-активатора
 
-    private Transform target; // Целевая позиция для центрирования
+    private Transform target; // Целевая позиция для движения
+    private bool isWaiting = false; // Флаг, указывающий, что происходит задержка
 
     void FixedUpdate()
     {
         // Проверяем, касается ли объект какого-либо объекта на нужном layer'е
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 0.2f, activatorLayer); // Используем окружность с радиусом 0.2f для проверки касания
 
-        // Если объект касается активатора
-        if (colliders.Length > 0)
+        // Если объект касается активатора и не в ожидании
+        if (colliders.Length > 0 && !isWaiting)
         {
             // Обрабатываем только первый найденный активатор
             Collider2D collider = colliders[0];
 
-            // Устанавливаем целевую позицию для центрирования
-            target = collider.transform;
+            // Запускаем корутину для обработки задержки
+            StartCoroutine(SwitchTargetAfterDelay(collider.transform));
+        }
+        else if (colliders.Length == 0)
+        {
+            // Если нет активаторов под объектом, сбрасываем целевую позицию
+            target = null;
+        }
 
+        // Если есть целевая позиция, двигаем объект в заданном направлении
+        if (target != null)
+        {
             // Получаем угол поворота активатора
             float rotationAngle = target.eulerAngles.z;
 
@@ -47,17 +57,19 @@ public class MovementController : MonoBehaviour
 
             // Двигаем объект в заданном направлении
             transform.Translate(direction * moveSpeed * Time.fixedDeltaTime);
-
-            // Центрируем объект на целевой позиции, если активатор найден
-            if (target != null)
-            {
-                // Проверяем, достаточно ли близко объект к целевой позиции
-                if (Vector3.Distance(transform.position, target.position) > centeringThreshold)
-                {
-                    // Центрируем объект на целевой позиции
-                    transform.position = Vector3.MoveTowards(transform.position, target.position, centeringSpeed * Time.fixedDeltaTime);
-                }
-            }
         }
+    }
+
+    private IEnumerator SwitchTargetAfterDelay(Transform newTarget)
+    {
+        isWaiting = true; // Устанавливаем флаг ожидания
+
+        // Ожидаем заданное время
+        yield return new WaitForSeconds(delay);
+
+        // Обновляем целевую позицию
+        target = newTarget;
+
+        isWaiting = false; // Сбрасываем флаг ожидания
     }
 }
