@@ -50,7 +50,7 @@ public class ObjectSpawner : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(position, 0.5f, blockedLayers);
         foreach (Collider2D collider in colliders)
         {
-            if (collider.CompareTag("Ore") || collider.CompareTag("Block"))
+            if (collider.gameObject.layer == 3 || collider.gameObject.layer == 7 || collider.gameObject.layer == 16)
             {
                 Debug.Log($"Position {position} blocked by {collider.tag}");
                 return true;

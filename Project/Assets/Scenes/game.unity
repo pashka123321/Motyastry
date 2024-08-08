@@ -866,7 +866,7 @@ MonoBehaviour:
   spawnAreaMax: {x: 199, y: 199}
   blockedLayers:
     serializedVersion: 2
-    m_Bits: 136
+    m_Bits: 65672
 --- !u!4 &62706289
 Transform:
   m_ObjectHideFlags: 0
@@ -900,7 +900,7 @@ MonoBehaviour:
   spawnAreaMax: {x: 199, y: 199}
   blockedLayers:
     serializedVersion: 2
-    m_Bits: 136
+    m_Bits: 65672
 --- !u!1 &74003406
 GameObject:
   m_ObjectHideFlags: 0
@@ -18515,7 +18515,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1045597669}
   - component: {fileID: 1045597670}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: "\u0442\u0435\u043D\u044C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26016,7 +26016,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1450034147}
   - component: {fileID: 1450034148}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: "\u0442\u0435\u043D\u044C"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32260,7 +32260,7 @@ GameObject:
   - component: {fileID: 1874793585}
   - component: {fileID: 1874793584}
   - component: {fileID: 1874793587}
-  m_Layer: 0
+  m_Layer: 16
   m_Name: "\u043A\u0430\u043C\u0435\u0448\u0435\u043A"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39827,7 +39827,7 @@ GameObject:
   - component: {fileID: 2075132973}
   - component: {fileID: 2075132974}
   - component: {fileID: 2075132975}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: "\u043A\u0443\u0441\u0442"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
