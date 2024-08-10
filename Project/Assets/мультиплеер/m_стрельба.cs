@@ -104,62 +104,76 @@ public class PlayerShootingm : NetworkBehaviour
             {
                 nextFireTime = Time.time + fireRate;
 
-                if (alternateShoot)
-                {
-                    ShootFromSecondGun();
-                }
-                else
-                {
-                    ShootFromFirstGun();
-                }
+                Vector3 spawnPosition = alternateShoot ? transform.position + transform.TransformDirection(secondBulletSpawnOffset) : transform.position + transform.TransformDirection(firstBulletSpawnOffset);
+                Quaternion rotation = transform.rotation;
+
+                // Локальное создание пули для игрока
+                CreateLocalBullet(spawnPosition, rotation, alternateShoot);
+
+                // Серверное создание пули для остальных
+                CmdShoot(spawnPosition, rotation, alternateShoot);
 
                 alternateShoot = !alternateShoot;
             }
         }
     }
 
-    void ShootFromFirstGun()
+    void CreateLocalBullet(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
     {
-        for (int i = 0; i < bulletCount; i++)
+        // Создаем пулю локально
+        GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
+        bullet.transform.Rotate(0, 0, -90);
+        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            Vector3 spawnOffset = transform.TransformDirection(firstBulletSpawnOffset);
-            Vector3 spawnPosition = transform.position + spawnOffset;
-            GameObject bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
-            bullet.transform.Rotate(0, 0, -90);
-            bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
-            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity = bullet.transform.up * bulletSpeed;
-            }
-            bullet.AddComponent<Bullet>().maxDistance = 100f;
-            bullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
-            Destroy(bullet, bulletLifeTime);
-
-            PlayShootingSound();
+            rb.velocity = bullet.transform.up * bulletSpeed;
         }
+        bullet.AddComponent<Bullet>().maxDistance = 100f;
+        Destroy(bullet, bulletLifeTime);
+
+        // Проигрываем звук выстрела
+        PlayShootingSound();
     }
 
-    void ShootFromSecondGun()
+    [Command]
+    void CmdShoot(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
     {
-        for (int i = 0; i < bulletCount; i++)
+        // Создаем пулю на сервере
+        GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
+        bullet.transform.Rotate(0, 0, -90);
+        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            Vector3 spawnOffset = transform.TransformDirection(secondBulletSpawnOffset);
-            Vector3 spawnPosition = transform.position + spawnOffset;
-            GameObject secondBullet = Instantiate(secondBulletPrefab, spawnPosition, transform.rotation);
-            secondBullet.transform.Rotate(0, 0, -90);
-            secondBullet.transform.position = new Vector3(secondBullet.transform.position.x, secondBullet.transform.position.y, 1);
-            Rigidbody2D rb = secondBullet.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity = secondBullet.transform.up * bulletSpeed;
-            }
-            secondBullet.AddComponent<Bullet>().maxDistance = 100f;
-            secondBullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
-            Destroy(secondBullet, bulletLifeTime);
-
-            PlayShootingSound();
+            rb.velocity = bullet.transform.up * bulletSpeed;
         }
+        bullet.AddComponent<Bullet>().maxDistance = 100f;
+        Destroy(bullet, bulletLifeTime);
+
+        // Синхронизируем выстрел со всеми клиентами
+        RpcShoot(spawnPosition, rotation, isSecondGun);
+    }
+
+    [ClientRpc]
+    void RpcShoot(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
+    {
+        if (isLocalPlayer) return;
+
+        // Создаем пулю на клиенте
+        GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
+        bullet.transform.Rotate(0, 0, -90);
+        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = bullet.transform.up * bulletSpeed;
+        }
+        bullet.AddComponent<Bullet>().maxDistance = 100f;
+        Destroy(bullet, bulletLifeTime);
+
+        // Проигрываем звук выстрела на клиенте
+        PlayShootingSound();
     }
 
     void PlayShootingSound()
