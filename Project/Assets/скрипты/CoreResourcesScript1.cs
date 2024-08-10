@@ -118,9 +118,11 @@ public class CoreResourcesScript : MonoBehaviour
 
             GameObject uiElement = resourceUIDictionary[resourceName];
             uiElement.GetComponentInChildren<Text>().text = amount.ToString();
+            uiElement.GetComponentInChildren<Text>().raycastTarget = false;
 
             Sprite icon = prefab.GetComponent<SpriteRenderer>().sprite;
             uiElement.GetComponentInChildren<Image>().sprite = icon;
+            uiElement.GetComponentInChildren<Image>().raycastTarget = false;
 
             if (prefab.TryGetComponent<SpriteRenderer>(out SpriteRenderer spriteRenderer))
             {
