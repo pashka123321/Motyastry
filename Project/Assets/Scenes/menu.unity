@@ -4222,7 +4222,7 @@ MonoBehaviour:
   - {fileID: 387804813}
   - {fileID: 714067643}
   - {fileID: 1897800911}
-  shakeAmount: 1.5
+  shakeAmount: 1
   shakeDuration: 10
 --- !u!4 &2006350099
 Transform:

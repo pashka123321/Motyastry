@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class WallGenerator : MonoBehaviour
 {
@@ -137,6 +138,12 @@ public class WallGenerator : MonoBehaviour
             SpriteRenderer shadowRenderer = shadow.GetComponent<SpriteRenderer>();
             shadowRenderer.sortingOrder = 0; // Начальное значение, будет изменено позже
 
+            // Изначально скрываем тень
+            shadowRenderer.enabled = false;
+
+            // Запускаем корутину для появления тени
+            StartCoroutine(ShowShadowAfterDelay(shadowRenderer, 1.6f));
+
             // Расчет коэффициента для затемнения тени
             float maxDistance = Mathf.Max(centerX, centerY);
             float shadowDarkness = Mathf.Lerp(0.5f, 1f, distanceFromCenter / maxDistance); // Чем ближе к центру, тем темнее
@@ -144,6 +151,12 @@ public class WallGenerator : MonoBehaviour
             shadowColor.a = shadowDarkness;
             shadowRenderer.color = shadowColor;
         }
+    }
+
+    IEnumerator ShowShadowAfterDelay(SpriteRenderer shadowRenderer, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        shadowRenderer.enabled = true;
     }
 
     void UpdateShadowLayers()
