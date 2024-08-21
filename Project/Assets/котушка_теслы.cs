@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class TeslaCoiltesla : MonoBehaviour
 {
-    public Transform target;  // Цель, куда будет ударять молния
+    public LayerMask targetLayer;  // Слой, на котором будут находиться цели
     public Sprite connectedSprite;  // Спрайт для состояния "подключена"
     public Sprite disconnectedSprite;  // Спрайт для состояния "не подключена"
     public float boltDuration = 0.1f; // Длительность отображения молнии
@@ -15,6 +15,7 @@ public class TeslaCoiltesla : MonoBehaviour
     private LineRenderer lineRenderer;
     private SpriteRenderer spriteRenderer;
     private bool isActive;
+    private Transform currentTarget; // Текущая цель
 
     void Start()
     {
@@ -29,24 +30,23 @@ public class TeslaCoiltesla : MonoBehaviour
     {
         while (true)
         {
-            if (isActive)
+            if (isActive && currentTarget != null)
             {
-                StartCoroutine(GenerateBolt());
+                StartCoroutine(GenerateBolt(currentTarget.position));
             }
             yield return new WaitForSeconds(strikeInterval);
         }
     }
 
-    IEnumerator GenerateBolt()
+    IEnumerator GenerateBolt(Vector3 targetPosition)
     {
         Vector3 startPosition = transform.position; // Начальная позиция молнии
-        Vector3 endPosition = target.position; // Конечная позиция молнии
 
         // Установка позиций линии молнии
         for (int i = 0; i < boltSegments; i++)
         {
             float t = i / (float)(boltSegments - 1);
-            Vector3 position = Vector3.Lerp(startPosition, endPosition, t);
+            Vector3 position = Vector3.Lerp(startPosition, targetPosition, t);
             position.x += Random.Range(-boltOffset, boltOffset);
             position.y += Random.Range(-boltOffset, boltOffset);
             lineRenderer.SetPosition(i, position);
@@ -60,26 +60,65 @@ public class TeslaCoiltesla : MonoBehaviour
 
     void Update()
     {
-        if (target != null)
+        UpdateTarget();  // Обновление текущей цели
+        isActive = currentTarget != null;
+        UpdateSprite();  // Обновление спрайта в зависимости от состояния
+    }
+
+    void UpdateTarget()
+    {
+        if (currentTarget != null)
         {
-            float distanceToTarget = Vector3.Distance(transform.position, target.position);
-            isActive = distanceToTarget <= activationRadius;
-            UpdateSprite(); // Обновление спрайта на каждом кадре
+            // Если цель вышла за радиус активации, сбросить цель
+            float distanceToTarget = Vector3.Distance(transform.position, currentTarget.position);
+            if (distanceToTarget > activationRadius)
+            {
+                currentTarget = null;
+            }
         }
+
+        if (currentTarget == null)
+        {
+            // Поиск ближайшей цели, если текущей цели нет
+            currentTarget = FindClosestTarget();
+        }
+    }
+
+    Transform FindClosestTarget()
+    {
+        Collider2D[] targetsInRange = Physics2D.OverlapCircleAll(transform.position, activationRadius, targetLayer);
+        Collider2D closestTarget = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var target in targetsInRange)
+        {
+            // Проверка, что цель на том же слое и не является самим собой
+            if (target.gameObject != gameObject)
+            {
+                float distance = Vector3.Distance(transform.position, target.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestTarget = target;
+                }
+            }
+        }
+
+        return closestTarget != null ? closestTarget.transform : null;
     }
 
     void UpdateSprite()
     {
         if (spriteRenderer != null)
         {
-            if (isActive)
-            {
-                spriteRenderer.sprite = connectedSprite;
-            }
-            else
-            {
-                spriteRenderer.sprite = disconnectedSprite;
-            }
+            spriteRenderer.sprite = isActive ? connectedSprite : disconnectedSprite;
         }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        // Отображение радиуса активации в редакторе
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, activationRadius);
     }
 }
