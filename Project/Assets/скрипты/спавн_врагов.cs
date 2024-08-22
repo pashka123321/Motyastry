@@ -5,24 +5,39 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; }
 
-    public GameObject[] enemyPrefabs; // Array of enemy prefabs
-    public Transform player; // Reference to the player object
-    public int enemiesPerWaveMin = 10; // Minimum number of enemies per wave
-    public int enemiesPerWaveMax = 30; // Maximum number of enemies per wave
-    public float waveInterval = 90.0f; // Interval between waves
-    public float minDistanceFromPlayer = 20.0f; // Minimum distance from player
-    public LayerMask blockLayer; // Layer for blocks where enemies can't spawn
-    public Text enemyCountText; // Reference to the UI text component for enemy count
-    public Text waveCountText; // Reference to the UI text component for wave count
+    // Ссылка на кнопку пропуска времени ожидания
+    public Button skipWaveButton;
 
-    public int maxEnemies = 50; // Maximum number of enemies in the game
+    [System.Serializable]
+    public class EnemyPrefab
+    {
+        public GameObject prefab;
+        public bool isBoss;
+    }
 
-    private int currentEnemies = 0; // Current number of enemies
-    private int currentWave = 0; // Current wave number
+    public EnemyPrefab[] enemyPrefabs;
+    public Transform player;
+    public int initialEnemiesPerWave = 2;
+    public int enemyIncrementPerWave = 2;
+    public float waveInterval = 90.0f;
+    public float restInterval = 120.0f;
+    public float minDistanceFromPlayer = 20.0f;
+    public LayerMask blockLayer;
+    public Text enemyCountText;
+    public Text waveCountText;
+    public Text waveTimerText;
+
+    public int maxEnemies = 50;
+
+    private int currentEnemies = 0;
+    private int currentWave = 0;
+    private int enemiesPerWave;
+    private bool isResting = false;
+    private bool isWaveActive = false;
+    private float timeUntilNextWave;
 
     void Awake()
     {
-        // Set up singleton
         if (Instance == null)
         {
             Instance = this;
@@ -35,45 +50,143 @@ public class EnemySpawner : MonoBehaviour
 
     void Start()
     {
-        // Start spawning enemy waves
-        InvokeRepeating("SpawnWave", waveInterval, waveInterval);
+        enemiesPerWave = initialEnemiesPerWave;
+        timeUntilNextWave = waveInterval;
+
         UpdateEnemyCountText();
         UpdateWaveCountText();
+        UpdateWaveTimerText();
+
+        // Привязываем метод SkipWave к кнопке
+        skipWaveButton.onClick.AddListener(SkipWave);
+
+        InvokeRepeating("UpdateWaveTimer", 1.0f, 1.0f);
+    }
+
+    void UpdateWaveTimer()
+    {
+        if (currentEnemies > 0)
+        {
+            isWaveActive = true;
+            waveTimerText.text = "Идет волна";
+            return;
+        }
+
+        isWaveActive = false;
+        timeUntilNextWave -= 1.0f;
+
+        if (timeUntilNextWave <= 0)
+        {
+            SpawnWave();
+            timeUntilNextWave = waveInterval;
+        }
+
+        UpdateWaveTimerText();
+    }
+
+    public void SkipWave()
+    {
+        if (currentEnemies > 0)
+        {
+            // Если есть оставшиеся враги, нельзя пропустить волну
+            return;
+        }
+
+        CancelInvoke("UpdateWaveTimer");
+        SpawnWave();
+        timeUntilNextWave = waveInterval; // Сбрасываем таймер на стандартный интервал
+        InvokeRepeating("UpdateWaveTimer", 1.0f, 1.0f);
     }
 
     void SpawnWave()
     {
+        isWaveActive = true; // Устанавливаем флаг, что волна активна
+
+        if (currentWave > 0 && currentWave % 5 == 0)
+        {
+            if (!isResting)
+            {
+                isResting = true;
+                Invoke("EndRest", restInterval);
+                timeUntilNextWave = restInterval;
+                return;
+            }
+        }
+
+        isResting = false;
         currentWave++;
         UpdateWaveCountText();
-        
-        int enemiesToSpawn = Random.Range(enemiesPerWaveMin, enemiesPerWaveMax + 1);
-        for (int i = 0; i < enemiesToSpawn; i++)
+
+        enemiesPerWave = initialEnemiesPerWave + (enemyIncrementPerWave * currentWave / 5);
+
+        if (currentWave % 5 == 0)
         {
-            if (currentEnemies < maxEnemies)
+            SpawnBoss();
+        }
+        else
+        {
+            for (int i = 0; i < enemiesPerWave; i++)
             {
-                TrySpawnClone();
+                if (currentEnemies < maxEnemies)
+                {
+                    TryActivateEnemy(false);
+                }
+            }
+        }
+
+        UpdateWaveTimerText(); // Обновляем текст таймера, чтобы показать "Идет волна"
+    }
+
+    void EndRest()
+    {
+        timeUntilNextWave = waveInterval;
+        Invoke("SpawnWave", waveInterval);
+    }
+
+    void SpawnBoss()
+    {
+        foreach (var enemyPrefab in enemyPrefabs)
+        {
+            if (enemyPrefab.isBoss)
+            {
+                TryActivateEnemy(true, enemyPrefab.prefab);
+                break;
             }
         }
     }
 
-    void TrySpawnClone()
+    void TryActivateEnemy(bool isBossWave, GameObject specificEnemyPrefab = null)
     {
-        Vector3 spawnPosition = GetRandomSpawnPosition();
+        GameObject enemyPrefab;
 
-        while (Vector3.Distance(spawnPosition, player.position) < minDistanceFromPlayer ||
-               IsPositionOccupiedByBlock(spawnPosition))
+        if (isBossWave && specificEnemyPrefab != null)
         {
-            spawnPosition = GetRandomSpawnPosition(); // Generate new position if too close to player or occupied by a block
+            enemyPrefab = specificEnemyPrefab;
+        }
+        else
+        {
+            enemyPrefab = GetRandomNonBossEnemyPrefab();
         }
 
-        GameObject selectedEnemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-        GameObject clone = Instantiate(selectedEnemyPrefab, spawnPosition, Quaternion.identity);
+        if (enemyPrefab == null) return;
 
-        // Add EnemyTracker to the enemy clone
-        clone.AddComponent<EnemyTracker>();
+        // Создаем новый клон врага
+        GameObject enemy = Instantiate(enemyPrefab, GetRandomSpawnPosition(), Quaternion.identity);
 
-        // Set up the enemy (e.g., link to the player)
-        EnemyAI enemyAI = clone.GetComponent<EnemyAI>();
+        // Включаем клон
+        enemy.SetActive(true);
+
+        // Добавляем скрипт отслеживания если его нет
+        if (enemy.GetComponent<EnemyTracker>() == null)
+        {
+            enemy.AddComponent<EnemyTracker>();
+        }
+
+        // Добавляем систему отсчета времени до отступления
+        EnemyRetreat enemyRetreat = enemy.AddComponent<EnemyRetreat>();
+        enemyRetreat.SetSpawner(this); // Передаем ссылку на спаунер для обратного вызова
+
+        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
         if (enemyAI != null)
         {
             enemyAI.isClone = true;
@@ -81,7 +194,7 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
-            EnemyAI2D enemyAI2D = clone.GetComponent<EnemyAI2D>();
+            EnemyAI2D enemyAI2D = enemy.GetComponent<EnemyAI2D>();
             if (enemyAI2D != null)
             {
                 enemyAI2D.isClone = true;
@@ -91,6 +204,26 @@ public class EnemySpawner : MonoBehaviour
 
         currentEnemies++;
         UpdateEnemyCountText();
+    }
+
+    GameObject GetRandomNonBossEnemyPrefab()
+    {
+        var nonBossEnemies = new System.Collections.Generic.List<GameObject>();
+
+        foreach (var enemyPrefab in enemyPrefabs)
+        {
+            if (!enemyPrefab.isBoss)
+            {
+                nonBossEnemies.Add(enemyPrefab.prefab);
+            }
+        }
+
+        if (nonBossEnemies.Count > 0)
+        {
+            return nonBossEnemies[Random.Range(0, nonBossEnemies.Count)];
+        }
+
+        return null;
     }
 
     Vector3 GetRandomSpawnPosition()
@@ -109,7 +242,6 @@ public class EnemySpawner : MonoBehaviour
 
     bool IsPositionOccupiedByBlock(Vector3 position)
     {
-        // Check if the position is within a block collider
         Collider2D collider = Physics2D.OverlapPoint(position, blockLayer);
         return collider != null;
     }
@@ -124,9 +256,68 @@ public class EnemySpawner : MonoBehaviour
         waveCountText.text = "Волны: " + currentWave.ToString();
     }
 
+    void UpdateWaveTimerText()
+    {
+        if (isWaveActive)
+        {
+            waveTimerText.text = "Идет волна";
+        }
+        else
+        {
+            int minutes = Mathf.FloorToInt(timeUntilNextWave / 60f);
+            int seconds = Mathf.FloorToInt(timeUntilNextWave % 60f);
+
+            string timeFormatted = string.Format("{0:00}:{1:00}", minutes, seconds);
+            waveTimerText.text = "До волны " + timeFormatted;
+        }
+    }
+
     public void OnEnemyDestroyed()
     {
         currentEnemies--;
         UpdateEnemyCountText();
+
+        if (currentEnemies <= 0 && !isResting)
+        {
+            isWaveActive = false; // Если все враги уничтожены, волна завершена
+            UpdateWaveTimerText(); // Обновляем текст таймера
+        }
+    }
+
+    public void OnEnemyRetreat(GameObject enemy)
+    {
+        Destroy(enemy);
+        currentEnemies--;
+        UpdateEnemyCountText();
+
+        if (currentEnemies <= 0 && !isResting)
+        {
+            isWaveActive = false;
+            UpdateWaveTimerText();
+        }
+    }
+}
+
+// Новый скрипт EnemyRetreat
+public class EnemyRetreat : MonoBehaviour
+{
+    private EnemySpawner spawner;
+    private float retreatTime = 120.0f; // Время до отступления
+    private float timeElapsed = 0.0f;
+
+    public void SetSpawner(EnemySpawner spawner)
+    {
+        this.spawner = spawner;
+    }
+
+    void Update()
+    {
+        timeElapsed += Time.deltaTime;
+
+        if (timeElapsed >= retreatTime)
+        {
+            // Уведомляем спаунер, что враг отступил
+            spawner.OnEnemyRetreat(gameObject);
+        }
     }
 }

@@ -3457,8 +3457,6 @@ GameObject:
   - component: {fileID: 223349319}
   - component: {fileID: 223349321}
   - component: {fileID: 223349320}
-  - component: {fileID: 223349323}
-  - component: {fileID: 223349325}
   m_Layer: 0
   m_Name: "\u0441\u0442\u0440\u043E\u0439\u043A\u0430"
   m_TagString: Untagged
@@ -3589,67 +3587,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &223349323
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223349318}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 420e697593c297a47b40662d029d5db5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  blockPrefabsData:
-  - prefab: {fileID: 1300875826}
-    previewPrefab: {fileID: 1104512540}
-    button: {fileID: 1479665318}
-    canRotate: 0
-    requiredResources:
-    - resourceName: "\u0441\u043B\u0438\u0442\u043E\u043A \u043C\u0435\u0434\u0438"
-      amount: 5
-  buildSounds:
-  - {fileID: 8300000, guid: 254ecde9f0b22ab40a088058fecdd56b, type: 3}
-  breakSounds:
-  - {fileID: 8300000, guid: 254ecde9f0b22ab40a088058fecdd56b, type: 3}
-  buildModeText: {fileID: 340349040}
-  uiObjectsToIgnoreArray:
-  - {fileID: 303803943}
---- !u!114 &223349325
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223349318}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UseUnreliableDeltas: 0
-  SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 1
-  SyncRotAngleX: 1
-  SyncRotAngleY: 1
-  SyncRotAngleZ: 1
-  SyncScaleX: 1
-  SyncScaleY: 1
-  SyncScaleZ: 1
-  PositionThreshold: 0.001
-  RotAngleThreshold: 0.01
-  ScaleThreshold: 0.01
-  UseQuaternionSynchronization: 0
-  UseQuaternionCompression: 0
-  UseHalfFloatPrecision: 0
-  InLocalSpace: 0
-  Interpolate: 1
-  SlerpPosition: 0
 --- !u!1 &230358216
 GameObject:
   m_ObjectHideFlags: 0
@@ -5212,6 +5149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: -70
+  initialRotation: 0
 --- !u!212 &307400645
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -17431,11 +17369,13 @@ MonoBehaviour:
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    shadowPrefab: {fileID: 0}
   - prefab: {fileID: 80789942}
     perlinScaleX: 20
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    shadowPrefab: {fileID: 0}
   mapWidth: 200
   mapHeight: 200
   perlinOffset: {x: 0, y: 0}

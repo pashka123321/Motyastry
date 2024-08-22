@@ -124,70 +124,77 @@ public class BuildModeController : MonoBehaviour
     }
 
     void Update()
+{
+    bool isPointerOverUI = IsPointerOverIgnoredUI();
+
+    // Если курсор находится над UI, блокируем возможность строительства
+    if (isPointerOverUI)
     {
-        bool isPointerOverUI = IsPointerOverIgnoredUI();
-
-        if (isPointerOverUI && !isBuildModeActive)
+        // Деактивируем предпросмотр блока
+        if (previewBlock != null)
         {
-            if (previewBlock != null)
-            {
-                previewBlock.SetActive(false);
-            }
-            return;
+            previewBlock.SetActive(false);
         }
-        else
+        return;
+    }
+    else
+    {
+        // Активируем предпросмотр блока, если он существует
+        if (previewBlock != null)
         {
-            if (previewBlock != null)
-            {
-                previewBlock.SetActive(true);
-            }
-        }
-
-        if (isBuildModeActive)
-        {
-            if (previewBlock == null)
-            {
-                previewBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
-                SetBlockTransparency(previewBlock, 0.5f);
-                SetBlockLayer(previewBlock, 10);
-            }
-            UpdatePreviewBlockPosition();
-
-            if (Input.GetMouseButton(0) && !isPointerOverUI)
-            {
-                PlaceBlock();
-            }
-        }
-        else
-        {
-            if (previewBlock != null)
-            {
-                Destroy(previewBlock);
-            }
-        }
-
-        if (Input.GetMouseButton(1))
-        {
-            if (isBuildModeActive)
-            {
-                ToggleBuildMode();
-            }
-            else
-            {
-                RemoveBlock();
-            }
-        }
-
-        if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                previewBlock.transform.Rotate(0, 0, -90f);
-            }
+            previewBlock.SetActive(true);
         }
     }
 
-    bool IsPointerOverIgnoredUI()
+    // Логика строительства и удаления блоков
+    if (isBuildModeActive)
+    {
+        if (previewBlock == null)
+        {
+            previewBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
+            SetBlockTransparency(previewBlock, 0.5f);
+            SetBlockLayer(previewBlock, 10);
+        }
+        UpdatePreviewBlockPosition();
+
+        if (Input.GetMouseButton(0) && !isPointerOverUI)
+        {
+            PlaceBlock();
+        }
+    }
+    else
+    {
+        if (previewBlock != null)
+        {
+            Destroy(previewBlock);
+        }
+    }
+
+    if (Input.GetMouseButton(1))
+    {
+        if (isBuildModeActive)
+        {
+            ToggleBuildMode();
+        }
+        else
+        {
+            RemoveBlock();
+        }
+    }
+
+    if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            previewBlock.transform.Rotate(0, 0, -90f);
+        }
+    }
+}
+
+
+bool IsPointerOverIgnoredUI()
+{
+    if (EventSystem.current.IsPointerOverGameObject())
     {
         PointerEventData eventData = new PointerEventData(EventSystem.current);
         eventData.position = Input.mousePosition;
@@ -196,14 +203,25 @@ public class BuildModeController : MonoBehaviour
 
         foreach (RaycastResult result in results)
         {
-            if (result.gameObject != null && (uiObjectsToIgnore.Contains(result.gameObject) || System.Array.Exists(uiObjectsToIgnoreArray, element => element == result.gameObject)))
+            if (result.gameObject != null)
             {
-                return true;
+                // Проверяем сам объект и его родителей
+                Transform currentTransform = result.gameObject.transform;
+                while (currentTransform != null)
+                {
+                    if (uiObjectsToIgnore.Contains(currentTransform.gameObject) ||
+                        System.Array.Exists(uiObjectsToIgnoreArray, element => element == currentTransform.gameObject))
+                    {
+                        return true;
+                    }
+                    currentTransform = currentTransform.parent;
+                }
             }
         }
-
-        return false;
     }
+    return false;
+}
+
 
     public void AddUIObjectToIgnore(GameObject uiObject)
     {

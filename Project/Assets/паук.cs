@@ -14,6 +14,8 @@ public class SpiderLegs2D : MonoBehaviour
     public float stepSpeed = 3f; // Скорость перемещения ноги
     public float legMoveThreshold = 1.5f; // Максимальное расстояние от тела, на котором нога должна сделать шаг
     public float rotationSpeed = 5f; // Скорость поворота главного объекта к цели
+    public float maxLegDistance = 3f; // Максимальная дистанция между ногой и телом
+    public float bodyAdjustmentSpeed = 2f; // Скорость корректировки положения тела
 
     public Vector2[] legOffsets;
     public Vector2[] jointOffsets;
@@ -64,13 +66,22 @@ public class SpiderLegs2D : MonoBehaviour
                     Vector3 directionToTarget = (target.position - transform.position).normalized;
                     Vector3 legTargetPosition = (Vector2)transform.position + (Vector2)directionToTarget * stepDistance + rotatedOffset;
 
-                    while (Vector2.Distance(legs[i].position, legTargetPosition) > 0.1f)
+                    Vector3 initialLegPosition = legs[i].position;
+
+                    float moveDuration = Vector2.Distance(initialLegPosition, legTargetPosition) / stepSpeed;
+                    float elapsedTime = 0f;
+
+                    while (elapsedTime < moveDuration)
                     {
-                        legs[i].position = Vector2.MoveTowards(legs[i].position, legTargetPosition, stepSpeed * Time.deltaTime);
+                        legs[i].position = Vector3.Lerp(initialLegPosition, legTargetPosition, elapsedTime / moveDuration);
                         UpdateJointPosition(i);
                         RotateLegTowardsTarget(i, legTargetPosition);
+                        elapsedTime += Time.deltaTime;
                         yield return null;
                     }
+
+                    legs[i].position = legTargetPosition;
+                    UpdateJointPosition(i);
 
                     // Спавн пыли под ногой
                     SpawnDustEffect(legs[i].position);
@@ -81,11 +92,11 @@ public class SpiderLegs2D : MonoBehaviour
                     legIsMoving[i] = false;
 
                     // Задержка перед следующим шагом
-                    yield return new WaitForSeconds(0.5f);
+                    yield return new WaitForSeconds(0.2f); // Уменьшена задержка для плавности
                 }
             }
 
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f); // Небольшая задержка между проходами по порядку ног
         }
     }
 
@@ -96,14 +107,30 @@ public class SpiderLegs2D : MonoBehaviour
         RotateTowardsTarget2D();
 
         Vector3 centerPosition = Vector3.zero;
+        bool adjustBodyPosition = false;
 
         foreach (Transform leg in legs)
         {
             centerPosition += leg.position;
+
+            // Проверка на максимальное расстояние между телом и ногами
+            if (Vector2.Distance(transform.position, leg.position) > maxLegDistance)
+            {
+                adjustBodyPosition = true;
+            }
         }
 
         centerPosition /= legs.Length;
-        transform.position = Vector2.Lerp(transform.position, centerPosition, Time.deltaTime * stepSpeed);
+
+        // Если тело слишком далеко от ног, скорректируем его позицию
+        if (adjustBodyPosition)
+        {
+            transform.position = Vector2.Lerp(transform.position, centerPosition, Time.deltaTime * bodyAdjustmentSpeed);
+        }
+        else
+        {
+            transform.position = Vector2.Lerp(transform.position, centerPosition, Time.deltaTime * stepSpeed * 0.5f); // Плавное смещение тела
+        }
 
         for (int i = 0; i < legs.Length; i++)
         {

@@ -43,8 +43,12 @@ public class Enemy : MonoBehaviour
         // Уничтожаем указанные объекты
         DestroyObjects(objectsToDestroy);
 
-        // Удаляем текущий объект
-        Destroy(gameObject);
+        // Проверяем, является ли объект клоном
+        if (IsClone())
+        {
+            // Если объект является клоном, удаляем его
+            Destroy(gameObject);
+        }
     }
 
     void DestroyObjects(List<GameObject> objects)
@@ -56,5 +60,11 @@ public class Enemy : MonoBehaviour
                 Destroy(obj);
             }
         }
+    }
+
+    bool IsClone()
+    {
+        // Проверяем, находится ли объект в активной сцене
+        return gameObject.scene.isLoaded;
     }
 }
