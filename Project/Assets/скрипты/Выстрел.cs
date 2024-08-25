@@ -7,6 +7,9 @@ public class PlayerShooting : MonoBehaviour
 {
     public GameObject bulletPrefab;
     public GameObject secondBulletPrefab;
+
+    [Range(0, 10)] public int damageType;
+
     public float bulletSpeed = 10f;
     public int bulletCount = 1;
     public float bulletSpacing = 0.2f;
@@ -130,6 +133,7 @@ public class PlayerShooting : MonoBehaviour
                 rb.velocity = bullet.transform.up * bulletSpeed;
             }
             bullet.AddComponent<Bullet>().maxDistance = 100f;
+            bullet.GetComponent<Bullet>().damageType = this.damageType;
             bullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
             Destroy(bullet, bulletLifeTime);
 
@@ -152,6 +156,7 @@ public class PlayerShooting : MonoBehaviour
                 rb.velocity = secondBullet.transform.up * bulletSpeed;
             }
             secondBullet.AddComponent<Bullet>().maxDistance = 100f;
+            secondBullet.GetComponent<Bullet>().damageType = this.damageType;
             secondBullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
             Destroy(secondBullet, bulletLifeTime);
 
@@ -202,6 +207,8 @@ public class Bullet : MonoBehaviour
     public float maxDistance = 100f;
     public int damage = 20; // Урон, который наносит пуля
 
+    public int damageType;
+
     void Start()
     {
         startPosition = transform.position;
@@ -222,7 +229,7 @@ public class Bullet : MonoBehaviour
         Enemy enemy = other.GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.TakeDamage(damage); // Наносим урон врагу
+            enemy.TakeDamage(damage, damageType); // Наносим урон врагу
             Destroy(gameObject); // Уничтожаем пулю
         }
     }

@@ -1450,6 +1450,8 @@ MonoBehaviour:
   deathSounds:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
   objectsToDestroy: []
+  damageResistance:
+  - 0
 --- !u!58 &75486865
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -8113,6 +8115,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
   objectsToDestroy:
   - {fileID: 1858131617}
+  damageResistance:
+  - 0.245
 --- !u!82 &391619552
 AudioSource:
   m_ObjectHideFlags: 0
@@ -45888,6 +45892,18 @@ PrefabInstance:
       propertyPath: secondBulletPrefab
       value: 
       objectReference: {fileID: 1594498211804588152, guid: 544cd7c5910c19b4f94991e85ccd5840, type: 3}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: damageType.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: damageType.Array.data[0]
+      value: 0.81
+      objectReference: {fileID: 0}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: damageType.Array.data[1]
+      value: 0.33
+      objectReference: {fileID: 0}
     - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: ignoreUIElements.Array.size
       value: 8

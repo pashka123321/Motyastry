@@ -4,11 +4,13 @@ using System.Collections.Generic;
 public class Enemy : MonoBehaviour
 {
     public int maxHealth = 100; // Максимальное здоровье
-    private int currentHealth;
+    private float currentHealth;
     public AudioClip[] deathSounds; // Массив звуков смерти
     private AudioSource audioSource;
 
     public List<GameObject> objectsToDestroy; // Список объектов для удаления
+
+    [SerializeField, Range(0, 1)] private float[] damageResistance;
 
     void Start()
     {
@@ -22,7 +24,16 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage; // Уменьшаем здоровье на величину урона
+        currentHealth -= damage;
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    public void TakeDamage(int damage, int damageType)
+    {
+        currentHealth -= damage * (1f - damageResistance[damageType]);
 
         if (currentHealth <= 0)
         {
