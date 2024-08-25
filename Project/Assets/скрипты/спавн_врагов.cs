@@ -202,8 +202,8 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        currentEnemies++;
-        UpdateEnemyCountText();
+        currentEnemies++; // Увеличиваем количество врагов
+        UpdateEnemyCountText(); // Обновляем текст количества врагов
     }
 
     GameObject GetRandomNonBossEnemyPrefab()
@@ -248,7 +248,14 @@ public class EnemySpawner : MonoBehaviour
 
     void UpdateEnemyCountText()
     {
-        enemyCountText.text = "Врагов: " + currentEnemies.ToString();
+        if (currentEnemies <= 0)
+        {
+            enemyCountText.text = "Врагов: нет";
+        }
+        else
+        {
+            enemyCountText.text = "Врагов: " + currentEnemies.ToString();
+        }
     }
 
     void UpdateWaveCountText()
