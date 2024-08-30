@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
 
 public class WorldGenerator : MonoBehaviour
 {
@@ -19,12 +20,20 @@ public class WorldGenerator : MonoBehaviour
     private enum BiomeType { Water, Sand, Grass, Stone };
 
     [System.Serializable]
+    public class FaunaData
+    {
+        public GameObject faunaPrefab; // Префаб фауны
+        public float spawnChance; // Шанс появления данного префаба
+    }
+
+    [System.Serializable]
     public class BiomeData
     {
         public string name; // Название биома
         public Color biomeColor; // Цвет биома
         public Color borderColor; // Цвет границы биома
         public Tile[] biomeTiles; // Блоки, связанные с биомом
+        public FaunaData[] faunaPrefabs; // Префабы, представляющие фауну с шансами появления
         public float percentage; // Процент присутствия биома
     }
 
@@ -44,6 +53,7 @@ public class WorldGenerator : MonoBehaviour
         NormalizeBiomePercentages();
         GenerateWorld();
         DrawWorld();
+        GenerateFauna(); // Вызываем метод для генерации фауны
     }
 
     void NormalizeBiomePercentages()
@@ -160,6 +170,51 @@ public class WorldGenerator : MonoBehaviour
                         }
 
                         tilemap.SetTile(tilePosition, tileToSet); // Устанавливаем тайл на карте
+                    }
+                }
+            }
+        }
+    }
+
+    // Метод для генерации объектов фауны
+    void GenerateFauna()
+    {
+        List<Vector3> spawnedFaunaPositions = new List<Vector3>();
+        float minDistance = 5f; // Минимальное расстояние между объектами фауны
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int biomeIndex = map[x, y];
+                if (biomeIndex >= 0 && biomeIndex < biomes.Length)
+                {
+                    BiomeData biome = biomes[biomeIndex];
+
+                    foreach (FaunaData faunaData in biome.faunaPrefabs)
+                    {
+                        if (Random.value <= faunaData.spawnChance)
+                        {
+                            Vector3 tileCenter = tilemap.CellToWorld(new Vector3Int(x, y, 0)) + tilemap.cellSize / 2f;
+
+                            // Проверяем расстояние до всех уже созданных объектов фауны
+                            bool tooClose = false;
+                            foreach (Vector3 pos in spawnedFaunaPositions)
+                            {
+                                if (Vector3.Distance(pos, tileCenter) < minDistance)
+                                {
+                                    tooClose = true;
+                                    break;
+                                }
+                            }
+
+                            // Если нет объектов слишком близко, создаем новый объект фауны
+                            if (!tooClose)
+                            {
+                                Instantiate(faunaData.faunaPrefab, tileCenter, Quaternion.identity);
+                                spawnedFaunaPositions.Add(tileCenter);
+                            }
+                        }
                     }
                 }
             }

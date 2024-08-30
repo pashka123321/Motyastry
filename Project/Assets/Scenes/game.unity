@@ -25297,18 +25297,18 @@ MonoBehaviour:
   numBiomes: 4
   tilemap: {fileID: 1648695019}
   biomes:
-  - name: Grass
+  - name: "\u041B\u0435\u0441"
     biomeColor: {r: 1, g: 1, b: 1, a: 1}
-    borderColor: {r: 1, g: 1, b: 1, a: 1}
+    borderColor: {r: 0.9411765, g: 0.9411765, b: 0.9411765, a: 1}
     biomeTiles:
     - {fileID: 11400000, guid: feab0f1e5751e7646a8a27900f898259, type: 2}
-    percentage: 32
-  - name: Sand
+    percentage: 50
+  - name: "\u041F\u0443\u0441\u0442\u044B\u043D\u044F"
     biomeColor: {r: 1, g: 1, b: 1, a: 1}
-    borderColor: {r: 1, g: 1, b: 1, a: 1}
+    borderColor: {r: 0.91764706, g: 0.91764706, b: 0.91764706, a: 1}
     biomeTiles:
     - {fileID: 11400000, guid: e02eea40194e4474ebebbbae23491e49, type: 2}
-    percentage: 68
+    percentage: 40
 --- !u!4 &1249055182
 Transform:
   m_ObjectHideFlags: 0
