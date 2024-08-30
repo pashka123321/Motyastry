@@ -1,47 +1,44 @@
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class WorldGenerator : MonoBehaviour
 {
     public int width = 100; // Ширина карты
     public int height = 100; // Высота карты
     public float scale = 20f; // Масштаб для шума Перлина
-    public int numBiomes = 4; // Количество различных биомов
 
-    public Tilemap tilemap; // Ссылка на Tilemap, которая будет использоваться
-    public Tile[] biomeTiles; // Массив тайлов для разных биомов
-    public Color[] biomeColors; // Массив постоянных цветов для каждого биома
-    public Color[] biomeBorderColors; // Массив цветов границ для каждого биома
+    // Структура для хранения информации о биоме
+    [System.Serializable]
+    public class Biome
+    {
+        public string name; // Название биома
+        public GameObject prefab; // Префаб биома
+        public GameObject borderPrefab; // Префаб границы
+        public float percentage; // Процент биома на карте
+    }
 
-    public float[] biomePercentages = new float[] { 0.25f, 0.25f, 0.25f, 0.25f }; // Процент для каждого биома
+    public Biome[] biomes; // Массив биомов
 
     private int[,] map; // Массив для хранения типов биомов
 
-    // Перечисление типов биомов для удобства
-    private enum BiomeType { Water, Sand, Grass, Stone };
+    void Start()
+    {
+        map = new int[width, height]; // Инициализируем массив карты
+        NormalizeBiomePercentages();
+        GenerateWorld();
+        DrawWorld();
+    }
 
-void Start()
-{
-    // Настройка слоя Tilemap на -1
-    tilemap.GetComponent<TilemapRenderer>().sortingOrder = -1;
-    
-    map = new int[width, height]; // Инициализируем массив карты
-    NormalizeBiomePercentages();
-    GenerateWorld();
-    DrawWorld();
-}
-
-
+    // Нормализация процентов биомов
     void NormalizeBiomePercentages()
     {
         float total = 0f;
-        foreach (float percentage in biomePercentages)
+        foreach (Biome biome in biomes)
         {
-            total += percentage;
+            total += biome.percentage;
         }
-        for (int i = 0; i < biomePercentages.Length; i++)
+        foreach (Biome biome in biomes)
         {
-            biomePercentages[i] /= total; // Нормализуем значения, чтобы сумма была равна 1
+            biome.percentage /= total; // Нормализуем значения, чтобы сумма была равна 1
         }
     }
 
@@ -87,15 +84,15 @@ void Start()
     int GetBiomeIndex(float value)
     {
         float cumulative = 0f;
-        for (int i = 0; i < biomePercentages.Length; i++)
+        for (int i = 0; i < biomes.Length; i++)
         {
-            cumulative += biomePercentages[i];
+            cumulative += biomes[i].percentage;
             if (value <= cumulative)
             {
                 return i;
             }
         }
-        return biomePercentages.Length - 1; // Если вдруг value больше, чем cumulative (в теории быть не должно)
+        return biomes.Length - 1; // Если вдруг value больше, чем cumulative (в теории быть не должно)
     }
 
     // Проверка, является ли текущий блок границей между биомами
@@ -114,36 +111,27 @@ void Start()
 
     void DrawWorld()
     {
-        // Отображение карты мира с использованием Tilemap
+        // Отображение карты мира с использованием префабов
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3Int tilePosition = new Vector3Int(x, y, 0);
                 int biomeIndex = map[x, y];
-                if (biomeIndex >= 0 && biomeIndex < biomeTiles.Length)
+                if (biomeIndex >= 0 && biomeIndex < biomes.Length)
                 {
-                    Tile originalTile = biomeTiles[biomeIndex];
+                    Biome biome = biomes[biomeIndex];
+                    Vector3 position = new Vector3(x, y, 0);
 
-                    // Создаем временный тайл для изменения его цвета
-                    Tile tileToSet = ScriptableObject.CreateInstance<Tile>();
-                    tileToSet.sprite = originalTile.sprite;
-                    tileToSet.color = originalTile.color; // Копируем цвет оригинального тайла
-                    tileToSet.colliderType = originalTile.colliderType; // Копируем тип коллайдера
+                    // Создаем игровой объект из префаба
+                    GameObject biomeObject = Instantiate(biome.prefab, position, Quaternion.identity);
+                    biomeObject.transform.parent = transform;
 
-                    // Применяем постоянный цвет для биома
-                    if (biomeIndex < biomeColors.Length)
+                    // Если блок находится на границе, создаем объект для границы
+                    if (IsBiomeBorder(x, y) && biome.borderPrefab != null)
                     {
-                        tileToSet.color = biomeColors[biomeIndex];
+                        GameObject borderObject = Instantiate(biome.borderPrefab, position, Quaternion.identity);
+                        borderObject.transform.parent = biomeObject.transform; // Добавляем как дочерний объект
                     }
-
-                    // Если блок находится на границе, изменяем его цвет
-                    if (IsBiomeBorder(x, y) && biomeIndex < biomeBorderColors.Length)
-                    {
-                        tileToSet.color = biomeBorderColors[biomeIndex]; // Применяем цвет границы
-                    }
-
-                    tilemap.SetTile(tilePosition, tileToSet); // Устанавливаем тайл на карте
                 }
             }
         }

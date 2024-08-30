@@ -36,9 +36,9 @@ public class CameraFollow : MonoBehaviour
             // Плавное движение камеры к новой позиции
             transform.position = Vector3.Lerp(transform.position, targetCamPos, smoothing * Time.deltaTime);
         }
-        else
+        // Добавленное условие, чтобы MoveCameraToMouse выполнялся только при наличии цели
+        else if (!isFollowingPlayer && target != null)
         {
-            // Если камера отсоединена и не следует за игроком, перемещаем камеру к мыши
             MoveCameraToMouse();
         }
 

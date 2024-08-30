@@ -122,6 +122,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &62714858
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 62714860}
+  m_Layer: 0
+  m_Name: "\u0441\u0442\u0430\u0440\u0442"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &62714860
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 62714858}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1482.0538, y: 467.0879, z: -11.495502}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &91749914
 GameObject:
   m_ObjectHideFlags: 0
@@ -4196,7 +4227,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2006350099}
   - component: {fileID: 2006350098}
-  - component: {fileID: 2006350100}
   m_Layer: 0
   m_Name: "\u0447\u0442\u043E\u0442\u043E \u0432\u0430\u0436\u043D\u043E\u0435"
   m_TagString: Untagged
@@ -4239,27 +4269,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2006350100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2006350097}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94a58a4b77566b34b8a756d9df8fe1bb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  audioClips:
-  - {fileID: 8300000, guid: 618a0657b85605745b7f09281005a21f, type: 3}
-  - {fileID: 8300000, guid: 4d6b860a8a846e64a9233de6d56f334d, type: 3}
-  - {fileID: 8300000, guid: fa10c37fdc30df142b87a5770cb5ecc5, type: 3}
-  - {fileID: 8300000, guid: 30b866a2a93be6f4fb120bb68d2fc3db, type: 3}
-  - {fileID: 8300000, guid: 4ff517b57eaedeb49a324a34e547be68, type: 3}
-  - {fileID: 8300000, guid: edeec260ffd1b3747a2142ce755f0859, type: 3}
-  - {fileID: 8300000, guid: 473128102f6af5c4dbdeb1d4d447f631, type: 3}
-  - {fileID: 8300000, guid: 65ab8d5db3e9b5649bfe5d254cd6f2bc, type: 3}
 --- !u!1 &2059131414
 GameObject:
   m_ObjectHideFlags: 0
@@ -4418,6 +4427,7 @@ CanvasRenderer:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 62714860}
   - {fileID: 804171651}
   - {fileID: 797680230}
   - {fileID: 723823134}
