@@ -4,10 +4,10 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Mirror;
 using Pathfinding;
+using Mirror; // Не забудьте подключить Mirror
 
-public class BuildModeControllerm : NetworkBehaviour
+public class BuildModeController2 : NetworkBehaviour
 {
     [System.Serializable]
     public class BlockPrefabData
@@ -126,10 +126,14 @@ public class BuildModeControllerm : NetworkBehaviour
 
     void Update()
     {
+        if (!isLocalPlayer) return; // Проверяем, локальный ли игрок
+
         bool isPointerOverUI = IsPointerOverIgnoredUI();
 
-        if (isPointerOverUI && !isBuildModeActive)
+        // Если курсор находится над UI, блокируем возможность строительства
+        if (isPointerOverUI)
         {
+            // Деактивируем предпросмотр блока
             if (previewBlock != null)
             {
                 previewBlock.SetActive(false);
@@ -138,12 +142,14 @@ public class BuildModeControllerm : NetworkBehaviour
         }
         else
         {
+            // Активируем предпросмотр блока, если он существует
             if (previewBlock != null)
             {
                 previewBlock.SetActive(true);
             }
         }
 
+        // Логика строительства и удаления блоков
         if (isBuildModeActive)
         {
             if (previewBlock == null)
@@ -188,21 +194,45 @@ public class BuildModeControllerm : NetworkBehaviour
         }
     }
 
+    [Command]
+    void CmdPlaceBlock()
+    {
+        PlaceBlock();
+    }
+
+    [Command]
+    void CmdRemoveBlock()
+    {
+        RemoveBlock();
+    }
+
     bool IsPointerOverIgnoredUI()
     {
-        PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (RaycastResult result in results)
+        if (EventSystem.current.IsPointerOverGameObject())
         {
-            if (result.gameObject != null && (uiObjectsToIgnore.Contains(result.gameObject) || System.Array.Exists(uiObjectsToIgnoreArray, element => element == result.gameObject)))
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            foreach (RaycastResult result in results)
             {
-                return true;
+                if (result.gameObject != null)
+                {
+                    // Проверяем сам объект и его родителей
+                    Transform currentTransform = result.gameObject.transform;
+                    while (currentTransform != null)
+                    {
+                        if (uiObjectsToIgnore.Contains(currentTransform.gameObject) ||
+                            System.Array.Exists(uiObjectsToIgnoreArray, element => element == currentTransform.gameObject))
+                        {
+                            return true;
+                        }
+                        currentTransform = currentTransform.parent;
+                    }
+                }
             }
         }
-
         return false;
     }
 
@@ -247,8 +277,7 @@ public class BuildModeControllerm : NetworkBehaviour
         SetBlockLayer(previewBlock, 10);
     }
 
-    [Command]
-    void CmdPlaceBlock()
+    void PlaceBlock()
     {
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 gridPosition = SnapToGrid(mousePosition);
@@ -280,14 +309,12 @@ public class BuildModeControllerm : NetworkBehaviour
 
         Quaternion rotation = previewBlock.transform.rotation;
         GameObject newBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].prefab, new Vector3(x, y, 0f), rotation);
-        NetworkServer.Spawn(newBlock);
         grid[x, y] = true;
 
         UpdateGraph(newBlock);
     }
 
-    [Command]
-    void CmdRemoveBlock()
+    void RemoveBlock()
     {
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 gridPosition = SnapToGrid(mousePosition);
@@ -302,7 +329,6 @@ public class BuildModeControllerm : NetworkBehaviour
 
         if (IsCellOccupied(x, y))
         {
-
             PlayBreakSound();
 
             Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
@@ -312,7 +338,7 @@ public class BuildModeControllerm : NetworkBehaviour
                 {
                     UpdateGraphBeforeRemoval(col.gameObject);
 
-                    NetworkServer.Destroy(col.gameObject);
+                    Destroy(col.gameObject);
                     grid[x, y] = false;
                     break;
                 }
@@ -334,7 +360,7 @@ public class BuildModeControllerm : NetworkBehaviour
             {
                 UpdateGraphBeforeRemoval(col.gameObject);
 
-                NetworkServer.Destroy(col.gameObject);
+                Destroy(col.gameObject);
                 grid[x, y] = false;
                 break;
             }

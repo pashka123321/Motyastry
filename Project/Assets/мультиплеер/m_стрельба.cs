@@ -36,39 +36,39 @@ public class PlayerShootingm : NetworkBehaviour
     private float shootingStartTime = 0f; // Time when the shooting button was first pressed
     private float shootingDelay = 0.2f; // Delay before shooting starts (1 second)
 
-    void Start()
+void Start()
+{
+    buildModeController = FindObjectOfType<BuildModeController>();
+    audioSource = GetComponent<AudioSource>();
+    if (audioSource == null)
     {
-        buildModeController = FindObjectOfType<BuildModeController>();
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        playerHealth = GetComponent<PlayerHealth>(); // Get reference to PlayerHealth script
-
-        // Initially hide the shooting mode text
-        if (shootingModeText != null)
-        {
-            shootingModeText.gameObject.SetActive(false);
-        }
+        audioSource = gameObject.AddComponent<AudioSource>();
     }
+
+    playerHealth = GetComponent<PlayerHealth>(); // Получаем ссылку на PlayerHealth
+
+    // Проверяем, что все ссылки и компоненты инициализированы
+    if (buildModeController == null)
+    {
+        Debug.LogError("BuildModeController не найден!");
+    }
+    if (playerHealth == null)
+    {
+        Debug.LogError("PlayerHealth не найден!");
+    }
+
+    if (shootingModeText != null)
+    {
+        shootingModeText.gameObject.SetActive(false);
+    }
+}
+
 
     void Update()
     {
         if (!isLocalPlayer) return; // Проверка, является ли объект локальным игроком
 
-        if (PauseController.IsGamePaused)
-        {
-            // Game is paused, do not shoot
-            return;
-        }
-
-        if (buildModeController != null && buildModeController.IsBuildModeActive)
-        {
-            // Build mode active, do not shoot
-            return;
-        }
+        if (PauseController.IsGamePaused || (buildModeController != null && buildModeController.IsBuildModeActive)) return;
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -120,10 +120,9 @@ public class PlayerShootingm : NetworkBehaviour
 
     void CreateLocalBullet(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
     {
-        // Создаем пулю локально
+        // Создаем пулю локально для игрока
         GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
         bullet.transform.Rotate(0, 0, -90);
-        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -139,10 +138,9 @@ public class PlayerShootingm : NetworkBehaviour
     [Command]
     void CmdShoot(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
     {
-        // Создаем пулю на сервере
+        // Создаем пулю на сервере для синхронизации с другими клиентами
         GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
         bullet.transform.Rotate(0, 0, -90);
-        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -151,19 +149,18 @@ public class PlayerShootingm : NetworkBehaviour
         bullet.AddComponent<Bullet>().maxDistance = 100f;
         Destroy(bullet, bulletLifeTime);
 
-        // Синхронизируем выстрел со всеми клиентами
+        // Рассылаем информацию о выстреле другим клиентам
         RpcShoot(spawnPosition, rotation, isSecondGun);
     }
 
     [ClientRpc]
     void RpcShoot(Vector3 spawnPosition, Quaternion rotation, bool isSecondGun)
     {
-        if (isLocalPlayer) return;
+        if (isLocalPlayer) return; // Локальный игрок не создает пулю, так как уже сделал это локально
 
-        // Создаем пулю на клиенте
+        // Создаем пулю на клиенте для всех остальных игроков
         GameObject bullet = Instantiate(isSecondGun ? secondBulletPrefab : bulletPrefab, spawnPosition, rotation);
         bullet.transform.Rotate(0, 0, -90);
-        bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {

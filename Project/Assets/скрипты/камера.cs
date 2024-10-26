@@ -14,10 +14,12 @@ public class CameraFollow : MonoBehaviour
     private bool isFollowingPlayer = true; // Флаг, указывающий, следует ли камера за игроком
     private bool isCameraStopped = false; // Флаг для остановки камеры
 
-    void Start()
-    {
-        targetZoom = Camera.main.orthographicSize; // Инициализация целевого масштаба текущим масштабом камеры
-    }
+void Start()
+{
+    targetZoom = 8f; // Установка начального масштаба камеры на 8 единиц
+    Camera.main.orthographicSize = targetZoom; // Применение начального масштаба
+}
+
 
     void LateUpdate()
     {

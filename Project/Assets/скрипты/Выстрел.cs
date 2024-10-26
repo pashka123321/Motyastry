@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class PlayerShooting : MonoBehaviour
@@ -8,16 +6,19 @@ public class PlayerShooting : MonoBehaviour
     public GameObject bulletPrefab;
     public GameObject secondBulletPrefab;
 
-    [Range(0, 10)] public int damageType;
+    public Transform firstGun; // Трансформ первого ствола
+    public Transform secondGun; // Трансформ второго ствола
 
+    [Header("Точки спауна пуль")]
+    public List<Transform> firstGunBulletSpawnPoints; // Точки спауна для первого ствола
+    public List<Transform> secondGunBulletSpawnPoints; // Точки спауна для второго ствола
+
+    [Range(0, 10)] public int damageType;
     public float bulletSpeed = 10f;
     public int bulletCount = 1;
     public float bulletSpacing = 0.2f;
     public float fireRate = 0.1f;
     public float bulletLifeTime = 2f;
-    public Vector2 firstBulletSpawnOffset = new Vector2(-0.1f, 0.1f);
-    public Vector2 secondBulletSpawnOffset = new Vector2(0.1f, 0.1f);
-
     public AudioClip shootingSound;
     private AudioSource audioSource;
     private float nextFireTime = 0f;
@@ -25,63 +26,40 @@ public class PlayerShooting : MonoBehaviour
     private bool shootingModeEnabled = true;
     private bool isShooting = false;
     private bool wasShootingInitially = false;
+    private float shootingStartTime = 0f;
+    private float shootingDelay = 0.2f;
 
-    private BuildModeController buildModeController; // Reference to build mode controller
+    public float recoilAmount = 0.1f;
+    public float recoilSpeed = 5f;
 
-    public Text shootingModeText; // Reference to the UI Text component
+    private Vector3 firstGunInitialPos;
+    private Vector3 secondGunInitialPos;
 
-    private PlayerHealth playerHealth; // Reference to PlayerHealth script
+    private PlayerHealth playerHealth; // Ссылка на PlayerHealth
 
-    // List of UI elements to ignore for pointer detection
-    public List<GameObject> ignoreUIElements = new List<GameObject>();
-
-    private float shootingStartTime = 0f; // Time when the shooting button was first pressed
-    private float shootingDelay = 0.2f; // Delay before shooting starts (1 second)
-
-    void Start()
+    private void Start()
     {
-        buildModeController = FindObjectOfType<BuildModeController>();
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
 
-        playerHealth = GetComponent<PlayerHealth>(); // Get reference to PlayerHealth script
+        // Запоминаем исходные позиции стволов для анимации отдачи
+        firstGunInitialPos = firstGun.localPosition;
+        secondGunInitialPos = secondGun.localPosition;
 
-        // Initially hide the shooting mode text
-        if (shootingModeText != null)
-        {
-            shootingModeText.gameObject.SetActive(false);
-        }
+        // Получаем ссылку на PlayerHealth
+        playerHealth = GetComponent<PlayerHealth>();
     }
 
-    void Update()
+    private void Update()
     {
-        if (PauseController.IsGamePaused)
+        // Проверка, жив ли игрок
+        if (playerHealth != null && !playerHealth.isAlive)
         {
-            // Game is paused, do not shoot
-            return;
+            return; // Блокируем стрельбу, если игрок мертв
         }
 
-        if (buildModeController != null && buildModeController.IsBuildModeActive)
+        if (shootingModeEnabled && Time.time > nextFireTime)
         {
-            // Build mode active, do not shoot
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            shootingModeEnabled = !shootingModeEnabled;
-            UpdateShootingModeText();
-        }
-
-        if (shootingModeEnabled && Time.time > nextFireTime && playerHealth.isAlive)
-        {
-            bool isPointerOverUI = IsPointerOverUI();
-            bool fireButtonPressed = Input.GetButton("Fire1");
-
-            if (fireButtonPressed && !isPointerOverUI)
+            if (Input.GetButton("Fire1"))
             {
                 if (!wasShootingInitially)
                 {
@@ -107,97 +85,74 @@ public class PlayerShooting : MonoBehaviour
                 if (alternateShoot)
                 {
                     ShootFromSecondGun();
+                    ApplyRecoil(secondGun, secondGunInitialPos);
                 }
                 else
                 {
                     ShootFromFirstGun();
+                    ApplyRecoil(firstGun, firstGunInitialPos);
                 }
 
                 alternateShoot = !alternateShoot;
             }
         }
+
+        // Возвращаем стволы в исходное положение
+        firstGun.localPosition = Vector3.Lerp(firstGun.localPosition, firstGunInitialPos, recoilSpeed * Time.deltaTime);
+        secondGun.localPosition = Vector3.Lerp(secondGun.localPosition, secondGunInitialPos, recoilSpeed * Time.deltaTime);
     }
 
-    void ShootFromFirstGun()
+    private void ApplyRecoil(Transform gun, Vector3 initialPosition)
     {
-        for (int i = 0; i < bulletCount; i++)
-        {
-            Vector3 spawnOffset = transform.TransformDirection(firstBulletSpawnOffset);
-            Vector3 spawnPosition = transform.position + spawnOffset;
-            GameObject bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
-            bullet.transform.Rotate(0, 0, -90);
-            bullet.transform.position = new Vector3(bullet.transform.position.x, bullet.transform.position.y, 1);
-            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity = bullet.transform.up * bulletSpeed;
-            }
-            bullet.AddComponent<Bullet>().maxDistance = 100f;
-            bullet.GetComponent<Bullet>().damageType = this.damageType;
-            bullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
-            Destroy(bullet, bulletLifeTime);
+        float recoilDirection = transform.localScale.x > 0 ? -1 : 1;
+        gun.localPosition = initialPosition + new Vector3(recoilAmount * recoilDirection, 0, 0);
+    }
 
-            PlayShootingSound();
+    private void ShootFromFirstGun()
+    {
+        foreach (var spawnPoint in firstGunBulletSpawnPoints)
+        {
+            CreateBullet(bulletPrefab, spawnPoint.position);
         }
     }
 
-    void ShootFromSecondGun()
+    private void ShootFromSecondGun()
     {
-        for (int i = 0; i < bulletCount; i++)
+        foreach (var spawnPoint in secondGunBulletSpawnPoints)
         {
-            Vector3 spawnOffset = transform.TransformDirection(secondBulletSpawnOffset);
-            Vector3 spawnPosition = transform.position + spawnOffset;
-            GameObject secondBullet = Instantiate(secondBulletPrefab, spawnPosition, transform.rotation);
-            secondBullet.transform.Rotate(0, 0, -90);
-            secondBullet.transform.position = new Vector3(secondBullet.transform.position.x, secondBullet.transform.position.y, 1);
-            Rigidbody2D rb = secondBullet.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity = secondBullet.transform.up * bulletSpeed;
-            }
-            secondBullet.AddComponent<Bullet>().maxDistance = 100f;
-            secondBullet.GetComponent<Bullet>().damageType = this.damageType;
-            secondBullet.transform.position += transform.right * (i - bulletCount / 2f) * bulletSpacing;
-            Destroy(secondBullet, bulletLifeTime);
-
-            PlayShootingSound();
+            CreateBullet(secondBulletPrefab, spawnPoint.position);
         }
+    }
+
+    private void CreateBullet(GameObject bulletPrefab, Vector3 spawnPosition)
+    {
+        GameObject bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
+        bullet.transform.Rotate(0, 0, -90);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = bullet.transform.up * bulletSpeed;
+        }
+        
+        // Добавляем компонент Bullet и задаем его параметры
+        Bullet bulletScript = bullet.AddComponent<Bullet>();
+        bulletScript.damage = 20; // Устанавливаем урон пули
+        bulletScript.damageType = this.damageType; // Устанавливаем тип урона
+
+        Destroy(bullet, bulletLifeTime);
+        PlayShootingSound();
     }
 
     void PlayShootingSound()
     {
-        if (shootingSound != null)
+        if (shootingSound != null && audioSource != null)
         {
             audioSource.PlayOneShot(shootingSound);
         }
-    }
-
-    void UpdateShootingModeText()
-    {
-        if (shootingModeText != null)
+        else
         {
-            shootingModeText.gameObject.SetActive(!shootingModeEnabled);
-            shootingModeText.text = shootingModeEnabled ? "" : "Стрельба отключена";
+            Debug.LogWarning("Отсутствует аудиоклип для выстрела или AudioSource не инициализирован.");
         }
-    }
-
-    bool IsPointerOverUI()
-    {
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> raycastResults = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, raycastResults);
-
-        foreach (RaycastResult result in raycastResults)
-        {
-            if (!ignoreUIElements.Contains(result.gameObject))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
 

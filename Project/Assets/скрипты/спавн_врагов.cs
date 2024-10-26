@@ -63,6 +63,15 @@ public class EnemySpawner : MonoBehaviour
         InvokeRepeating("UpdateWaveTimer", 1.0f, 1.0f);
     }
 
+    void Update()
+    {
+        // Проверяем, нажата ли клавиша F7
+        if (Input.GetKeyDown(KeyCode.F7))
+        {
+            ForceSkipWave();
+        }
+    }
+
     void UpdateWaveTimer()
     {
         if (currentEnemies > 0)
@@ -88,13 +97,33 @@ public class EnemySpawner : MonoBehaviour
     {
         if (currentEnemies > 0)
         {
-            // Если есть оставшиеся враги, нельзя пропустить волну
+            // Если есть оставшиеся враги, нельзя пропустить волну через UI
             return;
         }
 
+        ForceSkipWave(); // Используем метод принудительного пропуска волны
+    }
+
+    void ForceSkipWave()
+    {
+        // Удаляем всех врагов на сцене
+        foreach (EnemyRetreat enemy in FindObjectsOfType<EnemyRetreat>())
+        {
+            Destroy(enemy.gameObject);
+        }
+
+        // Сбрасываем количество текущих врагов
+        currentEnemies = 0;
+        UpdateEnemyCountText();
+
+        // Останавливаем таймер волны, если он запущен
         CancelInvoke("UpdateWaveTimer");
+
+        // Начинаем новую волну
         SpawnWave();
-        timeUntilNextWave = waveInterval; // Сбрасываем таймер на стандартный интервал
+
+        // Сбрасываем таймер на стандартный интервал
+        timeUntilNextWave = waveInterval;
         InvokeRepeating("UpdateWaveTimer", 1.0f, 1.0f);
     }
 

@@ -5,11 +5,16 @@ public class PanelManager : MonoBehaviour
 {
     public GameObject[] panels; // Массив панелей
     public Button[] buttons; // Массив кнопок
+    public GameObject highlightPrefab; // Префаб выделяющего объекта
+    private GameObject currentHighlight; // Текущий выделяющий объект
 
     private int initialPanelIndex = 0; // Индекс начальной панели
 
     void Start()
     {
+        // Создаем объект выделения
+        currentHighlight = Instantiate(highlightPrefab, transform);
+
         // Назначаем функции для кнопок
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -34,6 +39,19 @@ public class PanelManager : MonoBehaviour
         if (index >= 0 && index < panels.Length)
         {
             panels[index].SetActive(true);
+        }
+
+        // Перемещаем выделяющий объект на кнопку
+        TeleportHighlightToButton(buttons[index]);
+    }
+
+    // Функция для перемещения объекта выделения на кнопку
+    private void TeleportHighlightToButton(Button button)
+    {
+        if (button != null)
+        {
+            RectTransform buttonTransform = button.GetComponent<RectTransform>();
+            currentHighlight.transform.position = buttonTransform.position; // Устанавливаем позицию выделяющего объекта
         }
     }
 }

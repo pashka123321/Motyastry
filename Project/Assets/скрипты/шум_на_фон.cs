@@ -4,23 +4,25 @@ public class MusicPlayer : MonoBehaviour
 {
     public AudioClip musicClip; // Сюда перетащите ваш прифаб музыки
     public float volume = 0.5f; // Громкость от 0.0 (без звука) до 1.0 (максимальная громкость)
-    public AudioSource audioSource; // Сюда перетащите ваш компонент AudioSource
+    private AudioSource audioSource; // Приватная переменная для AudioSource
 
     void Awake()
     {
-        DontDestroyOnLoad(gameObject); // Этот объект не будет уничтожен при загрузке новой сцены
+        CreateAudioSource(); // Создаем и настраиваем AudioSource
     }
 
     void Start()
     {
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>(); // Если AudioSource не назначен, добавляем компонент
-        }
+        audioSource.Play(); // Начинаем воспроизведение музыки при старте сцены
+    }
+
+    void CreateAudioSource()
+    {
+        audioSource = gameObject.AddComponent<AudioSource>(); // Добавляем компонент AudioSource
         audioSource.clip = musicClip; // Устанавливаем клип
         audioSource.loop = true; // Устанавливаем бесконечное повторение
         audioSource.volume = volume; // Устанавливаем громкость
-        audioSource.Play(); // Начинаем воспроизведение
+        audioSource.playOnAwake = false; // Запрещаем автоматическое воспроизведение при запуске
     }
 
     // Метод для изменения громкости программно

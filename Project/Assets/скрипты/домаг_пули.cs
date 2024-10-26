@@ -28,7 +28,7 @@ public class Bullettank : MonoBehaviour
             {
                 blockHealth.TakeDamage(damage);
             }
-            // Пуля не уничтожается сразу при попадании в Block, поэтому удаляем эту строку
+            // Пуля не уничтожается сразу при попадании в Block
         }
         else if (collision.CompareTag("Conveer"))
         {
@@ -37,11 +37,20 @@ public class Bullettank : MonoBehaviour
             {
                 blockHealth.TakeDamage(damage);
             }
-            // Пуля не уничтожается сразу при попадании в Conveer, поэтому удаляем эту строку
+            // Пуля не уничтожается сразу при попадании в Conveer
         }
         else if (collision.CompareTag("Blockwall"))
         {
             Destroy(gameObject); // Уничтожить пулю при попадании в Blockwall
+        }
+        else if (collision.CompareTag("Core")) // Проверка на столкновение с Core
+        {
+            Core core = collision.GetComponent<Core>();
+            if (core != null)
+            {
+                core.TakeDamage((int)damage); // Наносим урон Core
+            }
+            Destroy(gameObject); // Уничтожить пулю после попадания в Core
         }
     }
 }

@@ -33,9 +33,17 @@ public class PlayAnimationOnce : MonoBehaviour
                 int randomIndex = Random.Range(0, animationNames.Length);
                 string randomAnimation = animationNames[randomIndex];
 
-                // Воспроизводим выбранную анимацию
-                animator.Play(randomAnimation);
-                hasPlayed = true;
+                // Проверяем, есть ли такое состояние в Animator
+                if (animator.HasState(0, Animator.StringToHash(randomAnimation)))
+                {
+                    // Воспроизводим выбранную анимацию
+                    animator.Play(randomAnimation, 0); // Указываем слой 0
+                    hasPlayed = true;
+                }
+                else
+                {
+                    Debug.LogError("Animator does not contain the state: " + randomAnimation);
+                }
             }
             else
             {

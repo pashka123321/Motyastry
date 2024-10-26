@@ -5,60 +5,43 @@ public class CanvasController : MonoBehaviour
 {
     [SerializeField] private Canvas inputCanvas;
     [SerializeField] private Button playButton;
-    [SerializeField] private Canvas menuCanvas; // Добавляем ссылку на Canvas с меню
+    [SerializeField] private Button[] hideButtons; // Массив кнопок для скрытия Canvas
     [SerializeField] private Vector3 originalPosition;
-    private bool isCanvasActive = false; // Флаг активности Canvas
-    private bool menuWasActiveBefore = false; // Переменная для хранения состояния Canvas с меню
+    private bool isCanvasActive = false;
 
     void Start()
     {
-        // Запоминаем оригинальное положение Canvas
         originalPosition = inputCanvas.transform.position;
-        
-        // Убедимся, что Canvas активен по умолчанию
-        inputCanvas.gameObject.SetActive(false);
-        
+        inputCanvas.gameObject.SetActive(false); // Убедимся, что Canvas скрыт по умолчанию
+
         // Привязываем метод к кнопке "играть"
         playButton.onClick.AddListener(OnPlayButtonClick);
+
+        // Привязываем метод для скрытия к каждой кнопке из массива
+        foreach (Button button in hideButtons)
+        {
+            button.onClick.AddListener(OnHideButtonClick); // Привязываем метод для скрытия к кнопке
+        }
     }
 
     void Update()
     {
-        // Проверяем нажатие клавиши Esc для скрытия Canvas
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && isCanvasActive)
         {
-            if (isCanvasActive)
-            {
-                HideCanvas();
-            }
+            HideCanvas();
         }
     }
 
     void ShowCanvas()
     {
-        // Скрываем Canvas с меню, если он активен
-        if (menuCanvas.gameObject.activeSelf)
-        {
-            menuWasActiveBefore = true;
-            menuCanvas.gameObject.SetActive(false);
-        }
-        
-        // Показываем основной Canvas
-        inputCanvas.gameObject.SetActive(true); // Активируем Canvas
-        isCanvasActive = true; // Устанавливаем флаг
+        inputCanvas.gameObject.SetActive(true); // Показываем Canvas
+        isCanvasActive = true;
     }
 
     void HideCanvas()
     {
         inputCanvas.gameObject.SetActive(false); // Скрываем Canvas
-        isCanvasActive = false; // Сбрасываем флаг
-        
-        // Показываем Canvas с меню, если он был активен до открытия основного Canvas
-        if (menuWasActiveBefore)
-        {
-            menuCanvas.gameObject.SetActive(true);
-            menuWasActiveBefore = false;
-        }
+        isCanvasActive = false;
     }
 
     void OnPlayButtonClick()
@@ -70,6 +53,15 @@ public class CanvasController : MonoBehaviour
         else
         {
             ShowCanvas();
+        }
+    }
+
+    // Метод для скрытия Canvas, вызываемый кнопками из массива
+    void OnHideButtonClick()
+    {
+        if (isCanvasActive)
+        {
+            HideCanvas();
         }
     }
 }

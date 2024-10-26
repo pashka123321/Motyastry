@@ -1,37 +1,22 @@
 using UnityEngine;
 using System.Collections;
-
-public class ParticleController : MonoBehaviour
+public class ParticleSpawner : MonoBehaviour
 {
-    public ParticleSystem particleSystem; // Переменная для системы частиц
-    public int particleCount = 1000; // Количество частиц, которое нужно выпустить
-    public float delayBeforeStart = 1.6f; // Задержка перед запуском частиц
-    public float particleDuration = 1f; // Продолжительность выпуска частиц
+    public GameObject particlePrefab; // Префаб системы частиц, который будет спауниться
+    public float spawnDelay = 1.6f; // Задержка перед спауном
 
-    private void Start()
+    void Start()
     {
-        // Убедимся, что система частиц изначально не запущена
-        particleSystem.Stop();
-
-        // Запуск корутины для управления частицами
-        StartCoroutine(ManageParticles());
+        // Запускаем корутину, которая через заданное время создаст частицу
+        StartCoroutine(SpawnParticleAfterDelay());
     }
 
-    private IEnumerator ManageParticles()
+    private IEnumerator SpawnParticleAfterDelay()
     {
-        // Ожидание заданного времени перед запуском частиц
-        yield return new WaitForSeconds(delayBeforeStart);
+        // Ждём указанное количество времени
+        yield return new WaitForSeconds(spawnDelay);
 
-        // Выпуск заданного количества частиц
-        particleSystem.Emit(particleCount);
-
-        // Запуск системы частиц (чтобы частицы отображались)
-        particleSystem.Play();
-
-        // Ожидание заданного времени перед остановкой частиц
-        yield return new WaitForSeconds(particleDuration);
-
-        // Остановка системы частиц
-        particleSystem.Stop();
+        // Создаём систему частиц на месте, где привязан этот скрипт
+        Instantiate(particlePrefab, transform.position, Quaternion.identity);
     }
 }
