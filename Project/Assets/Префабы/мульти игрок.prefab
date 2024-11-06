@@ -7831,7 +7831,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputCanvas: {fileID: 4821473801801370175}
   playButton: {fileID: 0}
-  menuCanvas: {fileID: 0}
+  hideButtons: []
   originalPosition: {x: -461.24, y: -416.9, z: 95.26604}
 --- !u!1 &2857737895456825467
 GameObject:
@@ -11037,6 +11037,7 @@ MonoBehaviour:
   - {fileID: 4283022792406916729}
   - {fileID: 7459082434264141292}
   - {fileID: 6726730683762742302}
+  highlightPrefab: {fileID: 0}
 --- !u!1 &5540931675490468042
 GameObject:
   m_ObjectHideFlags: 0
@@ -14475,6 +14476,7 @@ GameObject:
   - component: {fileID: 2552129147072382792}
   - component: {fileID: 4874655393070968714}
   - component: {fileID: 3940149726516869398}
+  - component: {fileID: 6172048130579140112}
   - component: {fileID: 1963016705954330137}
   - component: {fileID: 7004100029487903143}
   - component: {fileID: 9219666823806551993}
@@ -14551,7 +14553,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 7
-  m_Sprite: {fileID: 21300000, guid: 8a71a0c693e6eea45b0c153d006d0293, type: 3}
+  m_Sprite: {fileID: -1612806215, guid: 8a71a0c693e6eea45b0c153d006d0293, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -14650,7 +14652,7 @@ MonoBehaviour:
   modifiedCharacter: {fileID: 0}
   respawnPosition: {x: 0, y: 0, z: 0}
   cameraFollow: {fileID: 0}
---- !u!114 &1963016705954330137
+--- !u!114 &6172048130579140112
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14658,6 +14660,31 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8072199395865913298}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd289985aa7a0c429de1cfb7a577ed6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  maxHealth: 100
+  healthBar: {fileID: 9194000856052785314}
+  hurtSounds:
+  - {fileID: 8300000, guid: 3ab753135e2b910489312e7faa550cc7, type: 3}
+  - {fileID: 8300000, guid: 923f4bf8010e19d44b6764b0a179133c, type: 3}
+  - {fileID: 8300000, guid: 909c85b399d2cf642af38f4ab0171d0d, type: 3}
+  deathSounds:
+  - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
+  cameraFollow: {fileID: 0}
+  isInvincible: 0
+--- !u!114 &1963016705954330137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8072199395865913298}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f4df5c739205854bb2e8bce5ea59440, type: 3}
   m_Name: 

@@ -1,33 +1,34 @@
 using UnityEngine;
+using Mirror;
+using System.Linq;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CircleCollider2D))]
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : NetworkBehaviour
 {
-    public Transform player; // Ссылка на объект игрока
-    public float speed = 2.0f; // Скорость движения врага
-    public float minDesiredDistance = 10.0f; // Минимальное желаемое расстояние между врагом и игроком
-    public float maxDesiredDistance = 15.0f; // Максимальное желаемое расстояние между врагом и игроком
-    public float retreatDistance = 8.0f; // Расстояние для отступления
-    public bool isClone = false; // Флаг для определения, является ли объект клоном
-    public int damage = 10; // Урон, который наносит враг при попадании
-    public GameObject bulletPrefab; // Префаб пули
-    public Transform firePoint; // Точка, откуда выпускаются пули
-    public float fireRate = 1.0f; // Частота стрельбы (выстрелов в секунду)
-    public float bulletSpeed = 10.0f; // Скорость пули
-    public float rotationSpeed = 200.0f; // Скорость поворота врага (градусы в секунду)
-    public float shootAngleThreshold = 5.0f; // Максимальный угол отклонения для стрельбы
-    public float acceleration = 5.0f; // Ускорение при движении
-    public float deceleration = 5.0f; // Замедление при остановке
+    public Transform player; // Цель, если она задана
+    public float speed = 2.0f;
+    public float minDesiredDistance = 10.0f;
+    public float maxDesiredDistance = 15.0f;
+    public float retreatDistance = 8.0f;
+    public bool isClone = false;
+    public int damage = 10;
+    public GameObject bulletPrefab;
+    public Transform firePoint;
+    public float fireRate = 1.0f;
+    public float bulletSpeed = 10.0f;
+    public float rotationSpeed = 200.0f;
+    public float shootAngleThreshold = 5.0f;
+    public float acceleration = 5.0f;
+    public float deceleration = 5.0f;
+    public float floatAmplitude = 0.5f;
+    public float floatFrequency = 1.0f;
 
-    public float floatAmplitude = 0.5f; // Амплитуда планирования
-    public float floatFrequency = 1.0f; // Частота планирования
-
-    private float fireTimer; // Таймер для отслеживания частоты стрельбы
+    private float fireTimer;
     private Rigidbody2D rb;
-    private Vector2 currentVelocity; // Текущая скорость врага
-    private Vector2 recoilForce; // Сила отдачи
-    private float recoilDuration = 0.2f; // Длительность отдачи
+    private Vector2 currentVelocity;
+    private Vector2 recoilForce;
+    private float recoilDuration = 0.2f;
     private float recoilTimer;
 
     void Start()
@@ -39,69 +40,101 @@ public class EnemyAI : MonoBehaviour
         currentVelocity = Vector2.zero;
         recoilForce = Vector2.zero;
         recoilTimer = 0.0f;
+
+        CheckIfClone();
     }
 
-void FixedUpdate()
-{
-    if (isClone && player != null)
+    void Update()
     {
-        Vector3 direction = player.position - transform.position;
-        float distanceToPlayer = direction.magnitude;
-        Vector2 targetVelocity = Vector2.zero;
+        CheckIfClone();
 
-        // Добавляем планирование (плавное движение по синусоиде)
-        float floatOffset = Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
+        // Если цель не задана, ищем ближайшего игрока
+        if (player == null)
+        {
+            FindNearestPlayer();
+        }
+    }
 
-        if (distanceToPlayer < retreatDistance)
+    void CheckIfClone()
+    {
+        if (gameObject.name.Contains("Clone"))
         {
-            targetVelocity = -direction.normalized * speed;
+            isClone = true;
         }
-        else if (distanceToPlayer >= minDesiredDistance && distanceToPlayer <= maxDesiredDistance)
-        {
-            targetVelocity = new Vector2(0, floatOffset);
-        }
-        else if (distanceToPlayer < minDesiredDistance)
-        {
-            targetVelocity = -direction.normalized * speed;
-        }
-        else
-        {
-            targetVelocity = new Vector2(direction.normalized.x, direction.normalized.y) * speed + new Vector2(0, floatOffset);
-        }
+    }
 
-        // Плавное изменение скорости
-        currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, (targetVelocity == Vector2.zero ? deceleration : acceleration) * Time.fixedDeltaTime);
+    void FindNearestPlayer()
+    {
+        // Находим все объекты с компонентом NetworkIdentity, представляющие игроков
+        var players = GameObject.FindGameObjectsWithTag("Player")
+            .Select(obj => obj.transform)
+            .Where(transform => transform != null)
+            .ToArray();
 
-        // Применение отдачи при попадании
-        if (recoilTimer > 0)
+        // Ищем ближайшего игрока
+        if (players.Length > 0)
         {
-            recoilTimer -= Time.fixedDeltaTime;
-            rb.velocity = recoilForce; // Применяем силу отдачи
+            player = players
+                .OrderBy(p => Vector3.Distance(transform.position, p.position))
+                .FirstOrDefault();
         }
-        else
-        {
-            rb.velocity = currentVelocity;
-        }
+    }
 
-        // Поворот к игроку
-        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 0f;
-        float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.z, targetAngle, rotationSpeed * Time.fixedDeltaTime);
-        rb.MoveRotation(angle);
-
-        // Стрельба
-        float angleDifference = Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.z, targetAngle));
-        if (angleDifference < shootAngleThreshold && distanceToPlayer <= maxDesiredDistance)
+    void FixedUpdate()
+    {
+        if (isClone && player != null)
         {
-            fireTimer += Time.fixedDeltaTime;
-            if (fireTimer >= 1.0f / fireRate)
+            Vector3 direction = player.position - transform.position;
+            float distanceToPlayer = direction.magnitude;
+            Vector2 targetVelocity = Vector2.zero;
+
+            float floatOffset = Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
+
+            if (distanceToPlayer < retreatDistance)
             {
-                Fire();
-                fireTimer = 0.0f;
+                targetVelocity = -direction.normalized * speed;
+            }
+            else if (distanceToPlayer >= minDesiredDistance && distanceToPlayer <= maxDesiredDistance)
+            {
+                targetVelocity = new Vector2(0, floatOffset);
+            }
+            else if (distanceToPlayer < minDesiredDistance)
+            {
+                targetVelocity = -direction.normalized * speed;
+            }
+            else
+            {
+                targetVelocity = new Vector2(direction.normalized.x, direction.normalized.y) * speed + new Vector2(0, floatOffset);
+            }
+
+            currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, (targetVelocity == Vector2.zero ? deceleration : acceleration) * Time.fixedDeltaTime);
+
+            if (recoilTimer > 0)
+            {
+                recoilTimer -= Time.fixedDeltaTime;
+                rb.velocity = recoilForce;
+            }
+            else
+            {
+                rb.velocity = currentVelocity;
+            }
+
+            float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 0f;
+            float angle = Mathf.MoveTowardsAngle(transform.eulerAngles.z, targetAngle, rotationSpeed * Time.fixedDeltaTime);
+            rb.MoveRotation(angle);
+
+            float angleDifference = Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.z, targetAngle));
+            if (angleDifference < shootAngleThreshold && distanceToPlayer <= maxDesiredDistance)
+            {
+                fireTimer += Time.fixedDeltaTime;
+                if (fireTimer >= 1.0f / fireRate)
+                {
+                    Fire();
+                    fireTimer = 0.0f;
+                }
             }
         }
     }
-}
-
 
     void Fire()
     {
@@ -146,7 +179,6 @@ void FixedUpdate()
 
     public void TakeDamage(int damageAmount, Vector2 impactDirection)
     {
-        // Логика получения урона
-        ApplyRecoil(impactDirection * 2.0f); // Примерно отталкиваем врага
+        ApplyRecoil(impactDirection * 2.0f);
     }
 }

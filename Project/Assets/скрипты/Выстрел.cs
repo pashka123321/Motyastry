@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class PlayerShooting : MonoBehaviour
 {
     public GameObject bulletPrefab;
     public GameObject secondBulletPrefab;
-
     public Transform firstGun; // Трансформ первого ствола
     public Transform secondGun; // Трансформ второго ствола
 
@@ -19,6 +20,7 @@ public class PlayerShooting : MonoBehaviour
     public float bulletSpacing = 0.2f;
     public float fireRate = 0.1f;
     public float bulletLifeTime = 2f;
+
     public AudioClip shootingSound;
     private AudioSource audioSource;
     private float nextFireTime = 0f;
@@ -26,8 +28,15 @@ public class PlayerShooting : MonoBehaviour
     private bool shootingModeEnabled = true;
     private bool isShooting = false;
     private bool wasShootingInitially = false;
-    private float shootingStartTime = 0f;
-    private float shootingDelay = 0.2f;
+
+    private BuildModeController buildModeController;
+    public Text shootingModeText; // UI элемент для отображения статуса стрельбы
+    private PlayerHealth playerHealth; // Ссылка на PlayerHealth
+
+    public List<GameObject> ignoreUIElements = new List<GameObject>();
+
+    private float shootingStartTime = 0f; // Время первого нажатия на кнопку стрельбы
+    private float shootingDelay = 0.2f; // Задержка перед началом стрельбы (1 секунда)
 
     public float recoilAmount = 0.1f;
     public float recoilSpeed = 5f;
@@ -35,31 +44,45 @@ public class PlayerShooting : MonoBehaviour
     private Vector3 firstGunInitialPos;
     private Vector3 secondGunInitialPos;
 
-    private PlayerHealth playerHealth; // Ссылка на PlayerHealth
-
-    private void Start()
+    void Start()
     {
+        buildModeController = FindObjectOfType<BuildModeController>();
         audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+        playerHealth = GetComponent<PlayerHealth>();
 
-        // Запоминаем исходные позиции стволов для анимации отдачи
         firstGunInitialPos = firstGun.localPosition;
         secondGunInitialPos = secondGun.localPosition;
 
-        // Получаем ссылку на PlayerHealth
-        playerHealth = GetComponent<PlayerHealth>();
+        if (shootingModeText != null)
+        {
+            shootingModeText.gameObject.SetActive(false);
+        }
     }
 
-    private void Update()
+    void Update()
     {
-        // Проверка, жив ли игрок
-        if (playerHealth != null && !playerHealth.isAlive)
+        if (PauseController.IsGamePaused)
         {
-            return; // Блокируем стрельбу, если игрок мертв
+            return;
         }
 
-        if (shootingModeEnabled && Time.time > nextFireTime)
+        if (buildModeController != null && buildModeController.IsBuildModeActive)
         {
-            if (Input.GetButton("Fire1"))
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            shootingModeEnabled = !shootingModeEnabled;
+            UpdateShootingModeText();
+        }
+
+        if (shootingModeEnabled && Time.time > nextFireTime && playerHealth.isAlive)
+        {
+            bool isPointerOverUI = IsPointerOverUI();
+            bool fireButtonPressed = Input.GetButton("Fire1");
+
+            if (fireButtonPressed && !isPointerOverUI)
             {
                 if (!wasShootingInitially)
                 {
@@ -133,17 +156,16 @@ public class PlayerShooting : MonoBehaviour
         {
             rb.velocity = bullet.transform.up * bulletSpeed;
         }
-        
-        // Добавляем компонент Bullet и задаем его параметры
+
         Bullet bulletScript = bullet.AddComponent<Bullet>();
-        bulletScript.damage = 20; // Устанавливаем урон пули
-        bulletScript.damageType = this.damageType; // Устанавливаем тип урона
+        bulletScript.damage = 20;
+        bulletScript.damageType = this.damageType;
 
         Destroy(bullet, bulletLifeTime);
         PlayShootingSound();
     }
 
-    void PlayShootingSound()
+    private void PlayShootingSound()
     {
         if (shootingSound != null && audioSource != null)
         {
@@ -154,13 +176,41 @@ public class PlayerShooting : MonoBehaviour
             Debug.LogWarning("Отсутствует аудиоклип для выстрела или AudioSource не инициализирован.");
         }
     }
+
+    private void UpdateShootingModeText()
+    {
+        if (shootingModeText != null)
+        {
+            shootingModeText.gameObject.SetActive(!shootingModeEnabled);
+            shootingModeText.text = shootingModeEnabled ? "" : "Стрельба отключена";
+        }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+
+        foreach (RaycastResult result in raycastResults)
+        {
+            if (!ignoreUIElements.Contains(result.gameObject))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 public class Bullet : MonoBehaviour
 {
     private Vector3 startPosition;
     public float maxDistance = 100f;
-    public int damage = 20; // Урон, который наносит пуля
+    public int damage = 20;
 
     public int damageType;
 
@@ -171,7 +221,6 @@ public class Bullet : MonoBehaviour
 
     void Update()
     {
-        // Проверяем, прошло ли пуля более maxDistance единиц
         if (Vector3.Distance(startPosition, transform.position) >= maxDistance)
         {
             Destroy(gameObject);
@@ -180,12 +229,11 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Проверяем, столкнулась ли пуля с врагом
         Enemy enemy = other.GetComponent<Enemy>();
         if (enemy != null)
         {
-            enemy.TakeDamage(damage, damageType); // Наносим урон врагу
-            Destroy(gameObject); // Уничтожаем пулю
+            enemy.TakeDamage(damage, damageType);
+            Destroy(gameObject);
         }
     }
 }
