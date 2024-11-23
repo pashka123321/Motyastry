@@ -93,33 +93,37 @@ public class FadeOutObjects : MonoBehaviour
         }
     }
 
-    IEnumerator FadeOut(GameObject obj, float duration)
+IEnumerator FadeOut(GameObject obj, float duration)
+{
+    SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
+    if (sr == null)
     {
-        SpriteRenderer sr = obj.GetComponent<SpriteRenderer>();
-        if (sr == null)
-        {
-            yield break;
-        }
-
-        Color originalColor = sr.color;
-        float fadeSpeed = 1f / duration;
-        float progress = 0f;
-
-        while (progress < 1f)
-        {
-            Color color = sr.color;
-            color.a = Mathf.Lerp(originalColor.a, 0f, progress);
-            sr.color = color;
-
-            progress += fadeSpeed * Time.deltaTime;
-            yield return null;
-        }
-
-        // Убедимся, что объект полностью исчез
-        Color finalColor = sr.color;
-        finalColor.a = 0f;
-        sr.color = finalColor;
+        yield break;
     }
+
+    Color originalColor = sr.color;
+    float fadeSpeed = 1f / duration;
+    float progress = 0f;
+
+    while (progress < 1f)
+    {
+        Color color = sr.color;
+        color.a = Mathf.Lerp(originalColor.a, 0f, progress);
+        sr.color = color;
+
+        progress += fadeSpeed * Time.deltaTime;
+        yield return null;
+    }
+
+    // Убедимся, что объект полностью исчез
+    Color finalColor = sr.color;
+    finalColor.a = 0f;
+    sr.color = finalColor;
+
+    // Удаляем объект из сцены после затухания
+    Destroy(obj);
+}
+
 }
 
 // Дополнительный компонент для фиксированных объектов

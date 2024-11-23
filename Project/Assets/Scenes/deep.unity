@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -573,15 +572,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffb635f1bd8cd974884d2dd531c1accc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   player: {fileID: 1360284264}
   speed: 6
-  desiredDistance: 10
+  minDesiredDistance: 10
+  maxDesiredDistance: 15
+  retreatDistance: 8
   isClone: 0
   damage: 10
   bulletPrefab: {fileID: 1407697830}
   firePoint: {fileID: 75486858}
   fireRate: 1
   bulletSpeed: 10
+  rotationSpeed: 200
+  shootAngleThreshold: 5
+  acceleration: 5
+  deceleration: 5
+  floatAmplitude: 0.5
+  floatFrequency: 1
 --- !u!50 &75486862
 Rigidbody2D:
   serializedVersion: 4
@@ -638,6 +648,13 @@ MonoBehaviour:
   maxHealth: 100
   deathSounds:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
+  customAudioSource: {fileID: 0}
+  objectsToDestroy: []
+  damageResistance: []
+  explosionPrefab: {fileID: 0}
+  explosionPosition: {fileID: 0}
+  cameraShakeDuration: 0.5
+  cameraShakeMagnitude: 0.2
 --- !u!58 &75486865
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -754,7 +771,7 @@ SpriteRenderer:
   m_Size: {x: 0.64, y: 0.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &137479619
@@ -789,7 +806,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8201bea9ef1ca2b49a6d9c5748aed93a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settingsButtonPrefab: {fileID: 969713896}
   targetCamera: {fileID: 519420031}
   settingsCanvas: {fileID: 137479623}
 --- !u!114 &137479621
@@ -2292,6 +2308,13 @@ MonoBehaviour:
   maxHealth: 200
   deathSounds:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
+  customAudioSource: {fileID: 0}
+  objectsToDestroy: []
+  damageResistance: []
+  explosionPrefab: {fileID: 0}
+  explosionPosition: {fileID: 0}
+  cameraShakeDuration: 0.5
+  cameraShakeMagnitude: 0.2
 --- !u!82 &391619552
 AudioSource:
   m_ObjectHideFlags: 0
@@ -3703,7 +3726,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1360284264}
   smoothing: 8
-  offset: {x: 0, y: 0, z: 0}
   zoomSpeed: 5
   minZoom: 2
   maxZoom: 10
@@ -5320,7 +5342,9 @@ MonoBehaviour:
   deceleration: 10
   directionChangeSpeed: 10
   rotationSpeed: 10
+  rotationDelay: 0.5
   canControl: 1
+  ignoreUIElements: []
 --- !u!1 &788803657
 GameObject:
   m_ObjectHideFlags: 0
@@ -8056,9 +8080,10 @@ MonoBehaviour:
   slider: {fileID: 1319427679}
   fillImage: {fileID: 1054705960}
   fullHealthSprite: {fileID: 21300000, guid: a01df49e3317eb944abc3d5dd975e308, type: 3}
-  seventyFiveHealthSprite: {fileID: 21300000, guid: 850c58f4b4c6cf144a1ae311bebbb312, type: 3}
-  fiftyHealthSprite: {fileID: 21300000, guid: dc1965e39b365cc45a6ec6c80bf09e43, type: 3}
-  twentyFiveHealthSprite: {fileID: 21300000, guid: e97045e29d0262b43872da281870a2c7, type: 3}
+  eightyHealthSprite: {fileID: 0}
+  sixtyHealthSprite: {fileID: 0}
+  fortyHealthSprite: {fileID: 0}
+  twentyHealthSprite: {fileID: 0}
   zeroHealthSprite: {fileID: 21300000, guid: 4715b8177948dee41b335aa4c37e5fe7, type: 3}
 --- !u!1 &1060417406
 GameObject:
@@ -9361,11 +9386,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1140d69358c9dc14dbd209338d2575ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 391619543}
+  skipWaveButton: {fileID: 0}
+  enemyPrefabs: []
   player: {fileID: 1060417408}
-  maxEnemies: 10
-  spawnInterval: 10
+  initialEnemiesPerWave: 2
+  enemyIncrementPerWave: 2
+  waveInterval: 90
+  restInterval: 120
   minDistanceFromPlayer: 20
+  blockLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  enemyCountText: {fileID: 0}
+  waveCountText: {fileID: 0}
+  waveTimerText: {fileID: 0}
+  maxEnemies: 10
 --- !u!114 &1210164693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9378,11 +9413,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1140d69358c9dc14dbd209338d2575ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 75486855}
+  skipWaveButton: {fileID: 0}
+  enemyPrefabs: []
   player: {fileID: 1360284264}
-  maxEnemies: 10
-  spawnInterval: 10
+  initialEnemiesPerWave: 2
+  enemyIncrementPerWave: 2
+  waveInterval: 90
+  restInterval: 120
   minDistanceFromPlayer: 20
+  blockLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  enemyCountText: {fileID: 0}
+  waveCountText: {fileID: 0}
+  waveTimerText: {fileID: 0}
+  maxEnemies: 10
 --- !u!1 &1229347318
 GameObject:
   m_ObjectHideFlags: 0
@@ -10613,7 +10658,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 7
-  m_Sprite: {fileID: 21300000, guid: 8a71a0c693e6eea45b0c153d006d0293, type: 3}
+  m_Sprite: {fileID: -1612806215, guid: 8a71a0c693e6eea45b0c153d006d0293, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -10658,7 +10703,9 @@ MonoBehaviour:
   deceleration: 10
   directionChangeSpeed: 10
   rotationSpeed: 10
+  rotationDelay: 0.5
   canControl: 1
+  ignoreUIElements: []
 --- !u!114 &1360284266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10673,15 +10720,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 1312147304}
   secondBulletPrefab: {fileID: 1312147304}
+  firstGun: {fileID: 0}
+  secondGun: {fileID: 0}
+  firstGunBulletSpawnPoints: []
+  secondGunBulletSpawnPoints: []
+  damageType: 0
   bulletSpeed: 15
   bulletCount: 1
   bulletSpacing: 0.2
   fireRate: 0.15
   bulletLifeTime: 2
-  firstBulletSpawnOffset: {x: 0.7, y: -0.37}
-  secondBulletSpawnOffset: {x: 0.7, y: 0.32}
   shootingSound: {fileID: 8300000, guid: f237f61d3c507d04cbd8836f071f5041, type: 3}
   shootingModeText: {fileID: 0}
+  ignoreUIElements: []
+  recoilAmount: 0.1
+  recoilSpeed: 5
 --- !u!61 &1360284268
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -10776,6 +10829,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
   cameraFollow: {fileID: 519420033}
   respawnPoint: {fileID: 1060417408}
+  isInvincible: 0
 --- !u!114 &1360284272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10788,8 +10842,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44de4045e1b46fd418cf83eee157a782, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerModel1: {fileID: 1360284262}
-  playerModel2: {fileID: 786110900}
+  defaultCharacter: {fileID: 0}
+  modifiedCharacter: {fileID: 0}
+  respawnPosition: {x: 0, y: 0, z: 0}
+  cameraFollow: {fileID: 0}
 --- !u!114 &1360284273
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10843,8 +10899,14 @@ MonoBehaviour:
   fireRate: 3
   detectionRadius: 20
   rotationSpeed: 500
+  aimThreshold: 5
   shootSounds:
   - {fileID: 8300000, guid: b181abbc183caa24e987bc38769b14be, type: 3}
+  leadIngotCount: 10
+  maxLeadIngots: 50
+  ammoRefillAmount: 10
+  ammoTag: "\u0441\u043B\u0438\u0442\u043E\u043A \u0441\u0432\u0438\u043D\u0446\u0430"
+  requiresAmmo: 1
 --- !u!4 &1360300085
 Transform:
   m_ObjectHideFlags: 0
@@ -20401,10 +20463,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c699c474665ed242bd92a322c6fb705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleSystem: {fileID: 1979705492}
-  particleCount: 100
-  delayBeforeStart: 1.6
-  particleDuration: 1
+  particlePrefab: {fileID: 0}
+  spawnDelay: 1.6
 --- !u!199 &1979705491
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -25554,7 +25614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputCanvas: {fileID: 2017530735}
   playButton: {fileID: 0}
-  menuCanvas: {fileID: 0}
+  hideButtons: []
   originalPosition: {x: -461.24, y: -416.9, z: 95.26604}
 --- !u!1 &2062312317
 GameObject:

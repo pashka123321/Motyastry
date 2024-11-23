@@ -63,11 +63,16 @@ public class PixelWorld : MonoBehaviour
         SetCapital(90, 10, PixelType.Orange);
     }
 
-    void InitializeStartingPixel(int x, int y, PixelType type, Color color)
-    {
-        world[x, y] = type;
-        worldObjects[x, y].GetComponent<SpriteRenderer>().color = color;
-    }
+void InitializeStartingPixel(int x, int y, PixelType type, Color color)
+{
+    world[x, y] = type;
+    worldObjects[x, y].GetComponent<SpriteRenderer>().color = color;
+
+    // Назначаем мутацию для начальной клетки
+    cellMutations[new Vector2Int(x, y)] = new CellMutation();
+}
+private Dictionary<Vector2Int, CellMutation> cellMutations = new Dictionary<Vector2Int, CellMutation>();
+
 
     void SetCapital(int x, int y, PixelType type)
     {
@@ -81,33 +86,38 @@ public class PixelWorld : MonoBehaviour
         frontlines[type].Enqueue(new Vector2Int(x, y));
     }
 
-    IEnumerator UpdateWorld()
+IEnumerator UpdateWorld()
+{
+    while (true)
     {
-        while (true)
+        foreach (var frontline in frontlines)
         {
-            foreach (var frontline in frontlines)
+            PixelType type = frontline.Key;
+            Queue<Vector2Int> queue = frontline.Value;
+
+            int currentQueueSize = queue.Count;
+
+            for (int i = 0; i < currentQueueSize; i++)
             {
-                PixelType type = frontline.Key;
-                Queue<Vector2Int> queue = frontline.Value;
+                Vector2Int pos = queue.Dequeue();
 
-                int currentQueueSize = queue.Count;
+                // Получаем мутацию клетки, если она существует
+                float spreadMultiplier = cellMutations.ContainsKey(pos) ? cellMutations[pos].spreadSpeedMultiplier : 0.01f;
 
-                for (int i = 0; i < currentQueueSize; i++)
+                if (world[pos.x, pos.y] == type)
                 {
-                    Vector2Int pos = queue.Dequeue();
-
-                    if (world[pos.x, pos.y] == type)
-                    {
-                        Spread(pos.x, pos.y, ref queue);
-                    }
-
-                    queue.Enqueue(pos); // Добавляем позицию обратно в очередь
+                    Spread(pos.x, pos.y, ref queue);
                 }
-            }
 
-            yield return new WaitForSeconds(updateInterval);
+                // Возвращаем позицию обратно в очередь
+                queue.Enqueue(pos);
+
+                // Задержка на основе мутации
+                yield return new WaitForSeconds(updateInterval * spreadMultiplier);
+            }
         }
     }
+}
 
     IEnumerator RegeneratePower()
     {
@@ -165,64 +175,46 @@ public class PixelWorld : MonoBehaviour
         }
     }
 
-    void Spread(int x, int y, ref Queue<Vector2Int> queue)
+void Spread(int x, int y, ref Queue<Vector2Int> queue)
+{
+    PixelType type = world[x, y];
+    Color color = GetColor(type);
+
+    // Определяем направления (вверх, вниз, влево, вправо)
+    Vector2Int[] directions = new Vector2Int[]
     {
-        PixelType type = world[x, y];
-        int currentPower = GetPower(type);
-        Color color = GetColor(type);
+        new Vector2Int(0, 1),  // вверх
+        new Vector2Int(0, -1), // вниз
+        new Vector2Int(-1, 0), // влево
+        new Vector2Int(1, 0)   // вправо
+    };
 
-        int captureCost = CalculateCaptureCost(type);
+    // Захватываем соседние клетки во всех направлениях
+    foreach (var direction in directions)
+    {
+        int newX = x + direction.x;
+        int newY = y + direction.y;
 
-        if (currentPower < captureCost)
+        // Проверяем, что координаты в пределах мира
+        if (newX >= 0 && newX < worldSize && newY >= 0 && newY < worldSize)
         {
-            // Недостаточно силы для захвата
-            return;
-        }
-
-        List<Vector2Int> neighborsToCheck = new List<Vector2Int>();
-
-        // Захват соседних клеток
-        for (int i = -1; i <= 1; i++)
-        {
-            for (int j = -1; j <= 1; j++)
-            {
-                if (i == 0 && j == 0) continue;
-
-                int newX = x + i;
-                int newY = y + j;
-
-                if (newX >= 0 && newX < worldSize && newY >= 0 && newY < worldSize)
-                {
-                    if (world[newX, newY] == PixelType.White)
-                    {
-                        neighborsToCheck.Add(new Vector2Int(newX, newY));
-                    }
-                }
-            }
-        }
-
-        // Перемешиваем соседей для равномерного захвата
-        Shuffle(neighborsToCheck);
-
-        foreach (var pos in neighborsToCheck)
-        {
-            int newX = pos.x;
-            int newY = pos.y;
-
-            if (currentPower >= captureCost)
+            // Захватываем клетку, если она не принадлежит текущему типу
+            if (world[newX, newY] != type)
             {
                 world[newX, newY] = type;
                 worldObjects[newX, newY].GetComponent<SpriteRenderer>().color = color;
-                DeductPower(type, captureCost);
 
-                // Добавляем новую клетку в очередь для дальнейшего захвата
+                // Добавляем захваченную клетку в очередь для дальнейшего распространения
                 queue.Enqueue(new Vector2Int(newX, newY));
             }
         }
-
-        // Проверяем, не захвачена ли столица
-        CheckCapitals();
     }
+
+    // Проверяем, не захвачена ли столица
+    CheckCapitals();
+}
+
+
 
     void CheckCapitals()
     {
@@ -302,4 +294,15 @@ public class PixelWorld : MonoBehaviour
             list[randomIndex] = temp;
         }
     }
+public class CellMutation
+{
+    public float spreadSpeedMultiplier = 1f; // Множитель скорости (например, 1 - обычная скорость, <1 - медленнее, >1 - быстрее)
+
+    public CellMutation()
+    {
+        // Случайно задаем скорость распространения (от 0.5 до 1.5)
+        spreadSpeedMultiplier = Random.Range(0.0001f, 0.0005f);
+    }
+}
+
 }

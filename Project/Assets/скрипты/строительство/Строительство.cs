@@ -176,10 +176,6 @@ public class BuildModeController : MonoBehaviour
         {
             ToggleBuildMode();
         }
-        else
-        {
-            RemoveBlock();
-        }
     }
 
     if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
@@ -299,39 +295,6 @@ bool IsPointerOverIgnoredUI()
         grid[x, y] = true;
 
         UpdateGraph(newBlock);
-    }
-
-    void RemoveBlock()
-    {
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 gridPosition = SnapToGrid(mousePosition);
-        int x = Mathf.RoundToInt(gridPosition.x);
-        int y = Mathf.RoundToInt(gridPosition.y);
-
-        if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
-        {
-            Debug.Log("Position is out of bounds");
-            return;
-        }
-
-        if (IsCellOccupied(x, y))
-        {
-
-            PlayBreakSound();
-
-            Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(gridPosition.x, gridPosition.y));
-            foreach (Collider2D col in colliders)
-            {
-                if (col.gameObject.CompareTag("Block") || col.gameObject.CompareTag("Conveer"))
-                {
-                    UpdateGraphBeforeRemoval(col.gameObject);
-
-                    Destroy(col.gameObject);
-                    grid[x, y] = false;
-                    break;
-                }
-            }
-        }
     }
 
     public void DestroyByEnemy(Vector3 destoyedBlock)

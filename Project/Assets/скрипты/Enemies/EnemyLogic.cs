@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class EnemyLogic : MonoBehaviour
 {
@@ -20,12 +21,28 @@ public class EnemyLogic : MonoBehaviour
     [SerializeField] private float coreShootingRange = 5f; // Дальность стрельбы по ядру
     [SerializeField] private string coreTag = "core"; // Тег ядра
 
+[SerializeField] private float recoilForce = 0.5f; // Сила отдачи
+[SerializeField] private float recoilSpeed = 10f; // Скорость движения при отдаче
+[SerializeField] private float recoverySpeed = 5f; // Скорость возвращения после отдачи
+
+private Vector3 originalLocalPosition; // Исходное локальное положение пушки
+private bool isRecoiling; // Флаг выполнения отдачи
+
+
+
+
+
     private float lastShotTime;
 
-    private void Start()
-    {
-        core = GameObject.FindWithTag(coreTag)?.transform;
-    }
+private void Start()
+{
+    core = GameObject.FindWithTag(coreTag)?.transform;
+    originalLocalPosition = gunTransform.localPosition; // Сохраняем начальное локальное положение пушки
+}
+
+
+
+
 
     private void Update()
     {
@@ -151,18 +168,57 @@ public class EnemyLogic : MonoBehaviour
         }
     }
 
-    private void Shoot()
+private void Shoot()
+{
+    if (bulletPrefab != null && bulletSpawnPoint != null)
     {
-        if (bulletPrefab != null && bulletSpawnPoint != null)
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, gunTransform.rotation * Quaternion.Euler(0, 0, -90));
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
         {
-            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, gunTransform.rotation * Quaternion.Euler(0, 0, -90));
-            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-            if (rb != null)
-            {
-                rb.velocity = bullet.transform.up * 10f; // Скорость пули
-            }
+            rb.velocity = bullet.transform.up * 15f; // Скорость пули
         }
+
+        StartCoroutine(Recoil()); // Запуск эффекта отдачи
     }
+}
+
+
+
+private IEnumerator Recoil()
+{
+    if (isRecoiling) yield break; // Предотвращаем множественные вызовы
+    isRecoiling = true;
+
+    // Считаем направление отдачи в глобальных координатах
+    Vector3 recoilDirection = -gunTransform.up.normalized * recoilForce;
+
+    // Поворачиваем отдачу на 90 градусов
+    recoilDirection = Quaternion.Euler(0, 0, -90) * recoilDirection;  // Поворот на 90 градусов относительно направления прицеливания
+
+    // Переводим это смещение в локальные координаты относительно родителя (обычно корпуса)
+    Vector3 recoilTargetLocal = gunTransform.localPosition + gunTransform.parent.InverseTransformDirection(recoilDirection);
+
+    // Сдвигаем пушку назад
+    while (Vector3.Distance(gunTransform.localPosition, recoilTargetLocal) > 0.01f)
+    {
+        gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, recoilTargetLocal, recoilSpeed * Time.deltaTime);
+        yield return null;
+    }
+
+    // Возвращаем пушку в исходное локальное положение
+    while (Vector3.Distance(gunTransform.localPosition, originalLocalPosition) > 0.01f)
+    {
+        gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, originalLocalPosition, recoverySpeed * Time.deltaTime);
+        yield return null;
+    }
+
+    isRecoiling = false; // Завершение эффекта отдачи
+}
+
+
+
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
