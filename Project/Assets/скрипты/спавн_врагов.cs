@@ -131,6 +131,15 @@ public class EnemySpawner : MonoBehaviour
     {
         isWaveActive = true; // Устанавливаем флаг, что волна активна
 
+    if (Random.value <= 0.25f)
+    {
+        MusicManager1 musicManager = FindObjectOfType<MusicManager1>();
+        if (musicManager != null)
+        {
+            musicManager.PlayBattleMusic(); // Включаем боевую музыку
+        }
+    }
+
         if (currentWave > 0 && currentWave % 5 == 0)
         {
             if (!isResting)
@@ -308,17 +317,24 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    public void OnEnemyDestroyed()
-    {
-        currentEnemies--;
-        UpdateEnemyCountText();
+public void OnEnemyDestroyed()
+{
+    currentEnemies--;
+    UpdateEnemyCountText();
 
-        if (currentEnemies <= 0 && !isResting)
+    if (currentEnemies <= 0 && !isResting)
+    {
+        isWaveActive = false;
+
+        MusicManager1 musicManager = FindObjectOfType<MusicManager1>();
+        if (musicManager != null)
         {
-            isWaveActive = false; // Если все враги уничтожены, волна завершена
-            UpdateWaveTimerText(); // Обновляем текст таймера
+            musicManager.StopBattleMusic(); // Останавливаем боевую музыку
         }
+
+        UpdateWaveTimerText(); // Обновляем текст таймера
     }
+}
 
     public void OnEnemyRetreat(GameObject enemy)
     {

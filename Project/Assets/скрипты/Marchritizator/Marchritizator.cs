@@ -1,94 +1,201 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
-public class Marchritizator : MonoBehaviour
+public class Router : MonoBehaviour
 {
-    public Transform[] spawnPoints;    // Массив точек спавна
-    public bool[] activeSP;            // Массив активных точек спавна
+    public float speed = 2f; // Скорость перемещения объекта
+    public float detectionRadius = 2f; // Радиус поиска следующего конвейера
+    public LayerMask conveyorLayerMask; // Слой конвейеров
+    public LayerMask itemLayerMask; // Слой объектов для маршрутизации
 
-    private int currentSpawnIndex = 0;
-    private List<Collider2D> collidersInTrigger = new List<Collider2D>();
+    public Transform leftTrigger, rightTrigger, topTrigger, bottomTrigger; // Ссылки на триггеры
+
+    private List<GameObject> currentItems = new List<GameObject>(); // Список обрабатываемых объектов
+    private Dictionary<GameObject, Transform> targetConveyors = new Dictionary<GameObject, Transform>(); // Целевые конвейеры
+    private Dictionary<GameObject, string> entrySides = new Dictionary<GameObject, string>(); // Сторона входа ресурса
+    private int currentDirectionIndex = 0; // Индекс текущего направления
+
+    private string[] directions = { "Left", "Top", "Right", "Bottom" }; // Последовательность направлений
+
+    private void Start()
+    {
+        // Запускаем корутину для проверки объектов каждые 1 секунду
+        StartCoroutine(CheckItemsInColliderRoutine());
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.GetComponent<MovementController>() != null)
+        if (IsInLayerMask(collision.gameObject, itemLayerMask) && !currentItems.Contains(collision.gameObject))
         {
-            if (!collidersInTrigger.Contains(collision))
-            {
-                collidersInTrigger.Add(collision);
-            }
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.GetComponent<MovementController>() != null)
-        {
-            if (collidersInTrigger.Contains(collision))
-            {
-                collidersInTrigger.Remove(collision);
-            }
+            AddItemToRouting(collision.gameObject);
         }
     }
 
     private void Update()
     {
-        if (spawnPoints == null || spawnPoints.Length == 0 || activeSP == null || activeSP.Length == 0)
+        for (int i = currentItems.Count - 1; i >= 0; i--)
         {
-            return; // Прерывание, если массивы не заданы
-        }
-
-        // Найти активные точки спавна
-        var activeSpawnPoints = spawnPoints
-            .Select((point, index) => new { point, index })
-            .Where(x => activeSP[x.index])
-            .ToList();
-
-        if (activeSpawnPoints.Count == 0)
-        {
-            return; // Прерывание, если нет активных точек спавна
-        }
-
-        // Обработать ресурсы
-        if (collidersInTrigger.Count > 0)
-        {
-            var collider = collidersInTrigger.First(); // Получаем первый коллайдер из списка
-
-            // Проверяем, что текущий индекс находится в пределах допустимого диапазона
-            if (currentSpawnIndex >= activeSpawnPoints.Count)
+            GameObject item = currentItems[i];
+            if (targetConveyors.ContainsKey(item) && targetConveyors[item] != null)
             {
-                currentSpawnIndex = 0; // Сброс индекса если превышает количество активных точек спавна
-            }
-
-            // Создаем объект на текущей активной точке спавна
-            Instantiate(collider.gameObject, activeSpawnPoints[currentSpawnIndex].point.position, Quaternion.identity);
-            Destroy(collider.gameObject);
-
-            collidersInTrigger.Remove(collider); // Удаляем обработанный коллайдер из списка
-
-            // Переключаемся на следующую точку спавна
-            currentSpawnIndex++;
-            if (currentSpawnIndex >= activeSpawnPoints.Count)
-            {
-                currentSpawnIndex = 0; // Сброс индекса если превышает количество активных точек спавна
+                MoveItemToTarget(item, targetConveyor: targetConveyors[item]);
             }
         }
     }
 
-    public void ActivateSpawnPoint(int spIndex)
+    private void AddItemToRouting(GameObject item)
     {
-        if (spIndex >= 0 && spIndex < activeSP.Length)
+        currentItems.Add(item);
+        item.transform.parent = transform;
+
+        // Определяем, через какой триггер вошел ресурс
+        string entrySide = DetectEntrySide(item.transform.position);
+        entrySides[item] = entrySide;
+
+        SelectConveyorByRotation(item, entrySide);
+    }
+
+    private void MoveItemToTarget(GameObject item, Transform targetConveyor)
+    {
+        item.transform.position = Vector3.MoveTowards(
+            item.transform.position,
+            targetConveyor.position,
+            speed * Time.deltaTime
+        );
+
+        if (Vector3.Distance(item.transform.position, targetConveyor.position) < 0.1f)
         {
-            activeSP[spIndex] = true;
+            item.transform.parent = null;
+            currentItems.Remove(item);
+            targetConveyors.Remove(item);
+            entrySides.Remove(item);
         }
     }
 
-    public void DeactivateSpawnPoint(int spIndex)
+    private string DetectEntrySide(Vector2 itemPosition)
     {
-        if (spIndex >= 0 && spIndex < activeSP.Length)
+        float leftDist = Vector2.Distance(itemPosition, leftTrigger.position);
+        float rightDist = Vector2.Distance(itemPosition, rightTrigger.position);
+        float topDist = Vector2.Distance(itemPosition, topTrigger.position);
+        float bottomDist = Vector2.Distance(itemPosition, bottomTrigger.position);
+
+        float minDistance = Mathf.Min(leftDist, rightDist, topDist, bottomDist);
+
+        if (minDistance == leftDist) return "Left";
+        if (minDistance == rightDist) return "Right";
+        if (minDistance == topDist) return "Top";
+        return "Bottom";
+    }
+
+    private void SelectConveyorByRotation(GameObject item, string entrySide)
+    {
+        Collider2D[] conveyors = Physics2D.OverlapCircleAll(transform.position, detectionRadius, conveyorLayerMask);
+        List<Transform> validConveyors = new List<Transform>();
+
+        // Циклический выбор направления, пропуская сторону входа
+        for (int i = 0; i < directions.Length; i++)
         {
-            activeSP[spIndex] = false;
+            currentDirectionIndex = (currentDirectionIndex + 1) % directions.Length;
+            string targetDirection = directions[currentDirectionIndex];
+
+            // Пропускаем сторону входа
+            if (targetDirection == entrySide) continue;
+
+            foreach (var conveyor in conveyors)
+            {
+                Vector2 directionToConveyor = (conveyor.transform.position - transform.position).normalized;
+
+                switch (targetDirection)
+                {
+                    case "Left":
+                        if (directionToConveyor.x < -0.5f) validConveyors.Add(conveyor.transform);
+                        break;
+                    case "Right":
+                        if (directionToConveyor.x > 0.5f) validConveyors.Add(conveyor.transform);
+                        break;
+                    case "Top":
+                        if (directionToConveyor.y > 0.5f) validConveyors.Add(conveyor.transform);
+                        break;
+                    case "Bottom":
+                        if (directionToConveyor.y < -0.5f) validConveyors.Add(conveyor.transform);
+                        break;
+                }
+            }
+
+            if (validConveyors.Count > 0) break; // Нашли подходящий конвейер, выходим из цикла
         }
+
+        if (validConveyors.Count > 0)
+        {
+            targetConveyors[item] = validConveyors[0]; // Выбираем первый подходящий конвейер
+        }
+        else
+        {
+            item.transform.parent = null;
+            currentItems.Remove(item);
+            entrySides.Remove(item);
+        }
+    }
+
+private IEnumerator CheckItemsInColliderRoutine()
+{
+    while (true)
+    {
+        yield return new WaitForSeconds(1f); // Интервал проверки - 1 секунда
+
+        // Получаем коллайдер текущего объекта
+        Collider2D currentCollider = GetComponent<Collider2D>();
+        if (currentCollider == null) yield break;
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.SetLayerMask(itemLayerMask);
+        filter.useTriggers = true;
+
+        Collider2D[] results = new Collider2D[10]; // Максимальное число объектов для проверки
+        int count = currentCollider.OverlapCollider(filter, results);
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject item = results[i].gameObject;
+
+            if (!currentItems.Contains(item))
+            {
+                AddItemToRouting(item);
+            }
+        }
+
+        // Удаляем объекты, которые больше не активны или вышли из коллайдера
+        for (int i = currentItems.Count - 1; i >= 0; i--)
+        {
+            GameObject item = currentItems[i];
+            if (!item || !item.activeInHierarchy || !IsInCollider(item, currentCollider))
+            {
+                currentItems.RemoveAt(i);
+                targetConveyors.Remove(item);
+                entrySides.Remove(item);
+            }
+        }
+    }
+}
+
+// Проверка, находится ли объект внутри текущего коллайдера
+private bool IsInCollider(GameObject item, Collider2D currentCollider)
+{
+    Collider2D itemCollider = item.GetComponent<Collider2D>();
+    return itemCollider != null && currentCollider.IsTouching(itemCollider);
+}
+
+
+
+    private bool IsInLayerMask(GameObject obj, LayerMask layerMask)
+    {
+        return ((1 << obj.layer) & layerMask) != 0;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }

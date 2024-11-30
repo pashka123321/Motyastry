@@ -2,53 +2,47 @@ using UnityEngine;
 
 public class PlayAnimationOnce : MonoBehaviour
 {
-    private Animator animator;
-    private bool hasPlayed = false;
+    [SerializeField] private Animator animator; // Ссылка на Animator
+    [SerializeField] private string animationName; // Имя анимации, которую нужно проиграть
 
-    // Массив имен анимаций, которые будут воспроизводиться случайным образом
-    public string[] animationNames;
-
-    void Start()
+    private void Start()
     {
-        animator = GetComponent<Animator>();
-
-        if (animator != null)
+        // Проверяем, указана ли анимация
+        if (animator == null || string.IsNullOrEmpty(animationName))
         {
-            PlayRandomAnimation();
+            Debug.LogError("Animator или имя анимации не назначены!");
+            return;
+        }
+
+        // Проигрываем анимацию
+        animator.Play(animationName);
+
+        // Получаем длину анимации
+        AnimationClip clip = GetAnimationClip(animationName);
+        if (clip != null)
+        {
+            // Отключаем Animator после завершения анимации
+            Invoke(nameof(DisableAnimator), clip.length);
         }
         else
         {
-            Debug.LogError("Animator component is missing on the object " + gameObject.name);
+            Debug.LogWarning($"Анимация {animationName} не найдена!");
         }
     }
 
-    void PlayRandomAnimation()
+    private AnimationClip GetAnimationClip(string name)
     {
-        if (!hasPlayed && animator != null)
+        // Получаем анимационный клип по имени
+        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
         {
-            // Проверяем, что массив анимаций не пустой
-            if (animationNames.Length > 0)
-            {
-                // Выбираем случайную анимацию из массива
-                int randomIndex = Random.Range(0, animationNames.Length);
-                string randomAnimation = animationNames[randomIndex];
-
-                // Проверяем, есть ли такое состояние в Animator
-                if (animator.HasState(0, Animator.StringToHash(randomAnimation)))
-                {
-                    // Воспроизводим выбранную анимацию
-                    animator.Play(randomAnimation, 0); // Указываем слой 0
-                    hasPlayed = true;
-                }
-                else
-                {
-                    Debug.LogError("Animator does not contain the state: " + randomAnimation);
-                }
-            }
-            else
-            {
-                Debug.LogError("Animation names array is empty.");
-            }
+            if (clip.name == name)
+                return clip;
         }
+        return null;
+    }
+
+    private void DisableAnimator()
+    {
+        animator.enabled = false;
     }
 }
