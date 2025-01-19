@@ -23,6 +23,6 @@ public class SceneSwitcher : MonoBehaviour
     IEnumerator SwitchSceneWithDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        SceneManager.LoadScene("123");
+        SceneManager.LoadScene("multiplayer");
     }
 }

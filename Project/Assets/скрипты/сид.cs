@@ -7,8 +7,9 @@ using System.Text;
 
 public class MenuController : MonoBehaviour
 {
-    [SerializeField] private InputField seedInputField;
-    [SerializeField] private Button startButton;
+    [SerializeField] private InputField seedInputField; // Поле для ввода сида
+    [SerializeField] private Button startButton; // Кнопка "Старт"
+    [SerializeField] private Dropdown gameModeDropdown; // Dropdown для выбора режима игры
 
     void Start()
     {
@@ -17,6 +18,15 @@ public class MenuController : MonoBehaviour
 
     void OnStartButtonClick()
     {
+        if (gameModeDropdown == null)
+        {
+            Debug.LogError("Dropdown is not assigned!");
+            return;
+        }
+
+        // Получаем выбранный режим игры из Dropdown
+        string selectedGameMode = gameModeDropdown.options[gameModeDropdown.value].text;
+
         if (!string.IsNullOrEmpty(seedInputField.text))
         {
             // Преобразуем текстовый сид в числовой с помощью хеширования SHA256
@@ -24,7 +34,9 @@ public class MenuController : MonoBehaviour
 
             PlayerPrefs.SetInt("Seed", seed);
             PlayerPrefs.Save();
-            SceneManager.LoadScene("Game"); // Замените "Game" на имя вашей основной сцены
+
+            // Загружаем сцену в зависимости от выбора
+            LoadSceneBasedOnGameMode(selectedGameMode);
         }
         else
         {
@@ -32,7 +44,25 @@ public class MenuController : MonoBehaviour
             PlayerPrefs.SetInt("Seed", randomSeed);
             PlayerPrefs.Save();
             seedInputField.text = randomSeed.ToString();
-            SceneManager.LoadScene("Game");
+
+            // Загружаем сцену в зависимости от выбора
+            LoadSceneBasedOnGameMode(selectedGameMode);
+        }
+    }
+
+    void LoadSceneBasedOnGameMode(string gameMode)
+    {
+        if (gameMode == "Классика")
+        {
+            SceneManager.LoadScene("Game"); // Замените "Game" на вашу сцену для "Классика"
+        }
+        else if (gameMode == "RTS")
+        {
+            SceneManager.LoadScene("RTS"); // Замените "RTS" на вашу сцену для "RTS"
+        }
+        else
+        {
+            Debug.LogError($"Unknown game mode: {gameMode}");
         }
     }
 

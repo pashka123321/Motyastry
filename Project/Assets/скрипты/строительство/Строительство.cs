@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,9 @@ public class BuildModeController : MonoBehaviour
         public Button button;
         public bool canRotate;
         public ResourceRequirement[] requiredResources; // Изменено на массив ResourceRequirement
+        public int rtsCost; // Цена в режиме RTS
+        public float buildTime; // Добавлено время постройки
+        public bool disableScriptsDuringBuild = true; // Флаг для отключения скриптов во время постройки для каждого объекта
     }
 
     public BlockPrefabData[] blockPrefabsData;
@@ -34,11 +38,26 @@ public class BuildModeController : MonoBehaviour
 
     public bool IsBuildModeActive => isBuildModeActive;
     private CoreResourcesScript coreResources; // Ссылка на CoreResourcesScript
+    private MoneyManager moneyManager; // Ссылка на MoneyManager
+    private List<MonoBehaviour> disabledScripts = new List<MonoBehaviour>();
+    private Dictionary<GameObject, List<MonoBehaviour>> disabledScriptsByObject = new Dictionary<GameObject, List<MonoBehaviour>>();
+    public bool disableScriptsDuringBuild = true; // Флаг для отключения скриптов во время постройки
 
     void Start()
     {
         grid = new bool[gridWidth, gridHeight];
         coreResources = FindObjectOfType<CoreResourcesScript>(); // Ищем ссылку на CoreResourcesScript
+        moneyManager = FindObjectOfType<MoneyManager>(); // Ищем ссылку на MoneyManager
+
+        if (moneyManager == null)
+        {
+            Debug.LogError("MoneyManager not found on this scene.");
+        }
+
+        if (coreResources == null && !moneyManager.IsRTSMode())
+        {
+            Debug.LogError("CoreResourcesScript not found on this scene.");
+        }
 
         foreach (var blockPrefabData in blockPrefabsData)
         {
@@ -262,6 +281,12 @@ bool IsPointerOverIgnoredUI()
 
     void PlaceBlock()
     {
+        if (moneyManager == null)
+        {
+            Debug.LogError("MoneyManager not found on this scene.");
+            return;
+        }
+
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 gridPosition = SnapToGrid(mousePosition);
         int x = Mathf.RoundToInt(gridPosition.x);
@@ -279,23 +304,89 @@ bool IsPointerOverIgnoredUI()
             return;
         }
 
-        var requiredResources = blockPrefabsData[currentBlockPrefabIndex].requiredResources;
-        var resourceDictionary = requiredResources.ToDictionary(r => r.resourceName, r => r.amount);
-
-        if (!coreResources.ConsumeResources(resourceDictionary))
+        if (moneyManager.IsRTSMode())
         {
-            Debug.Log("Not enough resources to build this block");
-            return;
+            int totalCost = blockPrefabsData[currentBlockPrefabIndex].rtsCost;
+            if (moneyManager.money < totalCost)
+            {
+                Debug.Log("Not enough money to build this block");
+                return;
+            }
+            moneyManager.SubtractMoney(totalCost);
+        }
+        else
+        {
+            if (coreResources == null)
+            {
+                Debug.LogError("CoreResourcesScript not found on this scene.");
+                return;
+            }
+
+            var requiredResources = blockPrefabsData[currentBlockPrefabIndex].requiredResources;
+            var resourceDictionary = requiredResources.ToDictionary(r => r.resourceName, r => r.amount);
+
+            if (!coreResources.ConsumeResources(resourceDictionary))
+            {
+                Debug.Log("Not enough resources to build this block");
+                return;
+            }
         }
 
         PlayBuildSound();
 
         Quaternion rotation = previewBlock.transform.rotation;
-        GameObject newBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].prefab, new Vector3(x, y, 0f), rotation);
-        grid[x, y] = true;
-
-        UpdateGraph(newBlock);
+        Vector3 position = new Vector3(x, y, 0f);
+        StartCoroutine(BuildBlock(blockPrefabsData[currentBlockPrefabIndex].prefab, position, rotation, blockPrefabsData[currentBlockPrefabIndex].buildTime));
     }
+
+private IEnumerator BuildBlock(GameObject prefab, Vector3 position, Quaternion rotation, float buildTime)
+{
+    GameObject newBlock = Instantiate(prefab, position, rotation);
+    
+    if (blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild)
+    {
+        DisableScriptsOnObject(newBlock); // Отключаем скрипты на новом объекте
+    }
+
+    SpriteRenderer[] renderers = newBlock.GetComponentsInChildren<SpriteRenderer>();
+
+    foreach (SpriteRenderer renderer in renderers)
+    {
+        Color color = renderer.color;
+        color.a = 0;
+        renderer.color = color;
+    }
+
+    float elapsedTime = 0f;
+
+    while (elapsedTime < buildTime)
+    {
+        float alpha = Mathf.Lerp(0f, 1f, elapsedTime / buildTime);
+
+        foreach (SpriteRenderer renderer in renderers)
+        {
+            Color color = renderer.color;
+            color.a = alpha;
+            renderer.color = color;
+        }
+
+        elapsedTime += Time.deltaTime;
+        yield return null;
+    }
+
+    foreach (SpriteRenderer renderer in renderers)
+    {
+        Color color = renderer.color;
+        color.a = 1f;
+        renderer.color = color;
+    }
+
+    grid[Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y)] = true;
+    UpdateGraph(newBlock);
+
+    EnableScriptsOnObject(newBlock); // Включаем скрипты после завершения постройки
+}
+
 
     public void DestroyByEnemy(Vector3 destoyedBlock)
     {
@@ -421,4 +512,45 @@ bool IsPointerOverIgnoredUI()
         GraphUpdateObject guo = new GraphUpdateObject(bounds);
         AstarPath.active.UpdateGraphs(guo);
     }
+
+void DisableScriptsOnObject(GameObject obj)
+{
+    if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
+
+    if (!disabledScriptsByObject.ContainsKey(obj))
+    {
+        disabledScriptsByObject[obj] = new List<MonoBehaviour>();
+    }
+
+    MonoBehaviour[] scripts = obj.GetComponents<MonoBehaviour>();
+    foreach (var script in scripts)
+    {
+        if (script.enabled && script.GetType() != typeof(BlockHealth)) // Исключаем BlockHealth
+        {
+            script.enabled = false;
+            disabledScriptsByObject[obj].Add(script);
+        }
+    }
+}
+
+void EnableScriptsOnObject(GameObject obj)
+{
+    if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
+
+    if (obj == null || !disabledScriptsByObject.ContainsKey(obj))
+    {
+        return;
+    }
+
+    foreach (var script in disabledScriptsByObject[obj])
+    {
+        if (script != null)
+        {
+            script.enabled = true;
+        }
+    }
+
+    disabledScriptsByObject.Remove(obj);
+}
+
 }

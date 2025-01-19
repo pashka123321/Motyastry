@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/deep.unity
     guid: 7b31a95ece1dc61439a458d347daf8d2
+  - enabled: 1
+    path: Assets/Scenes/RTS.unity
+    guid: a923adca1040a094080ae7b345028dbd
   m_configObjects: {}

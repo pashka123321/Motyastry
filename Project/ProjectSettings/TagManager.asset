@@ -41,6 +41,8 @@ TagManager:
   - Main
   - remember
   - Core
+  - BlockWorld
+  - Friendly
   layers:
   - Default
   - TransparentFX

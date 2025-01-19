@@ -9,13 +9,12 @@ public class TurretController : MonoBehaviour
     public float fireRate = 1f; // Скорость стрельбы (выстрелов в секунду)
     public float detectionRadius = 20f; // Радиус обнаружения врагов
     public float rotationSpeed = 5f; // Скорость поворота турели к врагу
-    public float aimThreshold = 5f; // Порог для проверки, нацелена ли турель
     public AudioClip[] shootSounds; // Массив звуков выстрела
     public int leadIngotCount = 10; // Количество доступных слитков свинца
     public int maxLeadIngots = 50; // Максимальное количество слитков свинца, которое может храниться
-    public int ammoRefillAmount = 10; // Количество слитков свинца, добавляемое при пополнении
     public string ammoTag = "слиток свинца"; // Тег для объектов пополнения боеприпасов
     public bool requiresAmmo = true; // Флаг, указывающий, требуется ли для стрельбы боеприпасы
+    public bool isManualMode = false; // Ручное управление
 
     private float fireCountdown = 0f;
     private AudioSource audioSource;
@@ -28,45 +27,114 @@ public class TurretController : MonoBehaviour
 
     void Update()
     {
-        if (requiresAmmo && leadIngotCount <= 0)
+        if (isManualMode)
         {
-            return; // Турель не реагирует на врагов, если включен режим боеприпасов и их нет в наличии
-        }
-
-        if (currentTarget == null)
-        {
-            currentTarget = FindRandomEnemyWithinRadius();
+            ManualControl(); // Ручное управление
         }
         else
         {
-            Vector3 direction = currentTarget.transform.position - turretObject.transform.position;
-            Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, direction);
-            turretObject.transform.rotation = Quaternion.RotateTowards(turretObject.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            AutomaticControl(); // Автоматическое управление
+        }
+    }
 
-            float angle = Quaternion.Angle(turretObject.transform.rotation, targetRotation);
-            if (angle < aimThreshold)
-            {
-                if (fireCountdown <= 0f)
-                {
-                    if (CanShoot()) // Проверяем возможность стрельбы
-                    {
-                        Shoot();
-                        fireCountdown = 1f / fireRate;
-                    }
-                    else
-                    {
-                        Debug.Log("No lead ingots left!");
-                    }
-                }
-                fireCountdown -= Time.deltaTime;
-            }
+void ManualControl()
+{
+    // Поворот турели в сторону мышки
+    Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    mousePos.z = 0; // Устанавливаем Z в 0, чтобы корректно поворачивать объект в 2D
 
-            // Проверяем, жива ли текущая цель
-            if (!IsTargetAlive(currentTarget))
+    Vector3 direction = mousePos - turretObject.transform.position;
+    Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, direction);
+    turretObject.transform.rotation = Quaternion.RotateTowards(turretObject.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+    // Проверка, достигла ли турель целевого угла поворота
+    float angleDifference = Quaternion.Angle(turretObject.transform.rotation, targetRotation);
+    if (angleDifference < 1f) // Порог, например, 1 градус
+    {
+        // Стрельба при нажатии ЛКМ
+        if (Input.GetMouseButton(0) && fireCountdown <= 0f)
+        {
+            if (CanShoot())
             {
-                currentTarget = null; // Сбрасываем текущую цель, чтобы найти новую на следующем кадре
+                Shoot();
+                fireCountdown = 1f / fireRate;
             }
         }
+    }
+
+    fireCountdown -= Time.deltaTime;
+}
+
+
+void AutomaticControl()
+{
+    if (requiresAmmo && leadIngotCount <= 0)
+    {
+        return; // Турель не реагирует на врагов, если включен режим боеприпасов и их нет в наличии
+    }
+
+    if (currentTarget == null)
+    {
+        currentTarget = FindRandomEnemyWithinRadius();
+    }
+    else
+    {
+        Vector3 direction = currentTarget.transform.position - turretObject.transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, direction);
+        turretObject.transform.rotation = Quaternion.RotateTowards(turretObject.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+        // Проверка, достигла ли турель целевого угла поворота
+        float angleDifference = Quaternion.Angle(turretObject.transform.rotation, targetRotation);
+        if (angleDifference < 1f) // Порог, например, 1 градус
+        {
+            if (fireCountdown <= 0f)
+            {
+                if (CanShoot())
+                {
+                    Shoot();
+                    fireCountdown = 1f / fireRate;
+                }
+            }
+        }
+
+        fireCountdown -= Time.deltaTime;
+
+        // Проверяем, жива ли текущая цель
+        if (!IsTargetAlive(currentTarget))
+        {
+            currentTarget = null; // Сбрасываем текущую цель, чтобы найти новую на следующем кадре
+        }
+    }
+}
+
+
+    void Shoot()
+    {
+        if (Bullet1 != null && firePoint != null)
+        {
+            GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
+            Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
+            if (bulletScript != null)
+            {
+                bulletScript.SetDirection(firePoint.up); // Направление пули вверх от firePoint
+            }
+
+            if (requiresAmmo)
+            {
+                leadIngotCount--; // Уменьшаем количество боеприпасов
+            }
+        }
+
+        if (shootSounds.Length > 0 && audioSource != null)
+        {
+            AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
+            audioSource.PlayOneShot(randomShootSound, 0.3f); // Устанавливаем громкость на 30%
+        }
+    }
+
+    bool CanShoot()
+    {
+        return !requiresAmmo || leadIngotCount > 0;
     }
 
     bool IsTargetAlive(GameObject target)
@@ -94,49 +162,5 @@ public class TurretController : MonoBehaviour
         }
 
         return null;
-    }
-
-    void Shoot()
-    {
-        if (Bullet1 != null && firePoint != null)
-        {
-            GameObject bullet = Instantiate(Bullet1, firePoint.position, firePoint.rotation);
-            Bullet1 bulletScript = bullet.GetComponent<Bullet1>();
-            if (bulletScript != null)
-            {
-                bulletScript.SetDirection(firePoint.up); // Предполагаем, что направление пули - вверх от точки выстрела firePoint
-            }
-
-            if (requiresAmmo)
-            {
-                leadIngotCount--; // Уменьшаем количество слитков свинца после каждого выстрела
-            }
-        }
-
-        if (shootSounds.Length > 0 && audioSource != null)
-        {
-            AudioClip randomShootSound = shootSounds[Random.Range(0, shootSounds.Length)];
-            audioSource.PlayOneShot(randomShootSound, 0.3f); // Устанавливаем громкость на 30%
-        }
-    }
-
-    bool CanShoot()
-    {
-        return !requiresAmmo || leadIngotCount > 0;
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag(ammoTag))
-        {
-            RefillAmmo();
-            Destroy(other.gameObject); // Уничтожаем объект "Ammo" после пополнения
-        }
-    }
-
-    void RefillAmmo()
-    {
-        leadIngotCount = Mathf.Min(leadIngotCount + ammoRefillAmount, maxLeadIngots);
-        Debug.Log("Ammo refilled! Current lead ingots: " + leadIngotCount);
     }
 }

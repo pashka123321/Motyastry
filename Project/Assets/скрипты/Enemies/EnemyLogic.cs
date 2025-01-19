@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class EnemyLogic : MonoBehaviour
 {
@@ -20,60 +21,99 @@ public class EnemyLogic : MonoBehaviour
     [SerializeField] private float coreDetectionRange = 10f; // Дальность обнаружения ядра
     [SerializeField] private float coreShootingRange = 5f; // Дальность стрельбы по ядру
     [SerializeField] private string coreTag = "core"; // Тег ядра
+    [SerializeField] private string blockTag = "Block"; // Тег блоков
+    [SerializeField] private string enemyTag = "Enemy"; // Тег врагов
 
-[SerializeField] private float recoilForce = 0.5f; // Сила отдачи
-[SerializeField] private float recoilSpeed = 10f; // Скорость движения при отдаче
-[SerializeField] private float recoverySpeed = 5f; // Скорость возвращения после отдачи
+    public bool isFriendly; // Флаг, является ли враг дружелюбным
 
-private Vector3 originalLocalPosition; // Исходное локальное положение пушки
-private bool isRecoiling; // Флаг выполнения отдачи
+    [SerializeField] private float recoilForce = 0.5f; // Сила отдачи
+    [SerializeField] private float recoilSpeed = 10f; // Скорость движения при отдаче
+    [SerializeField] private float recoverySpeed = 5f; // Скорость возвращения после отдачи
 
+    [SerializeField] private GameObject[] ignorePrefabs; // Массив префабов объектов, по которым не нужно стрелять
 
-
-
+    private Vector3 originalLocalPosition; // Исходное локальное положение пушки
+    private bool isRecoiling; // Флаг выполнения отдачи
 
     private float lastShotTime;
 
-private void Start()
-{
-    core = GameObject.FindWithTag(coreTag)?.transform;
-    originalLocalPosition = gunTransform.localPosition; // Сохраняем начальное локальное положение пушки
-}
-
-
-
-
+    private void Start()
+    {
+        core = GameObject.FindWithTag(coreTag)?.transform;
+        originalLocalPosition = gunTransform.localPosition; // Сохраняем начальное локальное положение пушки
+    }
 
     private void Update()
     {
         bool isPlayerInRange = IsPlayerInShootingRange();
         bool isCoreInRange = IsCoreInRange();
         bool isBlockwallInRange = IsBlockwallInRange();
+        bool isBlockInRange = IsBlockInRange();
+        bool isEnemyInRange = IsEnemyInRange();
 
-        if (playerNearby && isPlayerInRange)
+        if (isFriendly)
         {
-            RotateTowardsTarget(playerTransform.position);
-            TryShootAtPlayer();
-        }
-        else if (isCoreInRange && core != null)
-        {
-            RotateTowardsTarget(core.position);
-            TryShootAtCore();
-        }
-        else if (isBlockwallInRange)
-        {
-            Transform closestBlockwall = FindClosestBlockwall();
-            if (closestBlockwall != null)
+            if (isEnemyInRange)
             {
-                RotateTowardsTarget(closestBlockwall.position);
-                TryShootAtBlockwall();
+                Transform closestEnemy = FindClosestEnemy();
+                if (closestEnemy != null)
+                {
+                    RotateTowardsTarget(closestEnemy.position);
+                    if (IsAimedAtTarget(closestEnemy.position))
+                    {
+                        TryShoot();
+                    }
+                }
             }
         }
         else
         {
-            if (core != null)
+            if (playerNearby && isPlayerInRange)
+            {
+                RotateTowardsTarget(playerTransform.position);
+                if (IsAimedAtTarget(playerTransform.position))
+                {
+                    TryShoot();
+                }
+            }
+            else if (isCoreInRange && core != null)
             {
                 RotateTowardsTarget(core.position);
+                if (IsAimedAtTarget(core.position))
+                {
+                    TryShoot();
+                }
+            }
+            else if (isBlockwallInRange)
+            {
+                Transform closestBlockwall = FindClosestBlockwall();
+                if (closestBlockwall != null)
+                {
+                    RotateTowardsTarget(closestBlockwall.position);
+                    if (IsAimedAtTarget(closestBlockwall.position))
+                    {
+                        TryShoot();
+                    }
+                }
+            }
+            else if (isBlockInRange)
+            {
+                Transform closestBlock = FindClosestBlock();
+                if (closestBlock != null)
+                {
+                    RotateTowardsTarget(closestBlock.position);
+                    if (IsAimedAtTarget(closestBlock.position))
+                    {
+                        TryShoot();
+                    }
+                }
+            }
+            else
+            {
+                if (core != null)
+                {
+                    RotateTowardsTarget(core.position);
+                }
             }
         }
     }
@@ -84,6 +124,14 @@ private void Start()
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
         gunTransform.rotation = Quaternion.RotateTowards(gunTransform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    private bool IsAimedAtTarget(Vector3 targetPosition)
+    {
+        Vector3 directionToTarget = targetPosition - gunTransform.position;
+        float angleToTarget = Mathf.Atan2(directionToTarget.y, directionToTarget.x) * Mathf.Rad2Deg;
+        float angleDifference = Mathf.Abs(Mathf.DeltaAngle(gunTransform.eulerAngles.z, angleToTarget));
+        return angleDifference < 5f; // Допустимая погрешность в 5 градусов
     }
 
     private bool IsPlayerInShootingRange()
@@ -113,6 +161,32 @@ private void Start()
         return false;
     }
 
+    private bool IsBlockInRange()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gunTransform.position, blockwallDetectionRange);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag(blockTag) && !IsIgnoredObject(hitCollider.gameObject))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool IsEnemyInRange()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gunTransform.position, blockwallDetectionRange);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag(enemyTag))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private Transform FindClosestBlockwall()
     {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gunTransform.position, blockwallDetectionRange);
@@ -134,7 +208,49 @@ private void Start()
         return closestBlockwall;
     }
 
-    private void TryShootAtPlayer()
+    private Transform FindClosestBlock()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gunTransform.position, blockwallDetectionRange);
+        Transform closestBlock = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag(blockTag) && !IsIgnoredObject(hitCollider.gameObject))
+            {
+                float distance = Vector3.Distance(gunTransform.position, hitCollider.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestBlock = hitCollider.transform;
+                }
+            }
+        }
+        return closestBlock;
+    }
+
+    private Transform FindClosestEnemy()
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(gunTransform.position, blockwallDetectionRange);
+        Transform closestEnemy = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag(enemyTag))
+            {
+                float distance = Vector3.Distance(gunTransform.position, hitCollider.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = hitCollider.transform;
+                }
+            }
+        }
+        return closestEnemy;
+    }
+
+    private void TryShoot()
     {
         if (Time.time - lastShotTime >= fireRate)
         {
@@ -143,82 +259,56 @@ private void Start()
         }
     }
 
-    private void TryShootAtBlockwall()
+    private void Shoot()
     {
-        Transform closestBlockwall = FindClosestBlockwall();
-        if (closestBlockwall != null && Vector3.Distance(gunTransform.position, closestBlockwall.position) <= blockwallShootingRange)
+        if (bulletPrefab != null && bulletSpawnPoint != null)
         {
-            if (Time.time - lastShotTime >= fireRate)
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, gunTransform.rotation * Quaternion.Euler(0, 0, -90));
+            Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+            if (rb != null)
             {
-                Shoot();
-                lastShotTime = Time.time;
+                rb.velocity = bullet.transform.up * 15f; // Скорость пули
             }
+
+            StartCoroutine(Recoil()); // Запуск эффекта отдачи
         }
     }
 
-    private void TryShootAtCore()
+    private IEnumerator Recoil()
     {
-        if (core != null && Vector3.Distance(gunTransform.position, core.position) <= coreShootingRange)
+        if (isRecoiling) yield break; // Предотвращаем множественные вызовы
+        isRecoiling = true;
+
+        // Считаем направление отдачи в глобальных координатах
+        Vector3 recoilDirection = -gunTransform.up.normalized * recoilForce;
+
+        // Поворачиваем отдачу на 90 градусов
+        recoilDirection = Quaternion.Euler(0, 0, -90) * recoilDirection;  // Поворот на 90 градусов относительно направления прицеливания
+
+        // Переводим это смещение в локальные координаты относительно родителя (обычно корпуса)
+        Vector3 recoilTargetLocal = gunTransform.localPosition + gunTransform.parent.InverseTransformDirection(recoilDirection);
+
+        // Сдвигаем пушку назад
+        while (Vector3.Distance(gunTransform.localPosition, recoilTargetLocal) > 0.01f)
         {
-            if (Time.time - lastShotTime >= fireRate)
-            {
-                Shoot();
-                lastShotTime = Time.time;
-            }
+            gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, recoilTargetLocal, recoilSpeed * Time.deltaTime);
+            yield return null;
         }
-    }
 
-private void Shoot()
-{
-    if (bulletPrefab != null && bulletSpawnPoint != null)
-    {
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, gunTransform.rotation * Quaternion.Euler(0, 0, -90));
-        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        // Возвращаем пушку в исходное локальное положение
+        while (Vector3.Distance(gunTransform.localPosition, originalLocalPosition) > 0.01f)
         {
-            rb.velocity = bullet.transform.up * 15f; // Скорость пули
+            gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, originalLocalPosition, recoverySpeed * Time.deltaTime);
+            yield return null;
         }
 
-        StartCoroutine(Recoil()); // Запуск эффекта отдачи
+        isRecoiling = false; // Завершение эффекта отдачи
     }
-}
 
-
-
-private IEnumerator Recoil()
-{
-    if (isRecoiling) yield break; // Предотвращаем множественные вызовы
-    isRecoiling = true;
-
-    // Считаем направление отдачи в глобальных координатах
-    Vector3 recoilDirection = -gunTransform.up.normalized * recoilForce;
-
-    // Поворачиваем отдачу на 90 градусов
-    recoilDirection = Quaternion.Euler(0, 0, -90) * recoilDirection;  // Поворот на 90 градусов относительно направления прицеливания
-
-    // Переводим это смещение в локальные координаты относительно родителя (обычно корпуса)
-    Vector3 recoilTargetLocal = gunTransform.localPosition + gunTransform.parent.InverseTransformDirection(recoilDirection);
-
-    // Сдвигаем пушку назад
-    while (Vector3.Distance(gunTransform.localPosition, recoilTargetLocal) > 0.01f)
+    private bool IsIgnoredObject(GameObject obj)
     {
-        gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, recoilTargetLocal, recoilSpeed * Time.deltaTime);
-        yield return null;
+        return ignorePrefabs.Any(prefab => prefab.name == obj.name.Replace("(Clone)", "").Trim());
     }
-
-    // Возвращаем пушку в исходное локальное положение
-    while (Vector3.Distance(gunTransform.localPosition, originalLocalPosition) > 0.01f)
-    {
-        gunTransform.localPosition = Vector3.MoveTowards(gunTransform.localPosition, originalLocalPosition, recoverySpeed * Time.deltaTime);
-        yield return null;
-    }
-
-    isRecoiling = false; // Завершение эффекта отдачи
-}
-
-
-
-
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
