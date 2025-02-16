@@ -50,7 +50,6 @@ public class DiscordController : MonoBehaviour
             Assets =
             {
                 LargeImage = "logo", // ключ изображения, загруженного в Discord Developer Portal
-                LargeText = "Ты лох",   // текст при наведении на изображение
                 SmallText = isSoloMode ? "Rogue - Level 100" : "Rogue - Level 100 (Multiplayer)", // текст при наведении на маленькую иконку
             }
         };
