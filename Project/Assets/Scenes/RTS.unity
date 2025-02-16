@@ -48312,7 +48312,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 15
+  m_Radius: 1
 --- !u!1001 &4028585897730902334
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -49444,6 +49444,7 @@ MonoBehaviour:
   - {fileID: 1258880145}
   moveSpeed: 2
   turnSpeed: 50
+  shootingSound: {fileID: 8300000, guid: 2b19a2ac4bee1b04e8a83dd39bd7e994, type: 3}
 --- !u!114 &6430932012284818277
 MonoBehaviour:
   m_ObjectHideFlags: 0
