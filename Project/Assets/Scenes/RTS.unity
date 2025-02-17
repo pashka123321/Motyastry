@@ -49590,6 +49590,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 831373319}
     m_Modifications:
     - target: {fileID: 3317463925869063806, guid: fbe35269d8b33174eaaec3b4e67c5570, type: 3}
+      propertyPath: shootingSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 2b19a2ac4bee1b04e8a83dd39bd7e994, type: 3}
+    - target: {fileID: 3317463925869063806, guid: fbe35269d8b33174eaaec3b4e67c5570, type: 3}
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 519420032}

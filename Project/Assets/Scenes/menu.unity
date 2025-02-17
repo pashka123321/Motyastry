@@ -4712,7 +4712,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: RTS
+  m_Text: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430"
 --- !u!222 &1557748539
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6190,9 +6190,9 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: RTS
-      m_Image: {fileID: 0}
     - m_Text: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430"
+      m_Image: {fileID: 0}
+    - m_Text: RTS
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

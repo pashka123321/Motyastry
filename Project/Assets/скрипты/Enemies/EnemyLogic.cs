@@ -37,10 +37,18 @@ public class EnemyLogic : MonoBehaviour
 
     private float lastShotTime;
 
+    [SerializeField] private AudioClip shootingSound; // Звук выстрела
+    private AudioSource audioSource; // Аудио источник
+
     private void Start()
     {
         core = GameObject.FindWithTag(coreTag)?.transform;
         originalLocalPosition = gunTransform.localPosition; // Сохраняем начальное локальное положение пушки
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     private void Update()
@@ -268,6 +276,11 @@ public class EnemyLogic : MonoBehaviour
             if (rb != null)
             {
                 rb.velocity = bullet.transform.up * 15f; // Скорость пули
+            }
+
+            if (shootingSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(shootingSound);
             }
 
             StartCoroutine(Recoil()); // Запуск эффекта отдачи

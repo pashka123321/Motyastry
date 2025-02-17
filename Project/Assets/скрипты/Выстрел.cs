@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Collections;
 
 public class PlayerShooting : MonoBehaviour
 {
@@ -44,6 +45,8 @@ public class PlayerShooting : MonoBehaviour
     private Vector3 firstGunInitialPos;
     private Vector3 secondGunInitialPos;
 
+    private PlayerSpeedDisplay playerSpeedDisplay;
+
     void Start()
     {
         buildModeController = FindObjectOfType<BuildModeController>();
@@ -52,6 +55,8 @@ public class PlayerShooting : MonoBehaviour
 
         firstGunInitialPos = firstGun.localPosition;
         secondGunInitialPos = secondGun.localPosition;
+
+        playerSpeedDisplay = FindObjectOfType<PlayerSpeedDisplay>();
 
         if (shootingModeText != null)
         {
@@ -154,7 +159,13 @@ public class PlayerShooting : MonoBehaviour
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.velocity = bullet.transform.up * bulletSpeed;
+            Vector2 playerVelocity = playerSpeedDisplay.GetPlayerVelocity();
+            float playerVelocityInfluence = 0.5f; // Коэффициент влияния скорости игрока
+            rb.velocity = bullet.transform.up * bulletSpeed + new Vector3(playerVelocity.x * playerVelocityInfluence, playerVelocity.y * playerVelocityInfluence, 0);
+        }
+        else
+        {
+            Debug.LogWarning("Отсутствует компонент Rigidbody2D у пули.");
         }
 
         Bullet bulletScript = bullet.AddComponent<Bullet>();
@@ -211,19 +222,23 @@ public class Bullet : MonoBehaviour
     private Vector3 startPosition;
     public float maxDistance = 100f;
     public int damage = 20;
-
     public int damageType;
+
+    private SpriteRenderer spriteRenderer;
+    private float fadeDuration = 2f; // Длительность плавного исчезновения
 
     void Start()
     {
         startPosition = transform.position;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        StartCoroutine(FadeOutAndDestroy());
     }
 
     void Update()
     {
         if (Vector3.Distance(startPosition, transform.position) >= maxDistance)
         {
-            Destroy(gameObject);
+            StartCoroutine(FadeOutAndDestroy());
         }
     }
 
@@ -235,5 +250,23 @@ public class Bullet : MonoBehaviour
             enemy.TakeDamage(damage, damageType);
             Destroy(gameObject);
         }
+    }
+
+    private IEnumerator FadeOutAndDestroy()
+    {
+        float startAlpha = spriteRenderer.color.a;
+        float rate = 1.0f / fadeDuration;
+        float progress = 0.0f;
+
+        while (progress < 1.0f)
+        {
+            Color tmpColor = spriteRenderer.color;
+            spriteRenderer.color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, Mathf.Lerp(startAlpha, 0, progress));
+            progress += rate * Time.deltaTime;
+
+            yield return null;
+        }
+
+        Destroy(gameObject);
     }
 }

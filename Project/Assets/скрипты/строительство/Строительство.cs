@@ -35,6 +35,9 @@ public class BuildModeController : MonoBehaviour
     public Text buildModeText;
     private List<GameObject> uiObjectsToIgnore = new List<GameObject>();
     public GameObject[] uiObjectsToIgnoreArray;
+    public LineRenderer lineRenderer; // Добавьте это поле
+    public GameObject playerPrefab; // Префаб игрока
+    public Transform lineStartPoint; // Точка начала линии
 
     public bool IsBuildModeActive => isBuildModeActive;
     private CoreResourcesScript coreResources; // Ссылка на CoreResourcesScript
@@ -129,11 +132,21 @@ public class BuildModeController : MonoBehaviour
         {
             buildModeText.text = "Повернуть на R";
             buildModeText.gameObject.SetActive(true);
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = true; // Включаем линию снова
+            }
         }
         else
         {
             buildModeText.gameObject.SetActive(false);
             Destroy(previewBlock);
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = false; // Скрываем линию при выходе
+            }
 
             foreach (var data in blockPrefabsData)
             {
@@ -142,101 +155,107 @@ public class BuildModeController : MonoBehaviour
         }
     }
 
+
     void Update()
-{
-    bool isPointerOverUI = IsPointerOverIgnoredUI();
+    {
+        bool isPointerOverUI = IsPointerOverIgnoredUI();
 
-    // Если курсор находится над UI, блокируем возможность строительства
-    if (isPointerOverUI)
-    {
-        // Деактивируем предпросмотр блока
-        if (previewBlock != null)
+        // Если курсор находится над UI, блокируем возможность строительства
+        if (isPointerOverUI)
         {
-            previewBlock.SetActive(false);
+            // Деактивируем предпросмотр блока
+            if (previewBlock != null)
+            {
+                previewBlock.SetActive(false);
+            }
+            return;
         }
-        return;
-    }
-    else
-    {
-        // Активируем предпросмотр блока, если он существует
-        if (previewBlock != null)
+        else
         {
-            previewBlock.SetActive(true);
+            // Активируем предпросмотр блока, если он существует
+            if (previewBlock != null)
+            {
+                previewBlock.SetActive(true);
+            }
         }
-    }
 
-    // Логика строительства и удаления блоков
-    if (isBuildModeActive)
-    {
-        if (previewBlock == null)
-        {
-            previewBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
-            SetBlockTransparency(previewBlock, 0.5f);
-            SetBlockLayer(previewBlock, 10);
-        }
-        UpdatePreviewBlockPosition();
-
-        if (Input.GetMouseButton(0) && !isPointerOverUI)
-        {
-            PlaceBlock();
-        }
-    }
-    else
-    {
-        if (previewBlock != null)
-        {
-            Destroy(previewBlock);
-        }
-    }
-
-    if (Input.GetMouseButton(1))
-    {
+        // Логика строительства и удаления блоков
         if (isBuildModeActive)
         {
-            ToggleBuildMode();
-        }
-    }
-
-    if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            previewBlock.transform.Rotate(0, 0, -90f);
-        }
-    }
-}
-
-
-bool IsPointerOverIgnoredUI()
-{
-    if (EventSystem.current.IsPointerOverGameObject())
-    {
-        PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = Input.mousePosition;
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-
-        foreach (RaycastResult result in results)
-        {
-            if (result.gameObject != null)
+            if (previewBlock == null)
             {
-                // Проверяем сам объект и его родителей
-                Transform currentTransform = result.gameObject.transform;
-                while (currentTransform != null)
+                previewBlock = Instantiate(blockPrefabsData[currentBlockPrefabIndex].previewPrefab);
+                SetBlockTransparency(previewBlock, 0.5f);
+                SetBlockLayer(previewBlock, 10);
+            }
+            UpdatePreviewBlockPosition();
+
+            if (Input.GetMouseButton(0) && !isPointerOverUI)
+            {
+                PlaceBlock();
+            }
+
+            RotatePlayerTowardsMouse(); // Поворачиваем игрока за мышкой
+        }
+        else
+        {
+            if (previewBlock != null)
+            {
+                Destroy(previewBlock);
+            }
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            if (isBuildModeActive)
+            {
+                ToggleBuildMode();
+            }
+        }
+
+        if (isBuildModeActive && previewBlock != null && blockPrefabsData[currentBlockPrefabIndex].canRotate)
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                previewBlock.transform.Rotate(0, 0, -90f);
+            }
+        }
+
+        if (isBuildModeActive && previewBlock != null)
+        {
+            UpdateBuildLine(previewBlock); // Обновляем линию во время строительства
+        }
+    }
+
+    bool IsPointerOverIgnoredUI()
+    {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            foreach (RaycastResult result in results)
+            {
+                if (result.gameObject != null)
                 {
-                    if (uiObjectsToIgnore.Contains(currentTransform.gameObject) ||
-                        System.Array.Exists(uiObjectsToIgnoreArray, element => element == currentTransform.gameObject))
+                    // Проверяем сам объект и его родителей
+                    Transform currentTransform = result.gameObject.transform;
+                    while (currentTransform != null)
                     {
-                        return true;
+                        if (uiObjectsToIgnore.Contains(currentTransform.gameObject) ||
+                            System.Array.Exists(uiObjectsToIgnoreArray, element => element == currentTransform.gameObject))
+                        {
+                            return true;
+                        }
+                        currentTransform = currentTransform.parent;
                     }
-                    currentTransform = currentTransform.parent;
                 }
             }
         }
+        return false;
     }
-    return false;
-}
-
 
     public void AddUIObjectToIgnore(GameObject uiObject)
     {
@@ -339,54 +358,65 @@ bool IsPointerOverIgnoredUI()
         StartCoroutine(BuildBlock(blockPrefabsData[currentBlockPrefabIndex].prefab, position, rotation, blockPrefabsData[currentBlockPrefabIndex].buildTime));
     }
 
-private IEnumerator BuildBlock(GameObject prefab, Vector3 position, Quaternion rotation, float buildTime)
-{
-    GameObject newBlock = Instantiate(prefab, position, rotation);
-    
-    if (blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild)
+    private IEnumerator BuildBlock(GameObject prefab, Vector3 position, Quaternion rotation, float buildTime)
     {
-        DisableScriptsOnObject(newBlock); // Отключаем скрипты на новом объекте
-    }
+        GameObject newBlock = Instantiate(prefab, position, rotation);
+        
+        if (blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild)
+        {
+            DisableScriptsOnObject(newBlock); // Отключаем скрипты на новом объекте
+        }
 
-    SpriteRenderer[] renderers = newBlock.GetComponentsInChildren<SpriteRenderer>();
-
-    foreach (SpriteRenderer renderer in renderers)
-    {
-        Color color = renderer.color;
-        color.a = 0;
-        renderer.color = color;
-    }
-
-    float elapsedTime = 0f;
-
-    while (elapsedTime < buildTime)
-    {
-        float alpha = Mathf.Lerp(0f, 1f, elapsedTime / buildTime);
+        SpriteRenderer[] renderers = newBlock.GetComponentsInChildren<SpriteRenderer>();
 
         foreach (SpriteRenderer renderer in renderers)
         {
             Color color = renderer.color;
-            color.a = alpha;
+            color.a = 0;
             renderer.color = color;
         }
 
-        elapsedTime += Time.deltaTime;
-        yield return null;
+        float elapsedTime = 0f;
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, previewBlock.transform.position);
+            lineRenderer.SetPosition(1, newBlock.transform.position);
+        }
+
+        while (elapsedTime < buildTime)
+        {
+            float alpha = Mathf.Lerp(0f, 1f, elapsedTime / buildTime);
+
+            foreach (SpriteRenderer renderer in renderers)
+            {
+                Color color = renderer.color;
+                color.a = alpha;
+                renderer.color = color;
+            }
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.enabled = false;
+        }
+
+        foreach (SpriteRenderer renderer in renderers)
+        {
+            Color color = renderer.color;
+            color.a = 1f;
+            renderer.color = color;
+        }
+
+        grid[Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y)] = true;
+        UpdateGraph(newBlock);
+
+        EnableScriptsOnObject(newBlock); // Включаем скрипты после завершения постройки
     }
-
-    foreach (SpriteRenderer renderer in renderers)
-    {
-        Color color = renderer.color;
-        color.a = 1f;
-        renderer.color = color;
-    }
-
-    grid[Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y)] = true;
-    UpdateGraph(newBlock);
-
-    EnableScriptsOnObject(newBlock); // Включаем скрипты после завершения постройки
-}
-
 
     public void DestroyByEnemy(Vector3 destoyedBlock)
     {
@@ -513,44 +543,69 @@ private IEnumerator BuildBlock(GameObject prefab, Vector3 position, Quaternion r
         AstarPath.active.UpdateGraphs(guo);
     }
 
-void DisableScriptsOnObject(GameObject obj)
-{
-    if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
-
-    if (!disabledScriptsByObject.ContainsKey(obj))
+    void DisableScriptsOnObject(GameObject obj)
     {
-        disabledScriptsByObject[obj] = new List<MonoBehaviour>();
-    }
+        if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
 
-    MonoBehaviour[] scripts = obj.GetComponents<MonoBehaviour>();
-    foreach (var script in scripts)
-    {
-        if (script.enabled && script.GetType() != typeof(BlockHealth)) // Исключаем BlockHealth
+        if (!disabledScriptsByObject.ContainsKey(obj))
         {
-            script.enabled = false;
-            disabledScriptsByObject[obj].Add(script);
+            disabledScriptsByObject[obj] = new List<MonoBehaviour>();
         }
-    }
-}
 
-void EnableScriptsOnObject(GameObject obj)
-{
-    if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
-
-    if (obj == null || !disabledScriptsByObject.ContainsKey(obj))
-    {
-        return;
-    }
-
-    foreach (var script in disabledScriptsByObject[obj])
-    {
-        if (script != null)
+        MonoBehaviour[] scripts = obj.GetComponents<MonoBehaviour>();
+        foreach (var script in scripts)
         {
-            script.enabled = true;
+            if (script.enabled && script.GetType() != typeof(BlockHealth)) // Исключаем BlockHealth
+            {
+                script.enabled = false;
+                disabledScriptsByObject[obj].Add(script);
+            }
         }
     }
 
-    disabledScriptsByObject.Remove(obj);
-}
+    void EnableScriptsOnObject(GameObject obj)
+    {
+        if (!blockPrefabsData[currentBlockPrefabIndex].disableScriptsDuringBuild) return; // Проверяем флаг
 
+        if (obj == null || !disabledScriptsByObject.ContainsKey(obj))
+        {
+            return;
+        }
+
+        foreach (var script in disabledScriptsByObject[obj])
+        {
+            if (script != null)
+            {
+                script.enabled = true;
+            }
+        }
+
+        disabledScriptsByObject.Remove(obj);
+    }
+
+    void UpdateBuildLine(GameObject target)
+    {
+        if (lineRenderer != null && target != null)
+        {
+            if (lineStartPoint != null)
+            {
+                lineRenderer.SetPosition(0, lineStartPoint.position);
+            }
+            else if (playerPrefab != null)
+            {
+                lineRenderer.SetPosition(0, playerPrefab.transform.position);
+            }
+            lineRenderer.SetPosition(1, target.transform.position);
+        }
+    }
+
+    void RotatePlayerTowardsMouse()
+    {
+        if (playerPrefab == null) return;
+
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 directionToMouse = (mousePosition - playerPrefab.transform.position).normalized;
+        float angle = Mathf.Atan2(directionToMouse.y, directionToMouse.x) * Mathf.Rad2Deg;
+        playerPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
+    }
 }

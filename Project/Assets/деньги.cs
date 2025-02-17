@@ -46,7 +46,14 @@ public class MoneyManager : MonoBehaviour
 
     private void UpdateMoneyText()
     {
-        moneyText.text = "$" + money.ToString(); // Обновляем текстовое отображение
+        if (moneyText != null)
+        {
+            moneyText.text = "$" + money.ToString(); // Обновляем текстовое отображение
+        }
+        else
+        {
+            Debug.LogError("moneyText is not assigned!");
+        }
     }
 
     public bool IsRTSMode()

@@ -50,51 +50,41 @@ void LateUpdate()
     targetZoom = Mathf.Clamp(targetZoom, minZoom, maxZoom);
     Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, targetZoom, smoothing * Time.deltaTime);
 
-    // Логика смены таргета при зажатом V
-    if (Input.GetKey(KeyCode.V))
-    {
-        HighlightHoveredTarget();
-    }
-    else
-    {
-        ResetHoveredTarget();
-    }
+    // Проверяем объект под курсором в любом случае
+    HighlightHoveredTarget();
 
     // Смена таргета камеры при нажатии ЛКМ
     if (Input.GetKey(KeyCode.V) && Input.GetMouseButtonDown(0) && hoveredTarget != null && hoveredTarget.GetComponent<TargetableObject>() != null)
     {
-        // Телепортируем игрока перед его отключением
         if (corePrefab != null && playerTransform != null)
         {
             playerTransform.position = corePrefab.transform.position;
         }
 
         SetTarget(hoveredTarget);
-        isTargetChanged = true; // Устанавливаем флаг смены таргета
-        playerTransform.gameObject.SetActive(false); // Отключаем игрока
+        isTargetChanged = true;
+        playerTransform.gameObject.SetActive(false);
 
-        // Проверяем, является ли новый таргет юнитом
         controlledUnit = hoveredTarget.GetComponent<UnitLogic>();
         if (controlledUnit != null)
         {
-            controlledUnit.isManualMode = true; // Активируем ручной режим
+            controlledUnit.isManualMode = true;
         }
     }
 
-    // Возврат к стандартному таргету при нажатии V, если мы вселились в другой объект
+    // Возврат к игроку при нажатии V
     if (Input.GetKeyDown(KeyCode.V) && isTargetChanged)
     {
         ResetToPlayer();
-        isTargetChanged = false; // Сбрасываем флаг после возврата
-        playerTransform.gameObject.SetActive(true); // Включаем игрока
+        isTargetChanged = false;
+        playerTransform.gameObject.SetActive(true);
         if (controlledUnit != null)
         {
-            controlledUnit.isManualMode = false; // Деактивируем ручной режим
-            controlledUnit = null; // Сбрасываем управляемый юнит
+            controlledUnit.isManualMode = false;
+            controlledUnit = null;
         }
     }
 
-    // Логика ручного управления юнитом
     if (controlledUnit != null && controlledUnit.isManualMode)
     {
         controlledUnit.ManualControl();
@@ -139,27 +129,34 @@ private void HighlightHoveredTarget()
     {
         Transform hitTransform = hit.collider.transform;
 
-        // Проверяем, есть ли на объекте скрипт TargetableObject
-        if (hitTransform != hoveredTarget && hitTransform.GetComponent<TargetableObject>() != null)
+        // Проверяем, изменился ли объект под курсором
+        if (hitTransform != hoveredTarget)
         {
-            ResetHoveredTarget(); // Сбрасываем предыдущий индикатор
+            ResetHoveredTarget(); 
             hoveredTarget = hitTransform;
+        }
 
-            if (hoverIndicatorPrefab != null)
+        // Если V зажата, включаем индикатор
+        if (Input.GetKey(KeyCode.V) && hoveredTarget.GetComponent<TargetableObject>() != null)
+        {
+            if (hoverIndicator == null && hoverIndicatorPrefab != null)
             {
                 hoverIndicator = Instantiate(hoverIndicatorPrefab, hoveredTarget.position, Quaternion.identity);
-                hoverIndicator.transform.SetParent(hoveredTarget); // Устанавливаем индикатор как дочерний объект
-
-                // Поворот индикатора на 90 градусов
+                hoverIndicator.transform.SetParent(hoveredTarget);
                 hoverIndicator.transform.rotation = Quaternion.Euler(0, 0, 45);
             }
+        }
+        else
+        {
+            ResetHoveredTarget();
         }
     }
     else
     {
-        ResetHoveredTarget(); // Сбрасываем индикатор, если ничего не выделено
+        ResetHoveredTarget();
     }
 }
+
 
 
     // Сброс индикатора с предыдущего объекта
