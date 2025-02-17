@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     public float directionChangeSpeed = 10f; // Скорость изменения направления
     public float rotationSpeed = 10f; // Скорость поворота
     public float rotationDelay = 0.5f; // Задержка перед началом поворота
+    public float buildModeRotationSpeed = 10f; // Скорость поворота в режиме строительства
 
     private Vector2 currentDirection = Vector2.zero; // Текущее направление
     private float currentSpeed = 0.0f; // Текущая скорость
@@ -23,6 +24,8 @@ public class PlayerMovement : MonoBehaviour
 
     // Список игнорируемых UI элементов
     public List<GameObject> ignoreUIElements = new List<GameObject>();
+
+    public BuildModeController buildModeController; // Ссылка на контроллер режима строительства
 
     void Update()
     {
@@ -91,7 +94,7 @@ public class PlayerMovement : MonoBehaviour
         {
             RotateTowardsMouse();
         }
-        else if (movement.magnitude > 0)
+        else if (movement.magnitude > 0 && (buildModeController == null || !buildModeController.IsBuildModeActive))
         {
             RotateTowardsMovement(movement);
         }

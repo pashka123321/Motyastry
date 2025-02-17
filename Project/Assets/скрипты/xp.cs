@@ -21,6 +21,8 @@ public class PlayerHealth : MonoBehaviour
 
     public bool isInvincible = false;
 
+    public GameObject deathParticles; // Префаб частиц смерти
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -107,6 +109,18 @@ public class PlayerHealth : MonoBehaviour
         // Play random death sound
         PlayRandomDeathSound();
 
+        // Спавним частицы смерти
+        if (deathParticles != null)
+        {
+            Instantiate(deathParticles, transform.position, Quaternion.identity);
+        }
+
+        // Отключаем визуальное представление игрока и всех его дочерних объектов
+        SetChildrenActive(false);
+
+        // Отключаем тень игрока
+        SetShadowActive(false);
+
         if (cameraFollow != null)
         {
             cameraFollow.StopCamera(); // Останавливаем камеру
@@ -153,6 +167,12 @@ public class PlayerHealth : MonoBehaviour
             Debug.LogWarning("Respawn point is not set!");
         }
 
+        // Включаем визуальное представление игрока и всех его дочерних объектов
+        SetChildrenActive(true);
+
+        // Включаем тень игрока
+        SetShadowActive(true);
+
         if (cameraFollow != null)
         {
             cameraFollow.ResumeCamera(); // Возобновляем следование камеры
@@ -161,6 +181,24 @@ public class PlayerHealth : MonoBehaviour
         if (playerMovement != null)
         {
             playerMovement.canControl = true; // Включаем управление
+        }
+    }
+
+    void SetChildrenActive(bool isActive)
+    {
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.enabled = isActive;
+        }
+    }
+
+    void SetShadowActive(bool isActive)
+    {
+        GameObject shadow = GameObject.FindGameObjectWithTag("Shadow");
+        if (shadow != null)
+        {
+            shadow.GetComponent<Renderer>().enabled = isActive;
         }
     }
 }

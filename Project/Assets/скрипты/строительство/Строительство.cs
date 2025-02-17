@@ -38,6 +38,7 @@ public class BuildModeController : MonoBehaviour
     public LineRenderer lineRenderer; // Добавьте это поле
     public GameObject playerPrefab; // Префаб игрока
     public Transform lineStartPoint; // Точка начала линии
+    public float rotationSpeed = 1f; // Скорость поворота игрока к мышке
 
     public bool IsBuildModeActive => isBuildModeActive;
     private CoreResourcesScript coreResources; // Ссылка на CoreResourcesScript
@@ -86,7 +87,7 @@ public class BuildModeController : MonoBehaviour
     {
         ColorBlock colors = button.colors;
         Color normalColor = colors.normalColor;
-        Color pressedColor = new Color(normalColor.r * 0.8f, normalColor.g * 0.8f, normalColor.b * 0.8f, normalColor.a);
+        Color pressedColor = new Color(normalColor.r * 0.8f, normalColor.g * 8f, normalColor.b * 0.8f, normalColor.a);
 
         button.onClick.AddListener(() =>
         {
@@ -168,6 +169,12 @@ public class BuildModeController : MonoBehaviour
             {
                 previewBlock.SetActive(false);
             }
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = false; // Отключаем линию, если курсор над UI
+            }
+
             return;
         }
         else
@@ -196,6 +203,19 @@ public class BuildModeController : MonoBehaviour
             }
 
             RotatePlayerTowardsMouse(); // Поворачиваем игрока за мышкой
+
+            if (lineRenderer != null)
+            {
+                if (previewBlock != null)
+                {
+                    lineRenderer.enabled = true; // Линия включена, если есть объект для постройки
+                    UpdateBuildLine(previewBlock); // Обновляем линию во время строительства
+                }
+                else
+                {
+                    lineRenderer.enabled = false; // Линия отключена, если нет объекта для постройки
+                }
+            }
         }
         else
         {
@@ -603,9 +623,15 @@ public class BuildModeController : MonoBehaviour
     {
         if (playerPrefab == null) return;
 
+        PlayerMovement playerMovement = playerPrefab.GetComponent<PlayerMovement>();
+        if (playerMovement == null) return;
+
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 directionToMouse = (mousePosition - playerPrefab.transform.position).normalized;
-        float angle = Mathf.Atan2(directionToMouse.y, directionToMouse.x) * Mathf.Rad2Deg;
-        playerPrefab.transform.rotation = Quaternion.Euler(0, 0, angle);
+        mousePosition.z = 0;
+
+        Vector3 direction = mousePosition - playerPrefab.transform.position;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(new Vector3(0, 0, angle));
+        playerPrefab.transform.rotation = Quaternion.RotateTowards(playerPrefab.transform.rotation, targetRotation, playerMovement.buildModeRotationSpeed * Time.deltaTime);
     }
 }

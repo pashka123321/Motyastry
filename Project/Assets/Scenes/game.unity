@@ -15543,7 +15543,7 @@ GameObject:
   - component: {fileID: 872920900}
   m_Layer: 0
   m_Name: "\u0442\u0435\u043D\u044C"
-  m_TagString: Untagged
+  m_TagString: Shadow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -22226,7 +22226,7 @@ MonoBehaviour:
     isBoss: 0
   - prefab: {fileID: 729812598}
     isBoss: 1
-  player: {fileID: 519420032}
+  player: {fileID: 2142286491}
   initialEnemiesPerWave: 2
   enemyIncrementPerWave: 2
   waveInterval: 120
@@ -22238,7 +22238,6 @@ MonoBehaviour:
   enemyCountText: {fileID: 341906424}
   waveCountText: {fileID: 2056028248}
   waveTimerText: {fileID: 1695961910}
-  maxEnemies: 50
 --- !u!114 &1210164693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24901,6 +24900,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1360284291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1360284262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c23d3099889a302498c30af540ba18e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitSound: {fileID: 8300000, guid: 43b86fc5bfa26a945b01142db6c46c1d, type: 3}
+  audioSource: {fileID: 0}
 --- !u!1 &1360300083 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9002805458664977366, guid: e4083c3c9f999f04597d59eaae5cc27a, type: 3}
@@ -46936,6 +46949,7 @@ MonoBehaviour:
   lineRenderer: {fileID: 1131410790}
   playerPrefab: {fileID: 1360284262}
   lineStartPoint: {fileID: 1131410791}
+  rotationSpeed: 10
   disableScriptsDuringBuild: 1
 --- !u!82 &2126028614
 AudioSource:
@@ -47085,6 +47099,37 @@ MonoBehaviour:
     destructionDelay: 2
   - prefab: {fileID: 2194962336534765725, guid: 34f6746c0649f464ea24e3b29ec3c5d7, type: 3}
     destructionDelay: 2
+--- !u!1 &2142286490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2142286491}
+  m_Layer: 0
+  m_Name: "\u0446\u0435\u043B\u044C"
+  m_TagString: Playerataka
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2142286491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142286490}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1360284264}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2142418245
 GameObject:
   m_ObjectHideFlags: 0
@@ -48265,6 +48310,10 @@ PrefabInstance:
       propertyPath: respawnPoint
       value: 
       objectReference: {fileID: 1060417408}
+    - target: {fileID: 1963016705954330137, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: deathParticles
+      value: 
+      objectReference: {fileID: 1392211115}
     - target: {fileID: 2247484721116463609, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -48321,6 +48370,10 @@ PrefabInstance:
       propertyPath: firstGun
       value: 
       objectReference: {fileID: 1080153176}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: hitSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 43b86fc5bfa26a945b01142db6c46c1d, type: 3}
     - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: secondGun
       value: 
@@ -48726,6 +48779,10 @@ PrefabInstance:
       value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 7679611916376105679, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: buildModeController
+      value: 
+      objectReference: {fileID: 2126028613}
+    - target: {fileID: 7679611916376105679, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: directionChangeSpeed
       value: 5
       objectReference: {fileID: 0}
@@ -48811,6 +48868,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1446109622018475072, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 318359220}
+    - targetCorrespondingSourceObject: {fileID: 1446109622018475072, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2142286491}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8072199395865913298, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       insertIndex: -1
@@ -48818,6 +48878,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8072199395865913298, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1360284282}
+    - targetCorrespondingSourceObject: {fileID: 8072199395865913298, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1360284291}
   m_SourcePrefab: {fileID: 100100000, guid: 4402abd2888491e40987eab023ae519f, type: 3}
 --- !u!1001 &5282430956500868499
 PrefabInstance:
@@ -48975,7 +49038,7 @@ PrefabInstance:
     - target: {fileID: 3317463925869063806, guid: fbe35269d8b33174eaaec3b4e67c5570, type: 3}
       propertyPath: playerTransform
       value: 
-      objectReference: {fileID: 519420032}
+      objectReference: {fileID: 2142286491}
     - target: {fileID: 3764069650683934423, guid: fbe35269d8b33174eaaec3b4e67c5570, type: 3}
       propertyPath: m_LocalPosition.x
       value: -442.13

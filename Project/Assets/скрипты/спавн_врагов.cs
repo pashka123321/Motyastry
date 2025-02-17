@@ -27,8 +27,6 @@ public class EnemySpawner : MonoBehaviour
     public Text waveCountText;
     public Text waveTimerText;
 
-    public int maxEnemies = 50;
-
     private int currentEnemies = 0;
     private int currentWave = 0;
     private int enemiesPerWave;
@@ -165,10 +163,7 @@ public class EnemySpawner : MonoBehaviour
         {
             for (int i = 0; i < enemiesPerWave; i++)
             {
-                if (currentEnemies < maxEnemies)
-                {
-                    TryActivateEnemy(false);
-                }
+                TryActivateEnemy(false);
             }
         }
 

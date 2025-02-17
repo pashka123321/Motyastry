@@ -38,10 +38,7 @@ public class MoneyManager : MonoBehaviour
             money -= amount; // Вычитаем деньги, если хватает
             UpdateMoneyText();
         }
-        else
-        {
-            Debug.Log("Недостаточно денег!");
-        }
+        // Если денег не хватает, просто ничего не делаем
     }
 
     private void UpdateMoneyText()
@@ -50,10 +47,7 @@ public class MoneyManager : MonoBehaviour
         {
             moneyText.text = "$" + money.ToString(); // Обновляем текстовое отображение
         }
-        else
-        {
-            Debug.LogError("moneyText is not assigned!");
-        }
+        // Убрали Debug.LogError, чтобы не спамило ошибками в консоли
     }
 
     public bool IsRTSMode()

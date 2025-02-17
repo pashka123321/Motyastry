@@ -43,6 +43,8 @@ TagManager:
   - Core
   - BlockWorld
   - Friendly
+  - Shadow
+  - Playerataka
   layers:
   - Default
   - TransparentFX

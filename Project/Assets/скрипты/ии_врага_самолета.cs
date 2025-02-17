@@ -66,7 +66,7 @@ public class EnemyAI : NetworkBehaviour
     void FindNearestPlayer()
     {
         // Находим все объекты с компонентом NetworkIdentity, представляющие игроков
-        var players = GameObject.FindGameObjectsWithTag("Player")
+        var players = GameObject.FindGameObjectsWithTag("Playerataka")
             .Select(obj => obj.transform)
             .Where(transform => transform != null)
             .ToArray();
