@@ -3,85 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя первая страница</title>
+    <title>Motyastry</title>
+    <link rel="icon" href="site/file/logo.png" type="image/png">
     <style>
         body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background: url('site/file/1.png') center top no-repeat fixed;
+            background-size: cover;
+            background-blend-mode: overlay;
+            backdrop-filter: blur(8px);
+            color: #f0f0f0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
             margin: 0;
             padding: 0;
+            transition: background-position 0.5s ease;
+        }
+        html {
+            overflow: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: none; /* Firefox */
+            scroll-behavior: smooth;
+        }
+        .container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
         header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 0;
             text-align: center;
-        }
-        nav {
-            margin: 20px;
-            text-align: center;
-        }
-        nav a {
-            margin: 0 15px;
-            text-decoration: none;
-            color: #4CAF50;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        section {
-            margin: 20px;
             padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: white;
-            position: fixed;
+        main {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
             width: 100%;
-            bottom: 0;
+        }
+        .section {
+            background: rgba(30, 30, 30, 0.85);
+            padding: 25px;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            flex: 1;
+            min-width: 45%;
+        }
+        h1 {
+            color: #ff4d4d;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #d43f3f;
+        }
+        a {
+            color: #ff4d4d;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff4d4d, #a12020);
+            padding: 12px 25px;
+            margin-top: 10px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1em;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0 4px 8px rgba(255, 77, 77, 0.3);
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, #a12020, #ff4d4d);
+            box-shadow: 0 6px 12px rgba(255, 77, 77, 0.5);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px 0;
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>Добро пожаловать на мою страницу!</h1>
-    </header>
-
-    <nav>
-        <a href="#about">О нас</a>
-        <a href="#services">Услуги</a>
-        <a href="#contact">Контакты</a>
-    </nav>
-
-    <section id="about">
-        <h2>О нас</h2>
-        <p>Это пример HTML-страницы, созданной для демонстрации базовой структуры и стилей.</p>
-    </section>
-
-    <section id="services">
-        <h2>Услуги</h2>
-        <ul>
-            <li>Веб-дизайн</li>
-            <li>Разработка сайтов</li>
-            <li>SEO-оптимизация</li>
-        </ul>
-    </section>
-
-    <section id="contact">
-        <h2>Контакты</h2>
-        <p>Свяжитесь с нами по email: <a href="mailto:info@example.com">info@example.com</a></p>
-    </section>
-
-    <footer>
-        <p>&copy; 2023 Моя компания. Все права защищены.</p>
-    </footer>
-
+    <div class="container">
+        <header>
+            <h1>Motyastry</h1>
+            <p>Увлекательный инди-проект, находящийся в стадии разработки. Строй автоматизацию, защищайся от врагов!</p>
+        </header>
+        <main>
+            <div class="section">
+                <h2>Последние обновления</h2>
+                <ul>
+                    <li><strong>Мультиплеер</strong> — Уже доступен, но в стадии разработки.</li>
+                    <li><strong>Выживание</strong> — Основной режим игры, постоянно улучшается.</li>
+                    <li><strong>RTS</strong> — Новый стратегический режим, пока на ранней стадии.</li>
+                    <li><strong>Генерация мира</strong> — Полностью случайная генерация.</li>
+                </ul>
+            </div>
+            <div class="section">
+                <h2>Видео и демонстрация</h2>
+                <p>Узнайте больше о проекте, посмотрев видео на YouTube:</p>
+                <a class="btn" href="https://www.youtube.com/@%D0%9C%D0%BE%D1%82%D1%8F%D1%81%D1%82%D1%80%D0%B8_%D1%80%D0%B0%D0%B7%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%BA%D0%B0" target="_blank">Смотреть видео</a>
+            </div>
+            <div class="section">
+                <h2>Скачать игру</h2>
+                <a class="btn" href="https://github.com/pashka123321/Motyastry/releases/latest" target="_blank">Скачать Motyastry</a>
+            </div>
+            <div class="section">
+                <h2>Поддержка и участие</h2>
+                <p>Присоединяйтесь к сообществу в Discord:</p>
+                <a class="btn" href="https://discord.gg/EvHBPtzHZ3" target="_blank">Присоединиться к Discord</a>
+            </div>
+        </main>
+        <footer>
+            <p>⭐ Подписывайтесь на проект и следите за его развитием!</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('wheel', function(event) {
+            const container = document.querySelector('.container');
+            if (event.deltaY > 0) {
+                container.scrollBy(0, 100);
+            } else {
+                container.scrollBy(0, -100);
+            }
+            const scrollTop = container.scrollTop;
+            const scrollHeight = container.scrollHeight - container.clientHeight;
+            const scrollRatio = scrollTop / scrollHeight;
+            document.body.style.backgroundPositionY = `${scrollRatio * 100}%`;
+        });
+    </script>
 </body>
 </html>
