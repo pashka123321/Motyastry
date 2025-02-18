@@ -278,6 +278,18 @@ void StartDestruction(GameObject target)
         }
     }
 
+    public void EnqueueObjectForDeletion(GameObject targetObject)
+    {
+        if (targetObject != null && destructionSpeeds.ContainsKey(targetObject.name.Replace("(Clone)", "")) &&
+            Vector3.Distance(player.position, targetObject.transform.position) <= maxDestructionDistance &&
+            !objectsInQueue.Contains(targetObject))
+        {
+            destructionQueue.Enqueue(targetObject);
+            objectsInQueue.Add(targetObject);
+            if (currentTarget == null) ProcessNextObject();
+        }
+    }
+
     private class BuildTask
     {
         public GameObject blockPrefab;

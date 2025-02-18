@@ -4,16 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motyastry</title>
-    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="icon" href="Site/logo.png" type="image/png">
     <style>
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный слой */
+            z-index: -1;
+        }
         body {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
-            background: url('1.png') center top no-repeat fixed;
+            background: url('Site/1.png') center top no-repeat fixed;
             background-size: cover;
             background-blend-mode: overlay;
             backdrop-filter: blur(8px);
@@ -135,11 +146,11 @@
     <script>
         document.addEventListener('wheel', function(event) {
             const container = document.querySelector('.container');
-            if (event.deltaY > 0) {
-                container.scrollBy(0, 100);
-            } else {
-                container.scrollBy(0, -100);
-            }
+            const scrollAmount = event.deltaY > 0 ? 100 : -100;
+            container.scrollBy({
+                top: scrollAmount,
+                behavior: 'smooth'
+            });
             const scrollTop = container.scrollTop;
             const scrollHeight = container.scrollHeight - container.clientHeight;
             const scrollRatio = scrollTop / scrollHeight;

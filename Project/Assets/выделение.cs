@@ -23,7 +23,7 @@ public class SelectionManager : MonoBehaviour
         // Рисуем рамку выделения, если выделяем
         if (isSelecting)
         {
-            Rect rect = GetScreenRect(startMousePosition, Input.mousePosition);
+            Rect rect = GetScreenRect(Camera.main.WorldToScreenPoint(startMousePosition), Camera.main.WorldToScreenPoint(currentMousePosition));
             DrawScreenRect(rect, selectionTexture);
             DrawScreenRectBorder(rect, 2, Color.green);
         }
@@ -33,13 +33,13 @@ public class SelectionManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1)) // Начало выделения (ПКМ)
         {
-            startMousePosition = Input.mousePosition;
+            startMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mouseMoved = false; // Сбрасываем флаг движения мыши
         }
 
         if (Input.GetMouseButton(1)) // Удерживание ПКМ
         {
-            currentMousePosition = Input.mousePosition;
+            currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
             // Проверяем, двигалась ли мышь достаточно
             if (!mouseMoved && Vector3.Distance(startMousePosition, currentMousePosition) > minMouseMovement)
@@ -53,8 +53,9 @@ public class SelectionManager : MonoBehaviour
         {
             if (isSelecting)
             {
-                endMousePosition = Input.mousePosition;
+                endMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 SelectBotsInRect(); // Выделяем ботов в зоне
+                AddObjectsToDeleteQueue(); // Добавляем объекты в очередь удаления
             }
 
             isSelecting = false; // Сбрасываем флаг выделения
@@ -64,11 +65,8 @@ public class SelectionManager : MonoBehaviour
     // Выделение ботов в зоне
     private void SelectBotsInRect()
     {
-        Vector2 startWorld = Camera.main.ScreenToWorldPoint(startMousePosition);
-        Vector2 endWorld = Camera.main.ScreenToWorldPoint(endMousePosition);
-
-        Vector2 min = Vector2.Min(startWorld, endWorld);
-        Vector2 max = Vector2.Max(startWorld, endWorld);
+        Vector2 min = Vector2.Min(startMousePosition, endMousePosition);
+        Vector2 max = Vector2.Max(startMousePosition, endMousePosition);
 
         Collider2D[] colliders = Physics2D.OverlapAreaAll(min, max);
 
@@ -79,6 +77,20 @@ public class SelectionManager : MonoBehaviour
             {
                 bot.Select(); // Выделяем бота
             }
+        }
+    }
+
+    // Добавление объектов в очередь удаления
+    private void AddObjectsToDeleteQueue()
+    {
+        Vector2 min = Vector2.Min(startMousePosition, endMousePosition);
+        Vector2 max = Vector2.Max(startMousePosition, endMousePosition);
+
+        Collider2D[] colliders = Physics2D.OverlapAreaAll(min, max);
+
+        foreach (var collider in colliders)
+        {
+            DeleteOnRightClick.Instance.EnqueueObjectForDeletion(collider.gameObject);
         }
     }
 
