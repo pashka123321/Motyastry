@@ -47,6 +47,8 @@ public class PlayerShooting : MonoBehaviour
 
     private PlayerSpeedDisplay playerSpeedDisplay;
 
+    private тряска_шейдер shakeShader;
+
     void Start()
     {
         buildModeController = FindObjectOfType<BuildModeController>();
@@ -57,6 +59,8 @@ public class PlayerShooting : MonoBehaviour
         secondGunInitialPos = secondGun.localPosition;
 
         playerSpeedDisplay = FindObjectOfType<PlayerSpeedDisplay>();
+
+        shakeShader = Camera.main.GetComponent<тряска_шейдер>();
 
         if (shootingModeText != null)
         {
@@ -171,6 +175,11 @@ public class PlayerShooting : MonoBehaviour
         Bullet bulletScript = bullet.AddComponent<Bullet>();
         bulletScript.damage = 20;
         bulletScript.damageType = this.damageType;
+
+        if (shakeShader != null)
+        {
+            shakeShader.ApplyShakeEffect();
+        }
 
         Destroy(bullet, bulletLifeTime);
         PlayShootingSound();

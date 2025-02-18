@@ -10,13 +10,21 @@ public class Core : MonoBehaviour
     public Sprite damagedSprite; // Спрайт для поврежденного состояния блока.
     public GameObject gameOverPrefab; // Префаб текста Game Over.
     public GameObject blockToDestroy; // Указанный объект, который будет удалён.
+    public GameObject deathParticlesPrefab; // Префаб партиклов смерти.
+    public AudioClip deathSound; // Звук смерти.
+    public GameObject cameraPrefab; // Префаб камеры.
     private SpriteRenderer spriteRenderer;
     private bool isGameOver = false; // Флаг для предотвращения повторных вызовов GameOver.
+    public AudioSource audioSource; // Источник звука.
 
     private void Start()
     {
         currentHealth = maxHealth;
         spriteRenderer = blockToDestroy.GetComponent<SpriteRenderer>(); // Получаем спрайт указанного блока.
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>(); // Получаем компонент AudioSource, если не указан.
+        }
     }
 
     private void Update()
@@ -52,6 +60,12 @@ public class Core : MonoBehaviour
         // Создаем префаб текста Game Over в центре экрана.
         CreateGameOverText();
 
+        // Спавним партиклы смерти.
+        SpawnDeathParticles();
+
+        // Проигрываем звук смерти.
+        PlayDeathSound();
+
         // Отключаем взаимодействие с ядром, но не удаляем его сразу.
         DisableCoreComponents();
 
@@ -67,7 +81,10 @@ public class Core : MonoBehaviour
         worldCenter.z = 0;  // Обнуляем Z-координату для 2D.
 
         // Создаем объект текста Game Over в центре экрана.
-        Instantiate(gameOverPrefab, worldCenter, Quaternion.identity);
+        GameObject gameOverText = Instantiate(gameOverPrefab, worldCenter, Quaternion.identity);
+
+        // Привязываем текст Game Over к камере.
+        gameOverText.transform.SetParent(cameraPrefab.transform);
     }
 
     private void LoadMenuScene()
@@ -93,6 +110,21 @@ public class Core : MonoBehaviour
         if (blockToDestroy != null)
         {
             Destroy(blockToDestroy); // Удаляем выбранный блок.
+        }
+    }
+
+    private void SpawnDeathParticles()
+    {
+        // Спавним партиклы смерти на месте ядра.
+        Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
+    }
+
+    private void PlayDeathSound()
+    {
+        // Проигрываем звук смерти.
+        if (audioSource != null && deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
         }
     }
 }

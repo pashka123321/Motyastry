@@ -19983,6 +19983,7 @@ GameObject:
   - component: {fileID: 1102378239}
   - component: {fileID: 1102378240}
   - component: {fileID: 1102378242}
+  - component: {fileID: 1102378243}
   m_Layer: 0
   m_Name: "\u041B\u043E\u0433\u0438\u043A\u0430"
   m_TagString: Untagged
@@ -20096,6 +20097,19 @@ MonoBehaviour:
   money: 4000
   moneyText: {fileID: 2003962295}
   passiveIncome: 10
+--- !u!114 &1102378243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102378236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6334bfe9f228f54c91536c44ee193fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorSprite: {fileID: 21300000, guid: 5d8369bc162b30949a1adf77efeeb70a, type: 3}
 --- !u!1 &1110261507 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6803877411490944538, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
@@ -21863,7 +21877,6 @@ MonoBehaviour:
   enemyCountText: {fileID: 341906424}
   waveCountText: {fileID: 2056028248}
   waveTimerText: {fileID: 1695961910}
-  maxEnemies: 50
 --- !u!114 &1210164693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46626,6 +46639,10 @@ MonoBehaviour:
   buildModeText: {fileID: 153337487}
   uiObjectsToIgnoreArray:
   - {fileID: 711596679}
+  lineRenderer: {fileID: 0}
+  playerPrefab: {fileID: 0}
+  lineStartPoint: {fileID: 0}
+  rotationSpeed: 1
   disableScriptsDuringBuild: 1
 --- !u!82 &2126028614
 AudioSource:

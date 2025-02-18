@@ -5361,8 +5361,10 @@ MonoBehaviour:
   directionChangeSpeed: 10
   rotationSpeed: 10
   rotationDelay: 0.5
+  buildModeRotationSpeed: 10
   canControl: 1
   ignoreUIElements: []
+  buildModeController: {fileID: 0}
 --- !u!1 &788803657
 GameObject:
   m_ObjectHideFlags: 0
@@ -8248,9 +8250,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d527a1e9d5515d645a740aff8fa24973, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationNames:
-  - core 1
-  - core 2
+  animator: {fileID: 0}
+  animationName: 
 --- !u!95 &1060417412
 Animator:
   serializedVersion: 5
@@ -9418,7 +9419,6 @@ MonoBehaviour:
   enemyCountText: {fileID: 0}
   waveCountText: {fileID: 0}
   waveTimerText: {fileID: 0}
-  maxEnemies: 10
 --- !u!114 &1210164693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9445,7 +9445,6 @@ MonoBehaviour:
   enemyCountText: {fileID: 0}
   waveCountText: {fileID: 0}
   waveTimerText: {fileID: 0}
-  maxEnemies: 10
 --- !u!1 &1229347318
 GameObject:
   m_ObjectHideFlags: 0
@@ -10722,8 +10721,10 @@ MonoBehaviour:
   directionChangeSpeed: 10
   rotationSpeed: 10
   rotationDelay: 0.5
+  buildModeRotationSpeed: 10
   canControl: 1
   ignoreUIElements: []
+  buildModeController: {fileID: 0}
 --- !u!114 &1360284266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10848,6 +10849,7 @@ MonoBehaviour:
   cameraFollow: {fileID: 519420033}
   respawnPoint: {fileID: 1060417408}
   isInvincible: 0
+  deathParticles: {fileID: 0}
 --- !u!114 &1360284272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10917,14 +10919,13 @@ MonoBehaviour:
   fireRate: 3
   detectionRadius: 20
   rotationSpeed: 500
-  aimThreshold: 5
   shootSounds:
   - {fileID: 8300000, guid: b181abbc183caa24e987bc38769b14be, type: 3}
   leadIngotCount: 10
   maxLeadIngots: 50
-  ammoRefillAmount: 10
   ammoTag: "\u0441\u043B\u0438\u0442\u043E\u043A \u0441\u0432\u0438\u043D\u0446\u0430"
   requiresAmmo: 1
+  isManualMode: 0
 --- !u!4 &1360300085
 Transform:
   m_ObjectHideFlags: 0
@@ -13469,6 +13470,7 @@ GameObject:
   - component: {fileID: 1680893877}
   - component: {fileID: 1680893878}
   - component: {fileID: 1680893879}
+  - component: {fileID: 1680893880}
   m_Layer: 0
   m_Name: "\u0441\u0442\u0430\u0440\u0442"
   m_TagString: Untagged
@@ -13631,6 +13633,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1680893880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1680893874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6334bfe9f228f54c91536c44ee193fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorSprite: {fileID: 21300000, guid: 5d8369bc162b30949a1adf77efeeb70a, type: 3}
 --- !u!1 &1683993768
 GameObject:
   m_ObjectHideFlags: 0
@@ -25935,6 +25950,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 254ecde9f0b22ab40a088058fecdd56b, type: 3}
   buildModeText: {fileID: 0}
   uiObjectsToIgnoreArray: []
+  lineRenderer: {fileID: 0}
+  playerPrefab: {fileID: 0}
+  lineStartPoint: {fileID: 0}
+  rotationSpeed: 1
+  disableScriptsDuringBuild: 1
 --- !u!82 &2126028614
 AudioSource:
   m_ObjectHideFlags: 0

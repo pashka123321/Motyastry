@@ -4371,6 +4371,14 @@ MonoBehaviour:
   coreDetectionRange: 10
   coreShootingRange: 5
   coreTag: core
+  blockTag: Block
+  enemyTag: Enemy
+  isFriendly: 0
+  recoilForce: 0.5
+  recoilSpeed: 10
+  recoverySpeed: 5
+  ignorePrefabs: []
+  shootingSound: {fileID: 0}
 --- !u!114 &306403128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4889,14 +4897,13 @@ MonoBehaviour:
   fireRate: 5
   detectionRadius: 20
   rotationSpeed: 500
-  aimThreshold: 5
   shootSounds:
   - {fileID: 8300000, guid: a2c47be0ed4302a43842b75ae60e74ba, type: 3}
   leadIngotCount: 0
   maxLeadIngots: 80
-  ammoRefillAmount: 3
   ammoTag: "\u0441\u043B\u0438\u0442\u043E\u043A \u0441\u0432\u0438\u043D\u0446\u0430"
   requiresAmmo: 1
+  isManualMode: 0
 --- !u!61 &322427978
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5618,12 +5625,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4d71b3093ff04742b8169d1ccb4cc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPoints:
-  - {fileID: 1353937210}
-  - {fileID: 1306845572}
-  - {fileID: 614266316}
-  - {fileID: 1047056627}
-  activeSP: 00000000
+  speed: 2
+  detectionRadius: 2
+  conveyorLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  itemLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  leftTrigger: {fileID: 0}
+  rightTrigger: {fileID: 0}
+  topTrigger: {fileID: 0}
+  bottomTrigger: {fileID: 0}
 --- !u!61 &437320536
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -19313,6 +19326,7 @@ GameObject:
   - component: {fileID: 1319191290}
   - component: {fileID: 1319191289}
   - component: {fileID: 1319191288}
+  - component: {fileID: 1319191295}
   m_Layer: 0
   m_Name: "\u0441\u0442\u0430\u0440\u0442"
   m_TagString: Untagged
@@ -19531,6 +19545,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1319191295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1319191287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6334bfe9f228f54c91536c44ee193fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorSprite: {fileID: 21300000, guid: 5d8369bc162b30949a1adf77efeeb70a, type: 3}
 --- !u!1 &1321649455
 GameObject:
   m_ObjectHideFlags: 0
@@ -20621,14 +20648,13 @@ MonoBehaviour:
   fireRate: 1
   detectionRadius: 20
   rotationSpeed: 500
-  aimThreshold: 5
   shootSounds:
   - {fileID: 8300000, guid: 5a03a2e510d27a84e9bf7587be2e9f9d, type: 3}
   leadIngotCount: 0
   maxLeadIngots: 30
-  ammoRefillAmount: 1
   ammoTag: "\u0441\u043B\u0438\u0442\u043E\u043A \u043C\u0435\u0434\u0438"
   requiresAmmo: 1
+  isManualMode: 0
 --- !u!61 &1399444303
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -24760,9 +24786,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d527a1e9d5515d645a740aff8fa24973, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationNames:
-  - core 1
-  - core 2
+  animator: {fileID: 0}
+  animationName: 
 --- !u!61 &1744014199
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -25072,14 +25097,13 @@ MonoBehaviour:
   fireRate: 3
   detectionRadius: 20
   rotationSpeed: 500
-  aimThreshold: 5
   shootSounds:
   - {fileID: 8300000, guid: b181abbc183caa24e987bc38769b14be, type: 3}
   leadIngotCount: 0
   maxLeadIngots: 0
-  ammoRefillAmount: 0
   ammoTag: 0
   requiresAmmo: 1
+  isManualMode: 0
 --- !u!1 &1771981584
 GameObject:
   m_ObjectHideFlags: 0
@@ -29721,6 +29745,7 @@ MonoBehaviour:
   - {fileID: 539660479}
   - {fileID: 1022048032}
   activeSP: 00000000
+  unloadInterval: 1
 --- !u!114 &2105826784
 MonoBehaviour:
   m_ObjectHideFlags: 0

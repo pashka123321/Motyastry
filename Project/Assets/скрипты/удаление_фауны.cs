@@ -30,6 +30,8 @@ public class DeleteOnRightClick : MonoBehaviour
     private Queue<BuildTask> buildQueue = new Queue<BuildTask>();
     private bool isBuilding = false;
 
+    private Dictionary<GameObject, Color[]> originalColors = new Dictionary<GameObject, Color[]>();
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -68,6 +70,13 @@ public class DeleteOnRightClick : MonoBehaviour
             UpdateLine();
             RotatePlayerTowardsObject(currentTarget);
         }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            CancelDeletionQueue();
+        }
+
+        HighlightObjectsInQueue();
     }
 
     public void EnqueueBuildTask(GameObject blockPrefab, Vector3 position, Quaternion rotation, float buildTime)
@@ -221,6 +230,10 @@ GameObject GetObjectUnderMouse()
                 StartDestruction(currentTarget);
             }
         }
+        else
+        {
+            currentTarget = null;
+        }
     }
 
     void RotatePlayerTowardsObject(GameObject target)
@@ -286,7 +299,64 @@ void StartDestruction(GameObject target)
         {
             destructionQueue.Enqueue(targetObject);
             objectsInQueue.Add(targetObject);
+
+            // Сохраняем исходные цвета
+            SpriteRenderer[] renderers = targetObject.GetComponentsInChildren<SpriteRenderer>();
+            Color[] colors = new Color[renderers.Length];
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                colors[i] = renderers[i].color;
+            }
+            originalColors[targetObject] = colors;
+
+            HighlightObjectsInQueue(); // Подсвечиваем объект
             if (currentTarget == null) ProcessNextObject();
+        }
+    }
+
+    void HighlightObjectsInQueue()
+    {
+        foreach (GameObject obj in objectsInQueue)
+        {
+            if (obj == null) continue; // Проверка на null
+
+            SpriteRenderer[] renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+            foreach (SpriteRenderer renderer in renderers)
+            {
+                if (renderer != null)
+                {
+                    renderer.color = new Color(1f, 0f, 0f, renderer.color.a); // Красный цвет
+                }
+            }
+        }
+    }
+
+    void CancelDeletionQueue()
+    {
+        // Возвращаем цвет объектов на стандартный
+        foreach (var obj in objectsInQueue)
+        {
+            if (obj != null && originalColors.ContainsKey(obj))
+            {
+                SpriteRenderer[] renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+                Color[] colors = originalColors[obj];
+                for (int i = 0; i < renderers.Length; i++)
+                {
+                    if (renderers[i] != null)
+                    {
+                        renderers[i].color = colors[i];
+                    }
+                }
+            }
+        }
+
+        // Очищаем очередь удаления, но оставляем текущий разрушаемый объект
+        destructionQueue.Clear();
+        objectsInQueue.Clear();
+
+        if (currentTarget != null)
+        {
+            objectsInQueue.Add(currentTarget); // Оставляем текущий разрушаемый объект в наборе
         }
     }
 

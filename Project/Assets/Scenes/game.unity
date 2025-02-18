@@ -9614,6 +9614,7 @@ GameObject:
   - component: {fileID: 519420034}
   - component: {fileID: 519420035}
   - component: {fileID: 519420036}
+  - component: {fileID: 519420037}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -9804,6 +9805,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 485affb5ed0010d4eb23a17254a2618c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &519420037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0084127c1178c0c4bb17c6eb69393143, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shakeMaterial: {fileID: 2100000, guid: 4ff6a1aa78d2fb84dad78d8ab57bc73d, type: 2}
+  shakeIntensity: 0.003
+  shakeSpeed: 30
 --- !u!1 &523297666
 GameObject:
   m_ObjectHideFlags: 0
@@ -19423,7 +19439,7 @@ Transform:
   m_GameObject: {fileID: 1055319426}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -453.06, y: -509.1588, z: -1.7230599}
+  m_LocalPosition: {x: -453.068, y: -509.132, z: -1.7230599}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20497,6 +20513,7 @@ GameObject:
   - component: {fileID: 1102378241}
   - component: {fileID: 1102378239}
   - component: {fileID: 1102378240}
+  - component: {fileID: 1102378242}
   m_Layer: 0
   m_Name: "\u041B\u043E\u0433\u0438\u043A\u0430"
   m_TagString: Untagged
@@ -20595,6 +20612,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modPaths: []
+--- !u!114 &1102378242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102378236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6334bfe9f228f54c91536c44ee193fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorSprite: {fileID: 21300000, guid: 5d8369bc162b30949a1adf77efeeb70a, type: 3}
 --- !u!1 &1110261507 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6803877411490944538, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
@@ -23216,7 +23246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1274513557
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32917,7 +32947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1558458638
 RectTransform:
   m_ObjectHideFlags: 0
@@ -33105,7 +33135,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.69999886, y: 0.6000004}
+  m_AnchoredPosition: {x: 0.69999695, y: 0.6000023}
   m_SizeDelta: {x: 28.22, y: 26.41}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1571746325
@@ -47309,6 +47339,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2142286491}
+  - component: {fileID: 2142286492}
   m_Layer: 0
   m_Name: "\u0446\u0435\u043B\u044C"
   m_TagString: Playerataka
@@ -47331,6 +47362,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1360284264}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &2142286492
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142286490}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &2142418245
 GameObject:
   m_ObjectHideFlags: 0
@@ -48588,6 +48646,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1594498211804588152, guid: 544cd7c5910c19b4f94991e85ccd5840, type: 3}
     - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: cameraPrefab
+      value: 
+      objectReference: {fileID: 519420028}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: gunTransform
       value: 
       objectReference: {fileID: 265700595}
@@ -48603,6 +48665,10 @@ PrefabInstance:
       propertyPath: shootingModeText
       value: 
       objectReference: {fileID: 2073770045}
+    - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
+      propertyPath: cameraShakePrefab
+      value: 
+      objectReference: {fileID: 519420028}
     - target: {fileID: 3660898754325278288, guid: 4402abd2888491e40987eab023ae519f, type: 3}
       propertyPath: firstGunTransform
       value: 
@@ -49397,6 +49463,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7311382173025934114, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 037a31a8c771d4b4facfe781da8c80c7, type: 3}
+    - target: {fileID: 7311382173025934114, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 310690376}
+    - target: {fileID: 7311382173025934114, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
+      propertyPath: cameraPrefab
+      value: 
+      objectReference: {fileID: 519420028}
+    - target: {fileID: 7311382173025934114, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
+      propertyPath: deathParticlesPrefab
+      value: 
+      objectReference: {fileID: 457435828}
     - target: {fileID: 8392424304253464644, guid: e55bc8dc8cb7821439d590d13ed97f80, type: 3}
       propertyPath: m_Name
       value: core

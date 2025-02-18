@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -720,28 +719,44 @@ MonoBehaviour:
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    percentage: 0
   - prefab: {fileID: 2127710088}
     perlinScaleX: 20
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    percentage: 0
   - prefab: {fileID: 277856382}
     perlinScaleX: 20
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    percentage: 0
   - prefab: {fileID: 1776878104}
     perlinScaleX: 20
     perlinScaleY: 20
     threshold: 0.5
     isBorder: 0
+    percentage: 0
   lakePrefabs:
   - prefab: {fileID: 808144897}
     type: water
+    sandPrefab: {fileID: 0}
+    sandBorderThickness: 1
+    centerLakePercentage: 0.5
+    centerLakePrefab: {fileID: 0}
   - prefab: {fileID: 211571074}
     type: lava
+    sandPrefab: {fileID: 0}
+    sandBorderThickness: 1
+    centerLakePercentage: 0.5
+    centerLakePrefab: {fileID: 0}
   - prefab: {fileID: 65867007}
     type: magma
+    sandPrefab: {fileID: 0}
+    sandBorderThickness: 1
+    centerLakePercentage: 0.5
+    centerLakePrefab: {fileID: 0}
   mapWidth: 200
   mapHeight: 200
   perlinOffset: {x: 0, y: 0}
@@ -6435,6 +6450,11 @@ MonoBehaviour:
   rotationSpeed: 500
   shootSounds:
   - {fileID: 8300000, guid: b181abbc183caa24e987bc38769b14be, type: 3}
+  leadIngotCount: 10
+  maxLeadIngots: 50
+  ammoTag: "\u0441\u043B\u0438\u0442\u043E\u043A \u0441\u0432\u0438\u043D\u0446\u0430"
+  requiresAmmo: 1
+  isManualMode: 0
 --- !u!1 &471603707
 GameObject:
   m_ObjectHideFlags: 0
@@ -7592,6 +7612,13 @@ MonoBehaviour:
   maxHealth: 200
   deathSounds:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
+  customAudioSource: {fileID: 0}
+  objectsToDestroy: []
+  damageResistance: []
+  explosionPrefab: {fileID: 0}
+  explosionPosition: {fileID: 0}
+  cameraShakeDuration: 0.5
+  cameraShakeMagnitude: 0.2
 --- !u!114 &845413255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7850,6 +7877,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6f64a21d19879df44a5295f5c1ddfbd6, type: 3}
   cameraFollow: {fileID: 1647650479}
   respawnPoint: {fileID: 0}
+  isInvincible: 0
+  deathParticles: {fileID: 0}
 --- !u!114 &878209383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7862,8 +7891,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44de4045e1b46fd418cf83eee157a782, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerModel1: {fileID: 878209380}
-  playerModel2: {fileID: 0}
+  defaultCharacter: {fileID: 0}
+  modifiedCharacter: {fileID: 0}
+  respawnPosition: {x: 0, y: 0, z: 0}
+  cameraFollow: {fileID: 0}
 --- !u!50 &878209384
 Rigidbody2D:
   serializedVersion: 4
@@ -7950,13 +7981,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 1844741729}
   secondBulletPrefab: {fileID: 1844741729}
+  firstGun: {fileID: 0}
+  secondGun: {fileID: 0}
+  firstGunBulletSpawnPoints: []
+  secondGunBulletSpawnPoints: []
+  damageType: 0
   bulletSpeed: 15
   bulletCount: 1
   bulletSpacing: 0.2
   fireRate: 0.15
   bulletLifeTime: 2
-  firstBulletSpawnOffset: {x: 0.7, y: -0.37}
-  secondBulletSpawnOffset: {x: 0.7, y: 0.32}
+  shootingSound: {fileID: 0}
+  shootingModeText: {fileID: 0}
+  ignoreUIElements: []
+  recoilAmount: 0.1
+  recoilSpeed: 5
 --- !u!114 &878209387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7974,10 +8013,11 @@ MonoBehaviour:
   deceleration: 10
   directionChangeSpeed: 10
   rotationSpeed: 10
-  shootingSounds:
-  - {fileID: 8300000, guid: f237f61d3c507d04cbd8836f071f5041, type: 3}
-  shootingInterval: 0.15
+  rotationDelay: 0.5
+  buildModeRotationSpeed: 10
   canControl: 1
+  ignoreUIElements: []
+  buildModeController: {fileID: 0}
 --- !u!212 &878209388
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -8027,7 +8067,7 @@ SpriteRenderer:
   m_Size: {x: 5.12, y: 5.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &878209389
@@ -9461,7 +9501,7 @@ SpriteRenderer:
   m_Size: {x: 0.64, y: 0.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1555971120
@@ -9691,6 +9731,7 @@ GameObject:
   - component: {fileID: 1647650481}
   - component: {fileID: 1647650480}
   - component: {fileID: 1647650479}
+  - component: {fileID: 1647650483}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -9712,7 +9753,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 878209389}
   smoothing: 8
-  offset: {x: 0, y: 0, z: 0}
   zoomSpeed: 5
   minZoom: 2
   maxZoom: 10
@@ -9790,6 +9830,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1647650483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1647650478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6334bfe9f228f54c91536c44ee193fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorSprite: {fileID: 21300000, guid: 5d8369bc162b30949a1adf77efeeb70a, type: 3}
 --- !u!1 &1679223576
 GameObject:
   m_ObjectHideFlags: 0
@@ -9871,7 +9924,7 @@ SpriteRenderer:
   m_Size: {x: 0.32, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1679643949
@@ -10301,7 +10354,7 @@ SpriteRenderer:
   m_Size: {x: 0.32, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1794218683
