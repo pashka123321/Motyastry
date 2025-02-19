@@ -34710,6 +34710,7 @@ GameObject:
   - component: {fileID: 1680893879}
   - component: {fileID: 1680893881}
   - component: {fileID: 1680893882}
+  - component: {fileID: 1680893883}
   m_Layer: 0
   m_Name: "\u0441\u0442\u0430\u0440\u0442"
   m_TagString: Untagged
@@ -34929,6 +34930,23 @@ MonoBehaviour:
   objectsWithDelay:
   - obj: {fileID: 1287632951}
     delay: 2
+--- !u!114 &1680893883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1680893874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bf41ae6f4c2fbf4580501172184cab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 310690376}
+  audioClip: {fileID: 8300000, guid: 10e60baca8bb1874c97334467fa511db, type: 3}
+  delay: 1.8
+  "\u043F\u043B\u0430\u0432\u043D\u043E\u0435\u041D\u0430\u0447\u0430\u043B\u043E": 1
+  fadeDuration: 2
 --- !u!4 &1682583223 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7676997438063953549, guid: a28c49fba8265ef48ba99829bc62aa0c, type: 3}

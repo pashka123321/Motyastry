@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/RTS.unity
     guid: a923adca1040a094080ae7b345028dbd
+  - enabled: 1
+    path: Assets/Scenes/company.unity
+    guid: d3770c221abb24c4eb2dc592b87f5eb1
   m_configObjects: {}

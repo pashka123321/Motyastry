@@ -6,6 +6,8 @@
     <title>Motyastry</title>
     <link rel="icon" href="Site/logo.png" type="image/png">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
         body::before {
             content: '';
             position: absolute;
@@ -29,10 +31,15 @@
             background-blend-mode: overlay;
             backdrop-filter: blur(8px);
             color: #f0f0f0;
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
             padding: 0;
             transition: background-position 0.5s ease;
+            animation: fadeIn 2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         html {
             overflow: hidden;
@@ -48,6 +55,11 @@
             height: 100vh;
             scrollbar-width: none; /* Firefox */
             scroll-behavior: smooth;
+            animation: slideIn 1s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .container::-webkit-scrollbar {
             display: none; /* Chrome, Safari, Opera */
@@ -55,6 +67,11 @@
         header {
             text-align: center;
             padding: 20px;
+            animation: fadeInDown 1.5s ease-in-out;
+        }
+        @keyframes fadeInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         main {
             display: flex;
@@ -70,6 +87,11 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             flex: 1;
             min-width: 45%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .section:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
         }
         h1 {
             color: #ff4d4d;
@@ -105,6 +127,15 @@
         }
         li {
             padding: 8px 0;
+        }
+        footer {
+            padding: 20px;
+            text-align: center;
+            animation: fadeInUp 1.5s ease-in-out;
+        }
+        @keyframes fadeInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>

@@ -8,6 +8,7 @@ public class SoundPreloader : MonoBehaviour
 {
     public AudioClip[] audioClips;   // Массив для хранения всех звуков и музыки
     public Slider progressBar;       // UI элемент для прогресс бара
+    public GameObject spriteObject;  // Пустой объект для применения спрайтов
 
     private List<AudioSource> audioSources = new List<AudioSource>(); // Список для хранения аудиоисточников
     private bool shouldPlayAfterLoad = false; // Переменная для управления проигрыванием музыки после загрузки
@@ -15,14 +16,19 @@ public class SoundPreloader : MonoBehaviour
     void Start()
     {
         DontDestroyOnLoad(this.gameObject); // Чтобы объект SoundPreloader не уничтожался при смене сцен
-        StartCoroutine(LoadSounds());
+        DontDestroyOnLoad(spriteObject); // Сохраняем объект между сценами
+        StartCoroutine(LoadSoundsAndSprites());
     }
 
-    private IEnumerator LoadSounds()
+    private IEnumerator LoadSoundsAndSprites()
     {
         int totalClips = audioClips.Length;
-        int loadedClips = 0;
+        Sprite[] sprites = Resources.FindObjectsOfTypeAll<Sprite>(); // Ищем все спрайты в игре
+        int totalSprites = sprites.Length;
+        int totalItems = totalClips + totalSprites;
+        int loadedItems = 0;
 
+        // Загрузка звуков
         foreach (var clip in audioClips)
         {
             // Создаем объект для звука и сохраняем его
@@ -47,8 +53,28 @@ public class SoundPreloader : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
 
             // Обновляем прогресс бар
-            loadedClips++;
-            progressBar.value = (float)loadedClips / totalClips;
+            loadedItems++;
+            progressBar.value = (float)loadedItems / totalItems;
+        }
+
+        // Загрузка спрайтов
+        SpriteRenderer spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = spriteObject.AddComponent<SpriteRenderer>();
+        }
+
+        foreach (var sprite in sprites)
+        {
+            // Применяем спрайт к пустому объекту
+            spriteRenderer.sprite = sprite;
+
+            // Ждем секунду, имитируя задержку загрузки спрайта
+            yield return new WaitForSeconds(0.1f);
+
+            // Обновляем прогресс бар
+            loadedItems++;
+            progressBar.value = (float)loadedItems / totalItems;
         }
 
         // Останавливаем все звуки перед переходом на новую сцену
