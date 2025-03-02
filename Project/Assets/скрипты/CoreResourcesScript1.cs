@@ -27,6 +27,8 @@ public class CoreResourcesScript : MonoBehaviour
     public GameObject goldIgnotPrefab;
     public GameObject ironIgnotPrefab;
 
+    public GameHelper gameHelper; // Ссылка на GameHelper
+
     private Dictionary<string, GameObject> resourceUIDictionary = new Dictionary<string, GameObject>();
 
     void Start()
@@ -64,6 +66,7 @@ public class CoreResourcesScript : MonoBehaviour
                 case "слиток меди":
                     copperigot++;
                     resourceCollected = true;
+                    gameHelper.HideNotification(); // Скрываем уведомление при добыче меди
                     break;
                 case "слиток свинца":
                     leadigot++;

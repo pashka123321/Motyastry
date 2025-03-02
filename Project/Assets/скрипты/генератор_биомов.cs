@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections;
 using System.Collections.Generic;
 
 public class WorldGenerator : MonoBehaviour
@@ -7,14 +8,14 @@ public class WorldGenerator : MonoBehaviour
     public int width = 100; // Ширина карты
     public int height = 100; // Высота карты
     public float scale = 20f; // Масштаб для шума Перлина
-    public int numBiomes = 4; // Количество различных биомов
 
     public Tilemap tilemap; // Ссылка на Tilemap, которая будет использоваться
 
-    // Массивы для хранения данных о биомах
-    public BiomeData[] biomes;
+    // Массивы для хранения данных о типах миров и биомах
+    public WorldTypeData[] worldTypes;
 
     private int[,] map; // Массив для хранения типов биомов
+    private BiomeData[] selectedBiomes; // Выбранные биомы для текущего типа мира
 
     // Перечисление типов биомов для удобства
     private enum BiomeType { Water, Sand, Grass, Stone };
@@ -37,36 +38,93 @@ public class WorldGenerator : MonoBehaviour
         public float percentage; // Процент присутствия биома
     }
 
+    [System.Serializable]
+    public class WorldTypeData
+    {
+        public string name; // Название типа мира
+        public BiomeData[] biomes; // Биомы, связанные с этим типом мира
+        public LandscapePrefab[] landscapePrefabs; // Префабы для ландшафта
+    }
+
+    [System.Serializable]
+    public class LandscapePrefab // это скалы
+    {
+        public GameObject prefab;
+        public float perlinScaleX = 20f;
+        public float perlinScaleY = 20f;
+        public float threshold = 0.5f;
+        public bool isBorder;
+        public float noiseLayer1Scale = 10f; // Новый параметр для первого слоя шума
+        public float noiseLayer2Scale = 30f; // Новый параметр для второго слоя шума
+        public float noiseLayer1Weight; // Вес первого слоя шума
+        public float noiseLayer2Weight; // Вес второго слоя шума
+    }
+
+    public int mapWidth = 200;
+    public int mapHeight = 200;
+    public Vector2 perlinOffset;
+    public float biomeScale = 50f;
+    public int exclusionRadius = 25;
+    public int transitionRadius = 10;
+
+    private int seed;
+
     void Start()
     {
+        // Инициализация значений noiseLayer1Weight и noiseLayer2Weight
+        foreach (var worldType in worldTypes)
+        {
+            foreach (var landscapePrefab in worldType.landscapePrefabs)
+            {
+                landscapePrefab.noiseLayer1Weight = Random.Range(0.4f, 0.5f);
+                landscapePrefab.noiseLayer2Weight = Random.Range(0.4f, 0.5f);
+            }
+        }
+
         // Настройка слоя Tilemap на -1
         tilemap.GetComponent<TilemapRenderer>().sortingOrder = -5;
 
         map = new int[width, height]; // Инициализируем массив карты
 
-        // Проверка, чтобы количество биомов не превышало доступное количество данных
-        if (numBiomes > biomes.Length)
-        {
-            numBiomes = biomes.Length; // Ограничиваем количество биомов количеством доступных данных
-        }
+        // Выбираем случайный тип мира
+        WorldTypeData selectedWorldType = worldTypes[Random.Range(0, worldTypes.Length)];
+        selectedBiomes = selectedWorldType.biomes;
+
+        // Передаем префабы ландшафта в WallGenerator
+        LandscapePrefab[] landscapePrefabs = selectedWorldType.landscapePrefabs;
 
         NormalizeBiomePercentages();
         GenerateWorld();
         DrawWorld();
         GenerateFauna(); // Вызываем метод для генерации фауны
+
+        if (PlayerPrefs.HasKey("Seed"))
+        {
+            seed = PlayerPrefs.GetInt("Seed");
+            Random.InitState(seed);
+        }
+        else
+        {
+            Debug.LogError("No seed found!");
+            seed = Random.Range(0, 1000000);
+            Random.InitState(seed);
+        }
+
+        perlinOffset = new Vector2(seed % 1000, seed % 1000);
+        GenerateLandscapes(landscapePrefabs);
     }
 
     void NormalizeBiomePercentages()
     {
         float total = 0f;
-        for (int i = 0; i < numBiomes; i++)
+        for (int i = 0; i < selectedBiomes.Length; i++)
         {
-            total += biomes[i].percentage;
+            total += selectedBiomes[i].percentage;
         }
 
-        for (int i = 0; i < numBiomes; i++)
+        for (int i = 0; i < selectedBiomes.Length; i++)
         {
-            biomes[i].percentage /= total; // Нормализуем значения, чтобы сумма была равна 1
+            selectedBiomes[i].percentage /= total; // Нормализуем значения, чтобы сумма была равна 1
         }
     }
 
@@ -112,15 +170,15 @@ public class WorldGenerator : MonoBehaviour
     int GetBiomeIndex(float value)
     {
         float cumulative = 0f;
-        for (int i = 0; i < numBiomes; i++)
+        for (int i = 0; i < selectedBiomes.Length; i++)
         {
-            cumulative += biomes[i].percentage;
+            cumulative += selectedBiomes[i].percentage;
             if (value <= cumulative)
             {
                 return i;
             }
         }
-        return numBiomes - 1; // Если вдруг value больше, чем cumulative (в теории быть не должно)
+        return selectedBiomes.Length - 1; // Если вдруг value больше, чем cumulative (в теории быть не должно)
     }
 
     // Проверка, является ли текущий блок границей между биомами
@@ -146,9 +204,9 @@ public class WorldGenerator : MonoBehaviour
             {
                 Vector3Int tilePosition = new Vector3Int(x, y, 0);
                 int biomeIndex = map[x, y];
-                if (biomeIndex >= 0 && biomeIndex < biomes.Length)
+                if (biomeIndex >= 0 && biomeIndex < selectedBiomes.Length)
                 {
-                    Tile[] tiles = biomes[biomeIndex].biomeTiles;
+                    Tile[] tiles = selectedBiomes[biomeIndex].biomeTiles;
 
                     if (tiles.Length > 0)
                     {
@@ -161,12 +219,12 @@ public class WorldGenerator : MonoBehaviour
                         tileToSet.colliderType = originalTile.colliderType; // Копируем тип коллайдера
 
                         // Применяем постоянный цвет для биома
-                        tileToSet.color = biomes[biomeIndex].biomeColor;
+                        tileToSet.color = selectedBiomes[biomeIndex].biomeColor;
 
                         // Если блок находится на границе, изменяем его цвет
                         if (IsBiomeBorder(x, y))
                         {
-                            tileToSet.color = biomes[biomeIndex].borderColor;
+                            tileToSet.color = selectedBiomes[biomeIndex].borderColor;
                         }
 
                         tilemap.SetTile(tilePosition, tileToSet); // Устанавливаем тайл на карте
@@ -187,9 +245,9 @@ public class WorldGenerator : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 int biomeIndex = map[x, y];
-                if (biomeIndex >= 0 && biomeIndex < biomes.Length)
+                if (biomeIndex >= 0 && biomeIndex < selectedBiomes.Length)
                 {
-                    BiomeData biome = biomes[biomeIndex];
+                    BiomeData biome = selectedBiomes[biomeIndex];
 
                     foreach (FaunaData faunaData in biome.faunaPrefabs)
                     {
@@ -219,5 +277,98 @@ public class WorldGenerator : MonoBehaviour
                 }
             }
         }
+    }
+
+    void GenerateLandscapes(LandscapePrefab[] landscapePrefabs)
+    {
+        // Очищаем старые объекты
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        int centerX = mapWidth / 2;
+        int centerY = mapHeight / 2;
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                float distanceFromCenter = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
+
+                if (distanceFromCenter <= exclusionRadius)
+                {
+                    continue;
+                }
+
+                float biomeValue = Mathf.PerlinNoise((x + perlinOffset.x) / biomeScale, (y + perlinOffset.y) / biomeScale);
+                int biomeIndex = Mathf.FloorToInt(biomeValue * landscapePrefabs.Length);
+
+                biomeIndex = Mathf.Clamp(biomeIndex, 0, landscapePrefabs.Length - 1);
+
+                var landscapePrefab = landscapePrefabs[biomeIndex];
+                float perlinValue1 = Mathf.PerlinNoise((x + perlinOffset.x) / landscapePrefab.noiseLayer1Scale, (y + perlinOffset.y) / landscapePrefab.noiseLayer1Scale);
+                float perlinValue2 = Mathf.PerlinNoise((x + perlinOffset.x) / landscapePrefab.noiseLayer2Scale, (y + perlinOffset.y) / landscapePrefab.noiseLayer2Scale);
+
+                float combinedPerlinValue = perlinValue1 * landscapePrefab.noiseLayer1Weight + perlinValue2 * landscapePrefab.noiseLayer2Weight;
+
+                if (distanceFromCenter <= exclusionRadius + transitionRadius)
+                {
+                    combinedPerlinValue *= Mathf.InverseLerp(exclusionRadius, exclusionRadius + transitionRadius, distanceFromCenter);
+                }
+
+                if (combinedPerlinValue > landscapePrefab.threshold)
+                {
+                    Vector3 position = new Vector3(x, y, 0);
+                    GameObject block = Instantiate(landscapePrefab.prefab, position, Quaternion.identity, transform);
+                    block.name = $"Wall_{x}_{y}";
+
+                    AddBorderBlocks(x, y, landscapePrefabs);
+                }
+            }
+        }
+    }
+
+    void AddBorderBlocks(int x, int y, LandscapePrefab[] landscapePrefabs)
+    {
+        Vector2[] directions = {
+            new Vector2(0, 1),
+            new Vector2(1, 0),
+            new Vector2(0, -1),
+            new Vector2(-1, 0)
+        };
+
+        foreach (var direction in directions)
+        {
+            int newX = x + (int)direction.x;
+            int newY = y + (int)direction.y;
+
+            if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapHeight)
+            {
+                Collider2D collider = Physics2D.OverlapPoint(new Vector2(newX, newY));
+                if (collider == null)
+                {
+                    foreach (var prefab in landscapePrefabs)
+                    {
+                        if (prefab.isBorder)
+                        {
+                            Vector3 position = new Vector3(newX, newY, 0);
+                            GameObject borderBlock = Instantiate(prefab.prefab, position, Quaternion.identity, transform);
+                            borderBlock.name = $"Border_{newX}_{newY}";
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    LandscapePrefab GetLandscapePrefabForPosition(int x, int y, LandscapePrefab[] landscapePrefabs)
+    {
+        float biomeValue = Mathf.PerlinNoise((x + perlinOffset.x) / biomeScale, (y + perlinOffset.y) / biomeScale);
+        int biomeIndex = Mathf.FloorToInt(biomeValue * landscapePrefabs.Length);
+        biomeIndex = Mathf.Clamp(biomeIndex, 0, landscapePrefabs.Length - 1);
+
+        return landscapePrefabs[biomeIndex];
     }
 }

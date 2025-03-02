@@ -34377,6 +34377,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 473128102f6af5c4dbdeb1d4d447f631, type: 3}
   - {fileID: 8300000, guid: 65ab8d5db3e9b5649bfe5d254cd6f2bc, type: 3}
   progressBar: {fileID: 0}
+  spriteObject: {fileID: 0}
+  statusText: {fileID: 0}
 --- !u!114 &1680893882
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47648,7 +47650,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1523557167551771288
 GameObject:
   m_ObjectHideFlags: 0

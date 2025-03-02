@@ -9,6 +9,7 @@ public class SoundPreloader : MonoBehaviour
     public AudioClip[] audioClips;   // Массив для хранения всех звуков и музыки
     public Slider progressBar;       // UI элемент для прогресс бара
     public GameObject spriteObject;  // Пустой объект для применения спрайтов
+    public Text statusText;          // UI элемент для отображения статуса загрузки
 
     private List<AudioSource> audioSources = new List<AudioSource>(); // Список для хранения аудиоисточников
     private bool shouldPlayAfterLoad = false; // Переменная для управления проигрыванием музыки после загрузки
@@ -29,6 +30,7 @@ public class SoundPreloader : MonoBehaviour
         int loadedItems = 0;
 
         // Загрузка звуков
+        statusText.text = "Загрузка звуков...";
         foreach (var clip in audioClips)
         {
             // Создаем объект для звука и сохраняем его
@@ -50,7 +52,7 @@ public class SoundPreloader : MonoBehaviour
             audioSources.Add(audioSource);
 
             // Ждем секунду, имитируя задержку загрузки звука
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
 
             // Обновляем прогресс бар
             loadedItems++;
@@ -58,6 +60,7 @@ public class SoundPreloader : MonoBehaviour
         }
 
         // Загрузка спрайтов
+        statusText.text = "Загрузка текстур...";
         SpriteRenderer spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
         if (spriteRenderer == null)
         {
@@ -70,7 +73,7 @@ public class SoundPreloader : MonoBehaviour
             spriteRenderer.sprite = sprite;
 
             // Ждем секунду, имитируя задержку загрузки спрайта
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
 
             // Обновляем прогресс бар
             loadedItems++;
